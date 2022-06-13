@@ -12,6 +12,10 @@ Base.query = db_session.query_property()
 def init_db():
     import models
     Base.metadata.create_all(bind=engine)
+    admin = models.User('admin')
+    admin.set_password('password')
+    db_session.add(admin)
+    db_session.commit()
     print("Initialized Database")
 
 

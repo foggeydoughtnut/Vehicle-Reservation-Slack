@@ -8,7 +8,7 @@ class Vehicle(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(50), unique=True)
     calendarID = Column(String(500), unique=True)
-    calendarGroupID = Column(String(500), unique=True)
+    calendarGroupID = Column(String(500), unique=False)
 
     def __init__(self, name=None, calendarID=None):
         self.name = name

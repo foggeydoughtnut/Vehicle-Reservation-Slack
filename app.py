@@ -6,6 +6,8 @@ from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_login import LoginManager, current_user, login_user, logout_user
 from flask_debugtoolbar import DebugToolbarExtension
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 # Slack Imports
 from slackeventsapi import SlackEventAdapter
 from slack import WebClient
@@ -24,6 +26,11 @@ from API.admin.user import getUser
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'f9b56900692ec651739de1b4638bd091'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
 app.debug = True
 toolbar = DebugToolbarExtension(app) # tool bar only works when app.debug is True
 
@@ -31,7 +38,7 @@ login = LoginManager(app)
 
 # # TEMP
 # test = {'username' : 'admin', 'password' : 'password'}
-print(getCalendarGroups().json()['value'][2]['id'])
+# print(getCalendarGroups().json()['value'][2]['id'])
 
 @login.user_loader
 def load_user(user_id):
