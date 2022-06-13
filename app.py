@@ -6,7 +6,6 @@ from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_login import LoginManager, current_user, login_user, logout_user
 from flask_debugtoolbar import DebugToolbarExtension
-from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 # Slack Imports
 from slackeventsapi import SlackEventAdapter
@@ -16,7 +15,7 @@ from threading import Thread
 from dotenv import load_dotenv
 load_dotenv()
 # Local Imports
-from API.Calendar import prettyPrintEvents, scheduleEvent, listEvents, getCalendarGroups
+from API.Calendar import prettyPrintEvents, scheduleEvent, listEvents, listSpecificCalendarInGroupEvents
 from models import Vehicle, User
 from API.admin.user import getUser
 from models import db
@@ -47,9 +46,6 @@ toolbar = DebugToolbarExtension(app) # tool bar only works when app.debug is Tru
 login = LoginManager(app)
 
 
-# # TEMP
-# print(getCalendarGroups().json()['value'][2]['id'])
-
 @login.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
@@ -77,6 +73,21 @@ VERIFICATION_TOKEN = os.getenv('VERIFICATION_TOKEN')
 
 #instantiating slack client
 slack_client = WebClient(slack_token)
+
+# TEMP
+# vehicle = Vehicle.query.filter(Vehicle.name == 'test1').first()
+# events = listSpecificCalendarInGroupEvents(vehicle.calendarGroupID, vehicle.calendarID)
+# print(prettyPrintEvents(events))
+
+# def getVehicleByName(name):
+    
+#         return Vehicle.query.filter(Vehicle.name == name).first()
+    
+
+vehicleNames = []
+for vehicle in Vehicle.query.all():
+    vehicleNames.append(vehicle.name)
+# 
 
 @app.route("/")
 def event_hook(request):
@@ -164,10 +175,25 @@ def handle_message(event_data):
                 slack_client.chat_postMessage(channel=channel_id, text=message)
             """Gets Events on the calendar"""
             if command.lower() == 'events':
-                events = listEvents()
-                message = prettyPrintEvents(events)
+                if len(commands) != 4:
+                    message = (f"Error : Did not provide correct amount of information")
+                else:
+                    vehicleName = commands[3]
+                    if vehicleName not in vehicleNames:
+                        message = ("Error : Did not provide a valid vehicle name")
+                    else:
+                        with app.app_context():
+                            vehicle = Vehicle.query.filter(Vehicle.name == vehicleName).first()
+                            events = listSpecificCalendarInGroupEvents(vehicle.calendarGroupID, vehicle.calendarID)
+                            message = prettyPrintEvents(events, vehicleName)
                 slack_client.chat_postMessage(channel=channel_id, text=message)
-            
+            """Lists all of the vehicle's names"""
+            if command.lower() == 'vehicles':
+                message = ""
+                for vehicle in vehicleNames:
+                    message += f"{vehicle}, "
+                slack_client.chat_postMessage(channel=channel_id, text=message)
+                
         
     thread = Thread(target=send_reply, kwargs={"value": event_data})
     thread.start()

@@ -16,7 +16,7 @@ class Vehicle(db.Model):
         self.calendarID = calendarID
     
     def __repr__(self):
-        return f'<Calendar for : {self.name!r} Id : {self.calendarID!r}>'
+        return f'<Calendar for : {self.name!r}>'
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'

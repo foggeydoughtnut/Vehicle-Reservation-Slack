@@ -23,6 +23,14 @@ In python terminal import User and db from models. Create app and app context, t
 >>> admin.set_password('password')
 >>> db.session.add(admin)
 >>> db.session.commit()
+```  
+### Migrations  
+When a column in a model changes make sure to run 
 ```
+$ flask db migrate -m "message goes here"  
+$ flask db upgrade  
+```
+
+
 
 ## Running the Application  

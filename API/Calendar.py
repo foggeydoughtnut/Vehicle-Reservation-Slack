@@ -98,9 +98,32 @@ def listEvents():
         i += 1
     
     return calendarEvents
+def listSpecificCalendarInGroupEvents(calendarGroupId, calendarId):
+    """Uses the outlook api to get the events that are happening and returns the events in an object with only the information needed NOTE: events variable has all of the calendar information and I use a portion of the information found in events"""
+    calendarHeaders = headers
+    calendarHeaders['Prefer'] = 'outlook.timezone="America/Denver"'
+    events = requests.get(
+        GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendarGroupId}/calendars/{calendarId}/events',
+        headers=headers
+    )
+    # To be returned for slack bot
+    calendarEvents = {}
+    i = 0
+    for event in events.json()['value']:
+        eventDict = {}
+        eventDict[f'event'] = f'event{i}'
+        eventDict['Subject'] = event['subject']
+        eventDict['bodyPreview'] = event['bodyPreview']
+        eventDict['webLink'] = event['webLink']
+        eventDict['start'] = event['start']
+        eventDict['end'] = event['end']
+        calendarEvents[f'event{i}'] = eventDict
+        i += 1
+    
+    return calendarEvents
 
-def prettyPrintEvents(events):
-    message = f'The calendar looks like this : \n'
+def prettyPrintEvents(events, vehicleName):
+    message = f'{vehicleName}\'s calendar looks like this : \n'
     for i in range(len(events)):
         message += f'Event         :  {events[f"event{i}"]["event"]}\n'
         message += f'Subject      :  {events[f"event{i}"]["Subject"]}\n'
