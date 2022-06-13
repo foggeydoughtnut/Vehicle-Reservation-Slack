@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "vehiclereservationbot"
+version = "0.1.0"
+description = ""
+authors = ["Jeff <foggeydoughtnut@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+Flask = "^2.1.2"
+slackeventsapi = "^3.0.1"
+slack = "^0.0.2"
+slackclient = "^2.9.4"
+msal = "^1.18.0"
+O365 = "^2.0.19"
+azure-identity = "^1.10.0"
+msgraph-core = "^0.2.2"
+rich = "^12.4.4"
+jq = "^1.2.2"
+SQLAlchemy = "^1.4.37"
+Flask-Admin = "^1.6.0"
+Flask-BasicAuth = "^0.2.0"
+Flask-Login = "^0.6.1"
+python-dotenv = "^0.20.0"
+
+[tool.poetry.dev-dependencies]
+Flask-DebugToolbar = "^0.13.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
