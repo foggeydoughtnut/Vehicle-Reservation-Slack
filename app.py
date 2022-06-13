@@ -6,38 +6,67 @@ from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_login import LoginManager, current_user, login_user, logout_user
 from flask_debugtoolbar import DebugToolbarExtension
-from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
 # Slack Imports
 from slackeventsapi import SlackEventAdapter
 from slack import WebClient
 
 from threading import Thread
+from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 load_dotenv()
 # Local Imports
 from API.Calendar import prettyPrintEvents, scheduleEvent, listEvents, getCalendarGroups
-from database import db_session
-from models import Vehicle, User
+# from database import db_session
+# from models import Vehicle, User
 from API.admin.user import getUser
+from models import db
 
-
-
-
+# This function is required or else there will be a context error
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'f9b56900692ec651739de1b4638bd091'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-
+app.config['SECRET_KEY'] = 'f9b56900692ec651739de1b4638bd091'
 app.debug = True
 toolbar = DebugToolbarExtension(app) # tool bar only works when app.debug is True
-
 login = LoginManager(app)
 
+# Models
+class Vehicle(db.Model):
+    __tablename__ = 'vehicles'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True)
+    calendarID = db.Column(db.String(500), unique=True)
+    calendarGroupID = db.Column(db.String(500), unique=False)
+
+    def __init__(self, name=None, calendarID=None):
+        self.name = name
+        self.calendarID = calendarID
+    
+    def __repr__(self):
+        return f'<Calendar for : {self.name!r} Id : {self.calendarID!r}>'
+
+class User(db.Model, UserMixin):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True)
+    password_hash = db.Column(db.String(128))
+    
+    def __init__(self, username=None):
+        self.username = username
+    def __repr__(self):
+        return f'<User {self.username!r}>'
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+
+
 # # TEMP
-# test = {'username' : 'admin', 'password' : 'password'}
 # print(getCalendarGroups().json()['value'][2]['id'])
 
 @login.user_loader
@@ -52,13 +81,13 @@ class MyModelView(ModelView):
 # Creates Admin Page
 app.config['FLASK_ADMIN_SWATCH'] = 'darkly'
 admin = Admin(app, name='Vehicle Reservation', template_mode='bootstrap3')
-admin.add_view(MyModelView(Vehicle, db_session))
-admin.add_view(MyModelView(User, db_session))
+admin.add_view(MyModelView(Vehicle, db.session))
+admin.add_view(MyModelView(User, db.session))
 
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
-    db_session.remove()
+    db.session.remove()
 
 
 SLACK_SIGNING_SECRET = os.getenv('SLACK_SIGNING_SECRET')
