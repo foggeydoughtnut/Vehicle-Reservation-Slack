@@ -7,6 +7,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_login import LoginManager, current_user, login_user, logout_user
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 # Slack Imports
 from slackeventsapi import SlackEventAdapter
 from slack import WebClient
@@ -30,6 +31,16 @@ app = create_app()
 app.app_context().push()
 with app.app_context():
     db.create_all()
+
+# Creates Admin User if there is no users in the database
+if (len(User.query.all()) == 0):
+    admin = User('admin')
+    admin.set_password('password')
+    db.session.add(admin)
+    db.session.commit()
+
+
+migrate = Migrate(app, db)
 app.config['SECRET_KEY'] = 'f9b56900692ec651739de1b4638bd091'
 app.debug = True
 toolbar = DebugToolbarExtension(app) # tool bar only works when app.debug is True
