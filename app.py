@@ -15,7 +15,7 @@ from threading import Thread
 from dotenv import load_dotenv
 load_dotenv()
 # Local Imports
-from API.Calendar import prettyPrintEvents, scheduleEvent, listEvents, listSpecificCalendarInGroupEvents
+from API.Calendar import prettyPrintEvents, scheduleEvent, listSpecificCalendarInGroupEvents
 from models import Vehicle, User
 from API.admin.user import getUser
 from models import db
@@ -72,22 +72,12 @@ slack_token = os.getenv('SLACK_BOT_TOKEN')
 VERIFICATION_TOKEN = os.getenv('VERIFICATION_TOKEN')
 
 #instantiating slack client
-slack_client = WebClient(slack_token)
-
-# TEMP
-# vehicle = Vehicle.query.filter(Vehicle.name == 'test1').first()
-# events = listSpecificCalendarInGroupEvents(vehicle.calendarGroupID, vehicle.calendarID)
-# print(prettyPrintEvents(events))
-
-# def getVehicleByName(name):
-    
-#         return Vehicle.query.filter(Vehicle.name == name).first()
-    
+slack_client = WebClient(slack_token)    
 
 vehicleNames = []
 for vehicle in Vehicle.query.all():
     vehicleNames.append(vehicle.name)
-# 
+ 
 
 @app.route("/")
 def event_hook(request):
@@ -168,10 +158,19 @@ def handle_message(event_data):
             """Makes an event on the calendar. INPUT FORMAT : reserve {vehicle} from {startTime} to {endTime}"""            
             if command.lower() == 'reserve':
                 data = createDataDict(commands)
-                scheduleEvent(data['from'], data['to'])
-                message = (  
-                    f"Reserved {data['reserve']} for <@{message['user']}> from {data['from']} to {data['to']}" if ("Error" not in data) else f"{data['Error']}"
-                )
+                if "Error" in data:
+                    message = f"{data['Error']}"
+                else:                
+                    vehicleName = data['reserve']
+                    if vehicleName not in vehicleNames:
+                        message = ("Error : Did not provide a valid vehicle name")
+                    else:
+                        with app.app_context():
+                            vehicle = Vehicle.query.filter(Vehicle.name == vehicleName).first()
+                            scheduleEvent(vehicle.calendarGroupID, vehicle.calendarID, data['from'], data['to'])
+                            message = (  
+                                f"Reserved {data['reserve']} for <@{message['user']}> from {data['from']} to {data['to']}"
+                            )
                 slack_client.chat_postMessage(channel=channel_id, text=message)
             """Gets Events on the calendar"""
             if command.lower() == 'events':

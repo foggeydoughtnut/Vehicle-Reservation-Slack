@@ -1,12 +1,10 @@
 # Vehicle Reservation app for Slack
 
 ## Setup  
-Type in the following commands in the python terminal  
-```
->>> from databse import init_db
->>> init_db()
-```
-This will create an admin user in the database right now.
+Run the app.py file and currently that will just make an admin with username of admin and password of password  
+Then login to the admin page with /login  
+Then from the admin (/admin) page you can add vehicles  
+Can logout with the route /logout  
 
 If there is no admin user
 ### Create Admin User  

@@ -1,5 +1,6 @@
 import requests
 import os
+from time import strftime
 from API.graphAPI import generateAccessToken, GRAPH_API_ENDPOINT, SCOPES
 from API.User import getUsersName, getUsersEmail
 from dotenv import load_dotenv
@@ -27,7 +28,7 @@ def constructEventDetail(event_name, **event_details):
         request_body[key] = value
     return request_body
 
-def scheduleEvent(startTime, endTime):
+def scheduleEvent(calendarGroupId, calendarId, startTime, endTime):
     """Uses Outlook's Graph api to schedule an event based off the information provided
     
         Keyword arguments:\n
@@ -57,7 +58,7 @@ def scheduleEvent(startTime, endTime):
         }
     ]
     requests.post(
-        GRAPH_API_ENDPOINT + f'/me/events',
+        GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendarGroupId}/calendars/{calendarId}/events',
         headers=headers,
         json=constructEventDetail(
             event_name,
@@ -68,43 +69,24 @@ def scheduleEvent(startTime, endTime):
         )
     )
 
-def getCalendarID():
-    calendar = requests.get(
-    GRAPH_API_ENDPOINT + f'/me/calendar',
-    headers=headers
-    )
-    return calendar.json()['id']
-    
-def listEvents():
-    """Uses the outlook api to get the events that are happening and returns the events in an object with only the information needed NOTE: events variable has all of the calendar information and I use a portion of the information found in events"""
-    calendarHeaders = headers
-    calendarHeaders['Prefer'] = 'outlook.timezone="America/Denver"'
-    events = requests.get(
-        GRAPH_API_ENDPOINT + f'/me/calendar/events',
-        headers=headers
-    )
-    # To be returned for slack bot
-    calendarEvents = {}
-    i = 0
-    for event in events.json()['value']:
-        eventDict = {}
-        eventDict[f'event'] = f'event{i}'
-        eventDict['Subject'] = event['subject']
-        eventDict['bodyPreview'] = event['bodyPreview']
-        eventDict['webLink'] = event['webLink']
-        eventDict['start'] = event['start']
-        eventDict['end'] = event['end']
-        calendarEvents[f'event{i}'] = eventDict
-        i += 1
-    
-    return calendarEvents
+
 def listSpecificCalendarInGroupEvents(calendarGroupId, calendarId):
-    """Uses the outlook api to get the events that are happening and returns the events in an object with only the information needed NOTE: events variable has all of the calendar information and I use a portion of the information found in events"""
+    """Uses the outlook api to get the events of a specific calendar in a calendar group and returns the events in an object with only the information needed NOTE: events variable has all of the calendar information and I use a portion of the information found in events\n    
+
+        Keyword arguments:\n
+        calendarGroupId         -- The calendar group id that the calendar is located in
+        calendarId              -- The specific id for the calendar
+    """
+
     calendarHeaders = headers
     calendarHeaders['Prefer'] = 'outlook.timezone="America/Denver"'
+
+    # startDateTime = '2022-06-15T08:40'
+    startDateTime = strftime("%Y-%m-%dT%H:%M:%S")
+    endDateTime = strftime("%Y-%m-%d")+'T23:59'
     events = requests.get(
-        GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendarGroupId}/calendars/{calendarId}/events',
-        headers=headers
+        GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendarGroupId}/calendars/{calendarId}/calendarView?startDateTime={startDateTime}&endDateTime={endDateTime}',
+        headers=calendarHeaders
     )
     # To be returned for slack bot
     calendarEvents = {}
@@ -123,6 +105,12 @@ def listSpecificCalendarInGroupEvents(calendarGroupId, calendarId):
     return calendarEvents
 
 def prettyPrintEvents(events, vehicleName):
+    """Makes the event object easier to read\n
+    
+        Keyword arguments:\n
+        events      -- And object containing all of the events of a calendar\n
+        vehicleName -- The vehicle name the user inputed\n
+    """
     message = f'{vehicleName}\'s calendar looks like this : \n'
     for i in range(len(events)):
         message += f'Event         :  {events[f"event{i}"]["event"]}\n'
@@ -134,17 +122,6 @@ def prettyPrintEvents(events, vehicleName):
         message += '\n\n'
     return message
 
-def getCalendarGroups():
-    header = {
-        'Authorization': 'Bearer ' + access_token,
-        'Content-Type' : 'application/json'
-    }
-    calendarGroups = requests.get(
-        GRAPH_API_ENDPOINT + f'/me/calendarGroups',
-        headers=header
-    )
-    return calendarGroups
-    
 
 # #  Delete an event
 # event_id1 = response1_create.json()['id'] # get event id then do a delete request
