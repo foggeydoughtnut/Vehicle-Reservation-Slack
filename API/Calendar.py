@@ -1,6 +1,7 @@
 import requests
 import os
 from time import strftime
+import datetime
 from API.graphAPI import generateAccessToken, GRAPH_API_ENDPOINT, SCOPES
 from API.User import getUsersName, getUsersEmail
 from dotenv import load_dotenv
@@ -81,7 +82,6 @@ def listSpecificCalendarInGroupEvents(calendarGroupId, calendarId):
     calendarHeaders = headers
     calendarHeaders['Prefer'] = 'outlook.timezone="America/Denver"'
 
-    # startDateTime = '2022-06-15T08:40'
     startDateTime = strftime("%Y-%m-%dT%H:%M:%S")
     endDateTime = strftime("%Y-%m-%d")+'T23:59'
     events = requests.get(
@@ -111,15 +111,30 @@ def prettyPrintEvents(events, vehicleName):
         events      -- And object containing all of the events of a calendar\n
         vehicleName -- The vehicle name the user inputed\n
     """
-    message = f'{vehicleName}\'s calendar looks like this : \n'
-    for i in range(len(events)):
-        message += f'Event         :  {events[f"event{i}"]["event"]}\n'
-        message += f'Subject      :  {events[f"event{i}"]["Subject"]}\n'
-        message += f'Body          :  {events[f"event{i}"]["bodyPreview"]}\n'
-        message += f'Start Time :  {events[f"event{i}"]["start"]["dateTime"]}\n'
-        message += f'End Time   :  {events[f"event{i}"]["end"]["dateTime"]}\n'
-        message += f'Web Link   :  {events[f"event{i}"]["webLink"]}\n'
-        message += '\n\n'
+    if events == {}:
+        message = f"There are no reservations for {vehicleName}"
+    else:            
+        message = f'{vehicleName}\'s calendar looks like this : \n'
+        for i in range(len(events)):
+            startTime = events[f"event{i}"]["start"]["dateTime"]
+            # startTime = startTime.split('.')[0].replace('T', ' at ')
+            cleandedUpStartTime = startTime.split('.')[0].split('T')[1][:-3] # Gets rid of microseconds, seconds and date
+
+            cleandedUpStartTime = datetime.datetime.strptime(f'{cleandedUpStartTime}', '%H:%M').strftime('%I:%M %p')
+            print(cleandedUpStartTime)
+
+            endTime = events[f"event{i}"]["end"]["dateTime"]
+            # endTime = endTime.split('.')[0].replace('T', ' at ')
+            cleanedUpEndTime = endTime.split('.')[0].split('T')[1][:-3] # Gets rid of microseconds, seconds and date
+            cleanedUpEndTime = datetime.datetime.strptime(f'{cleanedUpEndTime}', '%H:%M').strftime('%I:%M %p')
+
+            message += f'Event         :  {events[f"event{i}"]["event"]}\n'
+            message += f'Subject      :  {events[f"event{i}"]["Subject"]}\n'
+            message += f'Body          :  {events[f"event{i}"]["bodyPreview"]}\n'
+            message += f'Start Time :  Today at {cleandedUpStartTime}\n'
+            message += f'End Time   :  Today at {cleanedUpEndTime}\n'
+            message += f'Web Link   :  {events[f"event{i}"]["webLink"]}\n'
+            message += '\n\n'
     return message
 
 
