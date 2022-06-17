@@ -181,10 +181,13 @@ def handle_message(event_data):
                                 message = f"{data['reserve']} is reserved at that time!"
                             else:
                                 
-                                API.Calendar.scheduleEvent(vehicle.calendarGroupID, vehicle.calendarID, data['from'], data['to'])
-                                message = (  
-                                    f"Reserved {data['reserve']} for <@{message['user']}> from {data['from']} to {data['to']}"
-                                )
+                                response = API.Calendar.scheduleEvent(vehicle.calendarGroupID, vehicle.calendarID, data['from'], data['to'])
+                                if "ERROR" in response:
+                                    message = response['ERROR']
+                                else:
+                                    message = (  
+                                        f"Reserved {data['reserve']} for <@{message['user']}> from {data['from']} to {data['to']}"
+                                    )
                 slack_client.chat_postMessage(channel=channel_id, text=message)
             
             """Gets reservations on the calendar"""
