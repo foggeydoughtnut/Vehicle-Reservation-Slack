@@ -87,10 +87,9 @@ def listSpecificCalendarInGroupEvents(calendarGroupId, calendarId):
     calendarHeaders['Prefer'] = 'outlook.timezone="America/Denver"'
 
     startDateTime = strftime("%Y-%m-%dT%H:%M:%S")
-    tomorrowsDate = datetime.date.today() + datetime.timedelta(days=1)
-    endDateTime = str(tomorrowsDate)+strftime('T%H:%M:%S')
+    endDateTime = strftime("%Y-%m-%dT23:59:59")
     events = requests.get(
-        API.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendarGroupId}/calendars/{calendarId}/calendarview?startdatetime={startDateTime}&endDateTime={endDateTime}',
+        API.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendarGroupId}/calendars/{calendarId}/calendarview?startdatetime={startDateTime}-06:00&endDateTime={endDateTime}-06:00',
         headers=calendarHeaders
     )
 
