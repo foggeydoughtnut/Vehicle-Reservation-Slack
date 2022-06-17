@@ -92,18 +92,6 @@ def listSpecificCalendarInGroupEvents(calendarGroupId, calendarId):
         API.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendarGroupId}/calendars/{calendarId}/calendarview?startdatetime={startDateTime}-06:00&endDateTime={endDateTime}-06:00',
         headers=calendarHeaders
     )
-
-    # events = requests.get(
-    #     API.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarview?startdatetime={startDateTime}&endDateTime={endDateTime}',
-    #     headers=calendarHeaders
-    # )
-    # print(events)
-
-    # events = requests.get( 
-    #     API.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendarGroupId}/calendars/{calendarId}/events',
-    #     headers=calendarHeaders
-    # )
-
     # To be returned for slack bot
     calendarEvents = {}
     i = 0
