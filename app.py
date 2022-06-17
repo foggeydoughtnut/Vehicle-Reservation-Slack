@@ -1,4 +1,5 @@
 import os
+from tracemalloc import start
 from urllib import request
 # Flask Imports
 from flask import Flask, Response, redirect, request, render_template, session
@@ -164,6 +165,7 @@ def handle_message(event_data):
             command = commands[1]
             channel_id = message["channel"]
             # This is where slack messages are handled
+            
             """Makes an event on the calendar. INPUT FORMAT : reserve {vehicle} from {startTime} to {endTime}
             
                 Example - reserve vehicle from 2022-06-15T15:00:00 to 2022-06-15T16:00:00
@@ -190,6 +192,7 @@ def handle_message(event_data):
                                     f"Reserved {data['reserve']} for <@{message['user']}> from {data['from']} to {data['to']}"
                                 )
                 slack_client.chat_postMessage(channel=channel_id, text=message)
+            
             """Gets Events on the calendar"""
             if command.lower() == 'events':
                 if len(commands) != 4:
@@ -204,12 +207,38 @@ def handle_message(event_data):
                             events = API.Calendar.listSpecificCalendarInGroupEvents(vehicle.calendarGroupID, vehicle.calendarID)
                             message = API.Calendar.prettyPrintEvents(events, vehicleName)
                 slack_client.chat_postMessage(channel=channel_id, text=message)
+            
             """Lists all of the vehicle's names"""
             if command.lower() == 'vehicles':
                 message = ""
                 for vehicle in vehicleNames:
                     message += f"{vehicle}, "
                 slack_client.chat_postMessage(channel=channel_id, text=message)
+            
+            """Check if vehicle is available from startTime to endTime
+               Format : check {vehicleName} from {startTime} to {endTime}
+            """
+            if command.lower() == 'check':
+                if len(commands) != 7:
+                    message = (f"Error : Did not provide correct amount of information")
+                else:
+                    vehicleName = commands[2]
+                    if vehicleName not in vehicleNames:
+                        message = (f"Error : Did not provide a valid vehicle name : {vehicleName}")
+                    else:
+                        with app.app_context():
+                            vehicle = Vehicle.query.filter(Vehicle.name == vehicleName).first()
+                            startTime = commands[4]
+                            endTime = commands[6]
+                            
+                            try:
+                                available = checkAvailable(vehicle, startTime, endTime)
+                                availableMessage = 'available' if available else 'not available'
+                                message = f'{vehicleName} is {availableMessage}'
+                            except:
+                                message = 'An error has occured when trying to complete your request'
+                slack_client.chat_postMessage(channel=channel_id, text=message)
+
             if command.lower() == 'help':
                 message = """ Usage Manual
                 Command 1  
