@@ -143,6 +143,10 @@ def createDataDict(data):
 def getUserSlackId():
     app.client.users_identity
 
+def checkAvailable(vehicle, startTime, endTime):
+    available = API.Calendar.checkIfReservationAvailable(vehicle.calendarGroupID, vehicle.calendarID, startTime, endTime)
+    return available
+
 
 @slack_events_adapter.on("app_mention")
 def handle_message(event_data):
@@ -175,10 +179,16 @@ def handle_message(event_data):
                     else:
                         with app.app_context():
                             vehicle = Vehicle.query.filter(Vehicle.name == vehicleName).first()
-                            API.Calendar.scheduleEvent(vehicle.calendarGroupID, vehicle.calendarID, data['from'], data['to'])
-                            message = (  
-                                f"Reserved {data['reserve']} for <@{message['user']}> from {data['from']} to {data['to']}"
-                            )
+                            # First check that vehicle is available
+                            available = checkAvailable(vehicle, data['from'], data['to'])
+                            # Schedule reservation for vehicle
+                            if not available:
+                                message = f"{data['reserve']} is reserved at that time!"
+                            else:
+                                API.Calendar.scheduleEvent(vehicle.calendarGroupID, vehicle.calendarID, data['from'], data['to'])
+                                message = (  
+                                    f"Reserved {data['reserve']} for <@{message['user']}> from {data['from']} to {data['to']}"
+                                )
                 slack_client.chat_postMessage(channel=channel_id, text=message)
             """Gets Events on the calendar"""
             if command.lower() == 'events':

@@ -62,7 +62,6 @@ def scheduleEvent(calendarGroupId, calendarId, startTime, endTime):
             'type' : 'required'
         }
     ]
-    print(checkIfReservationAvailable(calendarGroupId, calendarId, startTime, endTime))
     requests.post(
         API.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendarGroupId}/calendars/{calendarId}/events',
         headers=generateHeaders(),
@@ -76,7 +75,6 @@ def scheduleEvent(calendarGroupId, calendarId, startTime, endTime):
     )
 
 
-# THIS IS NOT WORKING RIGHT NOW FOR SOME REASON
 def listSpecificCalendarInGroupEvents(calendarGroupId, calendarId):
     """Uses the outlook api to get the events of a specific calendar in a calendar group and returns the events happening that day in an object with only the information needed. NOTE: events variable has all of the calendar information and I use a portion of the information found in events\n    
 
@@ -91,8 +89,6 @@ def listSpecificCalendarInGroupEvents(calendarGroupId, calendarId):
     startDateTime = strftime("%Y-%m-%dT%H:%M:%S")
     tomorrowsDate = datetime.date.today() + datetime.timedelta(days=1)
     endDateTime = str(tomorrowsDate)+strftime('T%H:%M:%S')
-    print(startDateTime)
-    print(endDateTime)
     events = requests.get(
         API.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendarGroupId}/calendars/{calendarId}/calendarview?startdatetime={startDateTime}&endDateTime={endDateTime}',
         headers=calendarHeaders
@@ -122,7 +118,6 @@ def listSpecificCalendarInGroupEvents(calendarGroupId, calendarId):
         eventDict['end'] = event['end']
         calendarEvents[f'event{i}'] = eventDict
         i += 1
-    # print(calendarEvents)
     return calendarEvents
 
 def prettyPrintEvents(events, vehicleName):
@@ -138,13 +133,11 @@ def prettyPrintEvents(events, vehicleName):
         message = f'{vehicleName}\'s calendar looks like this : \n'
         for i in range(len(events)):
             startTime = events[f"event{i}"]["start"]["dateTime"]
-            # startTime = startTime.split('.')[0].replace('T', ' at ')
             cleandedUpStartTime = startTime.split('.')[0].split('T')[1][:-3] # Gets rid of microseconds, seconds and date
 
             cleandedUpStartTime = datetime.datetime.strptime(f'{cleandedUpStartTime}', '%H:%M').strftime('%I:%M %p') # Converts from military time to standard time
 
             endTime = events[f"event{i}"]["end"]["dateTime"]
-            # endTime = endTime.split('.')[0].replace('T', ' at ')
             cleanedUpEndTime = endTime.split('.')[0].split('T')[1][:-3] # Gets rid of microseconds, seconds and date
             cleanedUpEndTime = datetime.datetime.strptime(f'{cleanedUpEndTime}', '%H:%M').strftime('%I:%M %p') # Converts from military time to standard time
 
@@ -160,30 +153,11 @@ def prettyPrintEvents(events, vehicleName):
 def checkIfReservationAvailable(calendarGroupId, calendarId, startTime, endTime):
     calendarHeaders = generateHeaders()
     calendarHeaders['Prefer'] = 'outlook.timezone="America/Denver"'
-
-    # startDateTime = strftime("%Y-%m-%dT%H:%M:%S")
-    # endDateTime = strftime("%Y-%m-%d")+'T23:59'
     events = requests.get(
-        API.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendarGroupId}/calendars/{calendarId}/calendarView?startDateTime={startTime}&endDateTime={endTime}',
+        API.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendarGroupId}/calendars/{calendarId}/calendarView?startDateTime={startTime}-06:00&endDateTime={endTime}-06:00', # NOTE: offset is needed or else this won't work
         headers=calendarHeaders
     )
     return events.json()['value'] == []
-        
-    # calendarEvents = {}
-    # i = 0
-    # for event in events.json()['value']:
-    #     eventDict = {}
-    #     eventDict[f'event'] = f'event{i}'
-    #     eventDict['Subject'] = event['subject']
-    #     eventDict['bodyPreview'] = event['bodyPreview']
-    #     eventDict['webLink'] = event['webLink']
-    #     eventDict['start'] = event['start']
-    #     eventDict['end'] = event['end']
-    #     calendarEvents[f'event{i}'] = eventDict
-    #     i += 1
-    
-    # print(calendarEvents)
-
 
 
 # #  Delete an event
