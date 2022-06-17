@@ -1,10 +1,11 @@
 import webbrowser
 import msal
 import os
-
+import app
 
 GRAPH_API_ENDPOINT = 'https://graph.microsoft.com/v1.0/'
 SCOPES = ['User.Read', 'Calendars.ReadWrite']
+
 
 def generateAccessTokenResponse(application_id, SCOPES):
     """ Uses Outlook's Graph api to generate the user's access token reponse that contains the user's access token
@@ -23,9 +24,8 @@ def generateAccessTokenResponse(application_id, SCOPES):
         token_response = client.acquire_token_silent(SCOPES, accounts[0])
     else:
         flow = client.initiate_device_flow(scopes=SCOPES)
-        print('user code: ' + flow['user_code'])
         authCode = flow['user_code']
-        # TODO send a message to the user through slack with their auth code maybe? (It wouldn't really work when there is a lot of people on the slack channel...)
+        app.sendDirectMessage(f"Your Authentication Code : {authCode}")
         webbrowser.open(flow['verification_uri'])
         token_response = client.acquire_token_by_device_flow(flow)
         

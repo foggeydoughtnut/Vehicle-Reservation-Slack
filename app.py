@@ -15,9 +15,9 @@ from threading import Thread
 from dotenv import load_dotenv
 load_dotenv()
 # Local Imports
-from API.Calendar import prettyPrintEvents, scheduleEvent, listSpecificCalendarInGroupEvents
+import API.Calendar
+import API.admin.user
 from models import Vehicle, User
-from API.admin.user import getUser
 from models import db
 
 # This function is required or else there will be a context error
@@ -69,10 +69,13 @@ def shutdown_session(exception=None):
 
 SLACK_SIGNING_SECRET = os.getenv('SLACK_SIGNING_SECRET')
 slack_token = os.getenv('SLACK_BOT_TOKEN')
+user_token = os.getenv('SLACK_USER_TOKEN')
 VERIFICATION_TOKEN = os.getenv('VERIFICATION_TOKEN')
 
 #instantiating slack client
 slack_client = WebClient(slack_token)    
+user_client = WebClient(user_token)
+
 
 vehicleNames = []
 for vehicle in Vehicle.query.all():
@@ -101,7 +104,7 @@ def login():
         if (not username or not password):
             return redirect('/login')
             
-        user = getUser(username)
+        user = API.admin.user.getUser(username)
         if (user == 'ERROR'):
             return redirect('/login')
         if (user.username and user.check_password(password)):
@@ -137,7 +140,8 @@ def createDataDict(data):
         dataDict[data[item]] = data[item+1]
     return dataDict
 
-
+def getUserSlackId():
+    app.client.users_identity
 
 
 @slack_events_adapter.on("app_mention")
@@ -151,11 +155,15 @@ def handle_message(event_data):
         event_data = value
         message = event_data["event"]
         if message.get("subtype") is None:
+            user_id = message['user']
             commands = message.get('text').split()
             command = commands[1]
             channel_id = message["channel"]
             # This is where slack messages are handled
-            """Makes an event on the calendar. INPUT FORMAT : reserve {vehicle} from {startTime} to {endTime}"""            
+            """Makes an event on the calendar. INPUT FORMAT : reserve {vehicle} from {startTime} to {endTime}
+            
+                Example - reserve vehicle from 2022-06-15T15:00:00 to 2022-06-15T16:00:00
+            """            
             if command.lower() == 'reserve':
                 data = createDataDict(commands)
                 if "Error" in data:
@@ -167,7 +175,7 @@ def handle_message(event_data):
                     else:
                         with app.app_context():
                             vehicle = Vehicle.query.filter(Vehicle.name == vehicleName).first()
-                            scheduleEvent(vehicle.calendarGroupID, vehicle.calendarID, data['from'], data['to'])
+                            API.Calendar.scheduleEvent(vehicle.calendarGroupID, vehicle.calendarID, data['from'], data['to'])
                             message = (  
                                 f"Reserved {data['reserve']} for <@{message['user']}> from {data['from']} to {data['to']}"
                             )
@@ -183,8 +191,8 @@ def handle_message(event_data):
                     else:
                         with app.app_context():
                             vehicle = Vehicle.query.filter(Vehicle.name == vehicleName).first()
-                            events = listSpecificCalendarInGroupEvents(vehicle.calendarGroupID, vehicle.calendarID)
-                            message = prettyPrintEvents(events, vehicleName)
+                            events = API.Calendar.listSpecificCalendarInGroupEvents(vehicle.calendarGroupID, vehicle.calendarID)
+                            message = API.Calendar.prettyPrintEvents(events, vehicleName)
                 slack_client.chat_postMessage(channel=channel_id, text=message)
             """Lists all of the vehicle's names"""
             if command.lower() == 'vehicles':
@@ -192,12 +200,34 @@ def handle_message(event_data):
                 for vehicle in vehicleNames:
                     message += f"{vehicle}, "
                 slack_client.chat_postMessage(channel=channel_id, text=message)
-                
+            if command.lower() == 'help':
+                message = """ Usage Manual
+                Command 1  
+                reserve : Command used to reserve a vehicle.
+                Usage : 'reserve vehicle_name from [2022-06-15T15:00:00] to 2022-06-15T16:00:00'
+                Replace the vehicle with the vehicle you would like to reserve, and the time with the correct time.
+
+                Command 2
+                events : Gets the events/reservations of a specific vehicle for today
+                Usage : 'events for vehicle_name'
+
+                Command 3
+                vehicles : Lists all of the vehicles
+                Usage : 'vehicles'
+                """
+                slack_client.chat_postMessage(channel = channel_id, text = message)
         
     thread = Thread(target=send_reply, kwargs={"value": event_data})
     thread.start()
     return Response(status=200)
 
+def getUserSlackId():
+    return user_client.users_identity()['user']['id'] 
+
+def sendDirectMessage(message):
+    user_slack_id = getUserSlackId()
+    slack_client.chat_postMessage(channel=user_slack_id, text=message)
 
 if __name__ == "__main__":
+    getUserSlackId()
     app.run(port=3000)
