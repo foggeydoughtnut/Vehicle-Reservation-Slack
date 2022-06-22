@@ -210,7 +210,7 @@ def handle_message(event_data):
                                 message = 'An error has occured when trying to complete your request'
                 slack_client.chat_postMessage(channel=channel_id, text=message)
             
-            """Lists all of the vehicle's names"""
+            """Lists all of the vehicle's names and displays if they are available"""
             if command.lower() == 'vehicles':
                 message = ""
                 startTime = strftime("%Y-%m-%dT%H:%M:%S")
@@ -222,10 +222,6 @@ def handle_message(event_data):
                         available = checkAvailable(vehicle, startTime, endTime)
                         availablityMessage = "available" if available else "not available"
                         message += f"{vehicle.name} - {availablityMessage}\n"
-                # for vehicle in vehicleNames:
-                #     available = checkAvailable(vehicle, startTime, endTime)
-                #     availablityMessage = "available" if available else "not available"
-                #     message += f"{vehicle} - {availablityMessage}\n "
                 slack_client.chat_postMessage(channel=channel_id, text=message)
             
             """Check if vehicle is available from startTime to endTime
