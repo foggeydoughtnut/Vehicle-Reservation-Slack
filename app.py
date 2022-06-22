@@ -156,6 +156,7 @@ def handle_message(event_data):
             command = commands[1]
             channel_id = message["channel"]
             # This is where slack messages are handled
+
             
             """Makes an event on the calendar. INPUT FORMAT : reserve {vehicle} from {startTime} to {endTime}
             
@@ -164,7 +165,7 @@ def handle_message(event_data):
             if command.lower() == 'reserve':
                 data = createDataDict(commands)
                 if "Error" in data:
-                    reponseText = f"{data['Error']}"
+                    responseText = f"{data['Error']}"
                 else:                
                     vehicleName = data['reserve']
                     similarVehicleNames = []
@@ -172,7 +173,7 @@ def handle_message(event_data):
                         if vehicle.startswith(vehicleName):
                             similarVehicleNames.append(vehicle)
                     if vehicleName not in vehicleNames and similarVehicleNames == []:
-                        reponseText = ("Error : Did not provide a valid vehicle name")
+                        responseText = ("Error : Did not provide a valid vehicle name")
                     else:
                         with app.app_context():
                             errorOccured = False
@@ -187,46 +188,46 @@ def handle_message(event_data):
                                         available = checkAvailable(vehicle, data['from'], data['to'])
                                         # Schedule reservation for vehicle
                                         if not available:
-                                            reponseText = f"{vehicleName} is reserved at that time!"
+                                            responseText = f"{vehicleName} is reserved at that time!"
                                         else:
                                             response = API.Calendar.scheduleEvent(vehicle.calendarGroupID, vehicle.calendarID, data['from'], data['to'])
                                             if "ERROR" in response:
-                                                reponseText = response['ERROR']
+                                                responseText = response['ERROR']
                                                 continue
                                                 
                                             else:
-                                                reponseText = (f"Reserved {vehicle.name} for <@{message['user']}> from {data['from']} to {data['to']}")
+                                                responseText = (f"Reserved {vehicle.name} for <@{message['user']}> from {data['from']} to {data['to']}")
                                                 reserved = True
                                     except:
                                         errorOccured = True
-                                        reponseText = 'An error has occured when trying to complete your request'
+                                        responseText = 'An error has occured when trying to complete your request'
                                 else:
                                     break
 
                                 
-                slack_client.chat_postMessage(channel=channel_id, text=reponseText)
+                slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'], text=responseText)
             
             """Gets reservations on the calendar"""
             if command.lower() == 'reservations':
                 if len(commands) != 4:
-                    reponseText = (f"Error : Did not provide correct amount of information")
+                    responseText = (f"Error : Did not provide correct amount of information")
                 else:
                     vehicleName = commands[3]
                     if vehicleName not in vehicleNames:
-                        reponseText = ("Error : Did not provide a valid vehicle name")
+                        responseText = ("Error : Did not provide a valid vehicle name")
                     else:
                         with app.app_context():
                             vehicle = Vehicle.query.filter(Vehicle.name == vehicleName).first()
                             try:
                                 events = API.Calendar.listSpecificCalendarInGroupEvents(vehicle.calendarGroupID, vehicle.calendarID)
-                                reponseText = API.Calendar.prettyPrintEvents(events, vehicleName)
+                                responseText = API.Calendar.prettyPrintEvents(events, vehicleName)
                             except:
-                                reponseText = 'An error has occured when trying to complete your request'
-                slack_client.chat_postMessage(channel=channel_id, text=reponseText)
+                                responseText = 'An error has occured when trying to complete your request'
+                slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'], text=responseText)
             
             """Lists all of the vehicle's names and displays if they are available"""
             if command.lower() == 'vehicles':
-                reponseText = ""
+                responseText = ""
                 startTime = strftime("%Y-%m-%dT%H:%M:%S")
                 offsetMinutes = 15 # 15 Minute offset for check availability
                 offsetTime = datetime.strptime(startTime, '%Y-%m-%dT%H:%M:%S') + timedelta(minutes=offsetMinutes)
@@ -235,19 +236,19 @@ def handle_message(event_data):
                     for vehicle in Vehicle.query.all():
                         available = checkAvailable(vehicle, startTime, endTime)
                         availablityMessage = "available" if available else "not available"
-                        reponseText += f"{vehicle.name} - {availablityMessage}\n"
-                slack_client.chat_postMessage(channel=channel_id, text=reponseText)
+                        responseText += f"{vehicle.name} - {availablityMessage}\n"
+                slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'], text=responseText)
             
             """Check if vehicle is available from startTime to endTime
                Format : check {vehicleName} from {startTime} to {endTime}
             """
             if command.lower() == 'check':
                 if len(commands) != 7:
-                    reponseText = (f"Error : Did not provide correct amount of information")
+                    responseText = (f"Error : Did not provide correct amount of information")
                 else:
                     vehicleName = commands[2]
                     if vehicleName not in vehicleNames:
-                        reponseText = (f"Error : Did not provide a valid vehicle name : {vehicleName}")
+                        responseText = (f"Error : Did not provide a valid vehicle name : {vehicleName}")
                     else:
                         with app.app_context():
                             vehicle = Vehicle.query.filter(Vehicle.name == vehicleName).first()
@@ -257,13 +258,13 @@ def handle_message(event_data):
                             try:
                                 available = checkAvailable(vehicle, startTime, endTime)
                                 availableMessage = 'available' if available else 'not available'
-                                reponseText = f'{vehicleName} is {availableMessage}'
+                                responseText = f'{vehicleName} is {availableMessage}'
                             except:
-                                reponseText = 'An error has occured when trying to complete your request'
-                slack_client.chat_postMessage(channel=channel_id, text=reponseText)
+                                responseText = 'An error has occured when trying to complete your request'
+                slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'], text=responseText)
 
             if command.lower() == 'help':
-                reponseText = """ Usage Manual
+                responseText = """ Usage Manual
                 Command 1 - reserve
                 Command used to reserve a vehicle.
                 USAGE : reserve vehicle_name from start_time to end_time
@@ -282,7 +283,7 @@ def handle_message(event_data):
                 USAGE : check vehicle_name from start_time to end_time
                 EXAMPLE : check golf-cart-1 from 2022-06-22T08:00:00 to 2022-06-22T09:00:00
                 """
-                slack_client.chat_postMessage(channel = channel_id, text = reponseText)
+                slack_client.chat_postMessage(channel = channel_id, thread_ts=message['ts'], text = responseText)
         
     thread = Thread(target=send_reply, kwargs={"value": event_data})
     thread.start()
@@ -291,9 +292,9 @@ def handle_message(event_data):
 def getUserSlackId():
     return user_client.users_identity()['user']['id'] 
 
-def sendDirectMessage(reponseText):
+def sendDirectMessage(responseText):
     user_slack_id = getUserSlackId()
-    slack_client.chat_postMessage(channel=user_slack_id, text=reponseText)
+    slack_client.chat_postMessage(channel=user_slack_id, text=responseText)
 
 if __name__ == "__main__":
     getUserSlackId()
