@@ -1,5 +1,5 @@
-# import os
-from tracemalloc import start
+from time import strftime
+from datetime import datetime, timedelta
 from urllib import request
 # Flask Imports
 from flask import Flask, Response, redirect, request, render_template, session
@@ -213,8 +213,19 @@ def handle_message(event_data):
             """Lists all of the vehicle's names"""
             if command.lower() == 'vehicles':
                 message = ""
-                for vehicle in vehicleNames:
-                    message += f"{vehicle}, "
+                startTime = strftime("%Y-%m-%dT%H:%M:%S")
+                offsetMinutes = 15 # 15 Minute offset for check availability
+                offsetTime = datetime.strptime(startTime, '%Y-%m-%dT%H:%M:%S') + timedelta(minutes=offsetMinutes)
+                endTime = offsetTime.strftime('%Y-%m-%dT%H:%M:%S')
+                with app.app_context():
+                    for vehicle in Vehicle.query.all():
+                        available = checkAvailable(vehicle, startTime, endTime)
+                        availablityMessage = "available" if available else "not available"
+                        message += f"{vehicle.name} - {availablityMessage}\n"
+                # for vehicle in vehicleNames:
+                #     available = checkAvailable(vehicle, startTime, endTime)
+                #     availablityMessage = "available" if available else "not available"
+                #     message += f"{vehicle} - {availablityMessage}\n "
                 slack_client.chat_postMessage(channel=channel_id, text=message)
             
             """Check if vehicle is available from startTime to endTime
