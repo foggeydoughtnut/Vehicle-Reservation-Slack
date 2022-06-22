@@ -19,7 +19,7 @@ import API.Calendar
 import API.admin.user
 from models import Vehicle, User
 from models import db
-from config import SLACK_SIGNING_SECRET, slack_token, user_token, VERIFICATION_TOKEN, SECRET_KEY
+from config import SLACK_SIGNING_SECRET, slack_token, user_token, VERIFICATION_TOKEN
 
 # This function is required or else there will be a context error
 def create_app():
@@ -41,8 +41,7 @@ if (len(User.query.all()) == 0):
 
 
 migrate = Migrate(app, db)
-app.config['SECRET_KEY'] = SECRET_KEY
-app.debug = True
+app.config.from_pyfile('config.py')
 toolbar = DebugToolbarExtension(app) # tool bar only works when app.debug is True
 login = LoginManager(app)
 
@@ -57,7 +56,6 @@ class MyModelView(ModelView):
         return current_user.is_authenticated
     
 # Creates Admin Page
-app.config['FLASK_ADMIN_SWATCH'] = 'darkly'
 admin = Admin(app, name='Vehicle Reservation', template_mode='bootstrap3')
 admin.add_view(MyModelView(Vehicle, db.session))
 admin.add_view(MyModelView(User, db.session))
