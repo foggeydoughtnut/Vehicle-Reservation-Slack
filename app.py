@@ -205,7 +205,7 @@ def handle_message(event_data):
                                     break
 
                                 
-                slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'], text=responseText)
+                slack_client.chat_postMessage(channel=channel_id, text=responseText, thread_ts=message['ts'])
             
             """Gets reservations on the calendar"""
             if command.lower() == 'reservations':
