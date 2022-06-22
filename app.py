@@ -175,19 +175,21 @@ def handle_message(event_data):
                         with app.app_context():
                             vehicle = Vehicle.query.filter(Vehicle.name == vehicleName).first()
                             # First check that vehicle is available
-                            available = checkAvailable(vehicle, data['from'], data['to'])
-                            # Schedule reservation for vehicle
-                            if not available:
-                                message = f"{data['reserve']} is reserved at that time!"
-                            else:
-                                
-                                response = API.Calendar.scheduleEvent(vehicle.calendarGroupID, vehicle.calendarID, data['from'], data['to'])
-                                if "ERROR" in response:
-                                    message = response['ERROR']
+                            try:
+                                available = checkAvailable(vehicle, data['from'], data['to'])
+                                # Schedule reservation for vehicle
+                                if not available:
+                                    message = f"{data['reserve']} is reserved at that time!"
                                 else:
-                                    message = (  
-                                        f"Reserved {data['reserve']} for <@{message['user']}> from {data['from']} to {data['to']}"
+                                    response = API.Calendar.scheduleEvent(vehicle.calendarGroupID, vehicle.calendarID, data['from'], data['to'])
+                                    if "ERROR" in response:
+                                        message = response['ERROR']
+                                    else:
+                                        message = (  
+                                            f"Reserved {data['reserve']} for <@{message['user']}> from {data['from']} to {data['to']}"
                                     )
+                            except:
+                                message = 'An error has occured when trying to complete your request'
                 slack_client.chat_postMessage(channel=channel_id, text=message)
             
             """Gets reservations on the calendar"""
@@ -241,18 +243,23 @@ def handle_message(event_data):
 
             if command.lower() == 'help':
                 message = """ Usage Manual
-                Command 1  
-                reserve : Command used to reserve a vehicle.
-                Usage : 'reserve vehicle_name from [2022-06-15T15:00:00] to 2022-06-15T16:00:00'
-                Replace the vehicle with the vehicle you would like to reserve, and the time with the correct time.
+                Command 1 - reserve
+                Command used to reserve a vehicle.
+                USAGE : reserve vehicle_name from start_time to end_time
+                EXAMPLE : reserve golf-cart-1 from 2022-06-15T15:00:00 to 2022-06-15T16:00:00
 
-                Command 2
-                events : Gets the events/reservations of a specific vehicle for today
-                Usage : 'events for vehicle_name'
+                Command 2 - reservations
+                Gets the events/reservations of a specific vehicle for today
+                USAGE : 'events for vehicle_name'
 
-                Command 3
-                vehicles : Lists all of the vehicles
-                Usage : 'vehicles'
+                Command 3 - vehicles
+                Lists all of the vehicles
+                USAGE : 'vehicles'
+
+                Command 4 - check  
+                Checks if a vehicle is available from start-time to end-time
+                USAGE : check vehicle_name from start_time to end_time
+                EXAMPLE : check golf-cart-1 from 2022-06-22T08:00:00 to 2022-06-22T09:00:00
                 """
                 slack_client.chat_postMessage(channel = channel_id, text = message)
         
