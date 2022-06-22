@@ -6,6 +6,7 @@ import API.graphAPI
 import API.User
 from dotenv import load_dotenv
 load_dotenv()
+from time import strftime
 
 
 application_id = os.getenv('APPLICATION_ID')
@@ -62,17 +63,22 @@ def scheduleEvent(calendarGroupId, calendarId, startTime, endTime):
             'type' : 'required'
         }
     ]
-    requests.post(
-        API.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendarGroupId}/calendars/{calendarId}/events',
-        headers=generateHeaders(),
-        json=constructEventDetail(
-            event_name,
-            body=body,
-            start=start,
-            end=end,
-            attendees=attendees,
+    timeRightNow = strftime('%Y-%m-%dT%H:%M:%S')
+    if (startTime < timeRightNow or endTime < timeRightNow):
+        return {"ERROR" : "Error : event was made in the past"}
+    else:
+        requests.post(
+            API.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendarGroupId}/calendars/{calendarId}/events',
+            headers=generateHeaders(),
+            json=constructEventDetail(
+                event_name,
+                body=body,
+                start=start,
+                end=end,
+                attendees=attendees,
+            )
         )
-    )
+        return {"SUCCESS" : "Successfully created an event"}
 
 
 def listSpecificCalendarInGroupEvents(calendarGroupId, calendarId):
@@ -92,18 +98,6 @@ def listSpecificCalendarInGroupEvents(calendarGroupId, calendarId):
         API.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendarGroupId}/calendars/{calendarId}/calendarview?startdatetime={startDateTime}-06:00&endDateTime={endDateTime}-06:00',
         headers=calendarHeaders
     )
-
-    # events = requests.get(
-    #     API.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarview?startdatetime={startDateTime}&endDateTime={endDateTime}',
-    #     headers=calendarHeaders
-    # )
-    # print(events)
-
-    # events = requests.get( 
-    #     API.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendarGroupId}/calendars/{calendarId}/events',
-    #     headers=calendarHeaders
-    # )
-
     # To be returned for slack bot
     calendarEvents = {}
     i = 0

@@ -1,4 +1,4 @@
-import os
+# import os
 from tracemalloc import start
 from urllib import request
 # Flask Imports
@@ -13,13 +13,13 @@ from slackeventsapi import SlackEventAdapter
 from slack import WebClient
 
 from threading import Thread
-from dotenv import load_dotenv
-load_dotenv()
+
 # Local Imports
 import API.Calendar
 import API.admin.user
 from models import Vehicle, User
 from models import db
+from config import SLACK_SIGNING_SECRET, slack_token, user_token, VERIFICATION_TOKEN, SECRET_KEY
 
 # This function is required or else there will be a context error
 def create_app():
@@ -41,7 +41,7 @@ if (len(User.query.all()) == 0):
 
 
 migrate = Migrate(app, db)
-app.config['SECRET_KEY'] = 'f9b56900692ec651739de1b4638bd091'
+app.config['SECRET_KEY'] = SECRET_KEY
 app.debug = True
 toolbar = DebugToolbarExtension(app) # tool bar only works when app.debug is True
 login = LoginManager(app)
@@ -66,12 +66,6 @@ admin.add_view(MyModelView(User, db.session))
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     db.session.remove()
-
-
-SLACK_SIGNING_SECRET = os.getenv('SLACK_SIGNING_SECRET')
-slack_token = os.getenv('SLACK_BOT_TOKEN')
-user_token = os.getenv('SLACK_USER_TOKEN')
-VERIFICATION_TOKEN = os.getenv('VERIFICATION_TOKEN')
 
 #instantiating slack client
 slack_client = WebClient(slack_token)    
@@ -160,7 +154,6 @@ def handle_message(event_data):
         event_data = value
         message = event_data["event"]
         if message.get("subtype") is None:
-            user_id = message['user']
             commands = message.get('text').split()
             command = commands[1]
             channel_id = message["channel"]
@@ -182,19 +175,25 @@ def handle_message(event_data):
                         with app.app_context():
                             vehicle = Vehicle.query.filter(Vehicle.name == vehicleName).first()
                             # First check that vehicle is available
-                            available = checkAvailable(vehicle, data['from'], data['to'])
-                            # Schedule reservation for vehicle
-                            if not available:
-                                message = f"{data['reserve']} is reserved at that time!"
-                            else:
-                                API.Calendar.scheduleEvent(vehicle.calendarGroupID, vehicle.calendarID, data['from'], data['to'])
-                                message = (  
-                                    f"Reserved {data['reserve']} for <@{message['user']}> from {data['from']} to {data['to']}"
-                                )
+                            try:
+                                available = checkAvailable(vehicle, data['from'], data['to'])
+                                # Schedule reservation for vehicle
+                                if not available:
+                                    message = f"{data['reserve']} is reserved at that time!"
+                                else:
+                                    response = API.Calendar.scheduleEvent(vehicle.calendarGroupID, vehicle.calendarID, data['from'], data['to'])
+                                    if "ERROR" in response:
+                                        message = response['ERROR']
+                                    else:
+                                        message = (  
+                                            f"Reserved {data['reserve']} for <@{message['user']}> from {data['from']} to {data['to']}"
+                                    )
+                            except:
+                                message = 'An error has occured when trying to complete your request'
                 slack_client.chat_postMessage(channel=channel_id, text=message)
             
-            """Gets Events on the calendar"""
-            if command.lower() == 'events':
+            """Gets reservations on the calendar"""
+            if command.lower() == 'reservations':
                 if len(commands) != 4:
                     message = (f"Error : Did not provide correct amount of information")
                 else:
@@ -204,8 +203,11 @@ def handle_message(event_data):
                     else:
                         with app.app_context():
                             vehicle = Vehicle.query.filter(Vehicle.name == vehicleName).first()
-                            events = API.Calendar.listSpecificCalendarInGroupEvents(vehicle.calendarGroupID, vehicle.calendarID)
-                            message = API.Calendar.prettyPrintEvents(events, vehicleName)
+                            try:
+                                events = API.Calendar.listSpecificCalendarInGroupEvents(vehicle.calendarGroupID, vehicle.calendarID)
+                                message = API.Calendar.prettyPrintEvents(events, vehicleName)
+                            except:
+                                message = 'An error has occured when trying to complete your request'
                 slack_client.chat_postMessage(channel=channel_id, text=message)
             
             """Lists all of the vehicle's names"""
@@ -241,18 +243,23 @@ def handle_message(event_data):
 
             if command.lower() == 'help':
                 message = """ Usage Manual
-                Command 1  
-                reserve : Command used to reserve a vehicle.
-                Usage : 'reserve vehicle_name from [2022-06-15T15:00:00] to 2022-06-15T16:00:00'
-                Replace the vehicle with the vehicle you would like to reserve, and the time with the correct time.
+                Command 1 - reserve
+                Command used to reserve a vehicle.
+                USAGE : reserve vehicle_name from start_time to end_time
+                EXAMPLE : reserve golf-cart-1 from 2022-06-15T15:00:00 to 2022-06-15T16:00:00
 
-                Command 2
-                events : Gets the events/reservations of a specific vehicle for today
-                Usage : 'events for vehicle_name'
+                Command 2 - reservations
+                Gets the events/reservations of a specific vehicle for today
+                USAGE : 'events for vehicle_name'
 
-                Command 3
-                vehicles : Lists all of the vehicles
-                Usage : 'vehicles'
+                Command 3 - vehicles
+                Lists all of the vehicles
+                USAGE : 'vehicles'
+
+                Command 4 - check  
+                Checks if a vehicle is available from start-time to end-time
+                USAGE : check vehicle_name from start_time to end_time
+                EXAMPLE : check golf-cart-1 from 2022-06-22T08:00:00 to 2022-06-22T09:00:00
                 """
                 slack_client.chat_postMessage(channel = channel_id, text = message)
         
