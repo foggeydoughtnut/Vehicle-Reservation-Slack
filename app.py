@@ -181,7 +181,6 @@ def handle_message(event_data):
                                     break
                                 elif not reserved and not errorOccured:
                                     vehicle = Vehicle.query.filter(Vehicle.name == vehicles).first()
-                                    # First check that vehicle is available
                                     try:
                                         available = checkAvailable(vehicle, data['from'], data['to'])
                                         # Schedule reservation for vehicle
