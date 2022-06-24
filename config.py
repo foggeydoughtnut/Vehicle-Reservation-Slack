@@ -11,3 +11,9 @@ VERIFICATION_TOKEN = os.getenv('VERIFICATION_TOKEN')
 DEBUG = True
 SECRET_KEY = os.getenv('SECRET_KEY')
 FLASK_ADMIN_SWATCH = 'darkly'
+
+# For Outlook
+GRAPH_API_ENDPOINT = 'https://graph.microsoft.com/v1.0/'
+SCOPES = ['User.Read', 'Calendars.ReadWrite']
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+APPLICATION_ID = os.getenv('APPLICATION_ID')

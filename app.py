@@ -155,9 +155,7 @@ def handle_message(event_data):
             commands = message.get('text').split()
             command = commands[1]
             channel_id = message["channel"]
-            # This is where slack messages are handled
-
-            
+            # This is where slack messages are handled            
             """Makes an event on the calendar. INPUT FORMAT : reserve {vehicle} from {startTime} to {endTime}
             
                 Example - reserve vehicle from 2022-06-15T15:00:00 to 2022-06-15T16:00:00
@@ -218,11 +216,11 @@ def handle_message(event_data):
                     else:
                         with app.app_context():
                             vehicle = Vehicle.query.filter(Vehicle.name == vehicleName).first()
-                            try:
-                                events = API.Calendar.listSpecificCalendarInGroupEvents(vehicle.calendarGroupID, vehicle.calendarID)
-                                responseText = API.Calendar.prettyPrintEvents(events, vehicleName)
-                            except:
-                                responseText = 'An error has occured when trying to complete your request'
+                            # try:
+                            events = API.Calendar.listSpecificCalendarInGroupEvents(vehicle.calendarGroupID, vehicle.calendarID)
+                            responseText = API.Calendar.prettyPrintEvents(events, vehicleName)
+                            # except:
+                            #     responseText = 'An error has occured when trying to complete your request'
                 slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'], text=responseText)
             
             """Lists all of the vehicle's names and displays if they are available"""
@@ -294,8 +292,7 @@ def getUserSlackId():
 
 def sendDirectMessage(responseText):
     user_slack_id = getUserSlackId()
-    slack_client.chat_postMessage(channel=user_slack_id, text=responseText)
+    slack_client.chat_postEphemeral(channel=user_slack_id, text=responseText, user=user_slack_id)
 
 if __name__ == "__main__":
-    getUserSlackId()
     app.run(port=3000)
