@@ -12,7 +12,7 @@ from time import strftime
 application_id = os.getenv('APPLICATION_ID')
 
 
-def generateHeaders():
+def generate_headers():
     access_token = API.graphAPI.generateAccessToken(application_id, API.graphAPI.SCOPES)
     headers = {
         'Authorization': 'Bearer ' + access_token
@@ -20,7 +20,7 @@ def generateHeaders():
     return headers
 
 
-def constructEventDetail(event_name, **event_details):
+def construct_event_detail(event_name, **event_details):
     """ Constructs a calendar event with the name and details given
 
         Keyword arguments:\n
@@ -34,7 +34,7 @@ def constructEventDetail(event_name, **event_details):
         request_body[key] = value
     return request_body
 
-def scheduleEvent(calendarGroupId, calendarId, startTime, endTime):
+def schedule_event(calendarGroupId, calendarId, startTime, endTime):
     """Uses Outlook's Graph api to schedule an event based off the information provided
     
         Keyword arguments:\n
@@ -67,21 +67,24 @@ def scheduleEvent(calendarGroupId, calendarId, startTime, endTime):
     if (startTime < timeRightNow or endTime < timeRightNow):
         return {"ERROR" : "Error : event was made in the past"}
     else:
-        requests.post(
-            API.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendarGroupId}/calendars/{calendarId}/events',
-            headers=generateHeaders(),
-            json=constructEventDetail(
-                event_name,
-                body=body,
-                start=start,
-                end=end,
-                attendees=attendees,
+        try:
+            requests.post(
+                API.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendarGroupId}/calendars/{calendarId}/events',
+                headers=generate_headers(),
+                json=construct_event_detail(
+                    event_name,
+                    body=body,
+                    start=start,
+                    end=end,
+                    attendees=attendees,
+                )
             )
-        )
-        return {"SUCCESS" : "Successfully created an event"}
+            return {"SUCCESS" : "Successfully created an event"}
+        except:
+            return {"ERROR" : "Something went wrong with scheduling the event"}
 
 
-def listSpecificCalendarInGroupEvents(calendarGroupId, calendarId):
+def list_specific_calendar_in_group_events(calendarGroupId, calendarId):
     """Uses the outlook api to get the events of a specific calendar in a calendar group and returns the events happening that day in an object with only the information needed. NOTE: events variable has all of the calendar information and I use a portion of the information found in events\n    
 
         Keyword arguments:\n
@@ -89,7 +92,7 @@ def listSpecificCalendarInGroupEvents(calendarGroupId, calendarId):
         calendarId              -- The specific id for the calendar
     """
 
-    calendarHeaders = generateHeaders()
+    calendarHeaders = generate_headers()
     calendarHeaders['Prefer'] = 'outlook.timezone="America/Denver"'
 
     startDateTime = strftime("%Y-%m-%dT%H:%M:%S")
@@ -113,7 +116,7 @@ def listSpecificCalendarInGroupEvents(calendarGroupId, calendarId):
         i += 1
     return calendarEvents
 
-def prettyPrintEvents(events, vehicleName):
+def pretty_print_events(events, vehicleName):
     """Makes the event object easier to read\n
     
         Keyword arguments:\n
@@ -143,8 +146,8 @@ def prettyPrintEvents(events, vehicleName):
             message += '\n\n'
     return message
 
-def checkIfReservationAvailable(calendarGroupId, calendarId, startTime, endTime):
-    calendarHeaders = generateHeaders()
+def check_if_reservation_available(calendarGroupId, calendarId, startTime, endTime):
+    calendarHeaders = generate_headers()
     calendarHeaders['Prefer'] = 'outlook.timezone="America/Denver"'
     events = requests.get(
         API.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendarGroupId}/calendars/{calendarId}/calendarView?startDateTime={startTime}-06:00&endDateTime={endTime}-06:00', # NOTE: offset is needed or else this won't work

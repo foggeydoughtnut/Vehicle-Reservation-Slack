@@ -125,7 +125,7 @@ slack_events_adapter = SlackEventAdapter(
     SLACK_SIGNING_SECRET, "/slack/events", app
 )  
 
-def createDataDict(data):
+def create_data_dict(data):
     """ Takes in the command the user inputs into slack and returns a dictionary that contains the commands they used
     
         Keyword arguments\n
@@ -141,11 +141,8 @@ def createDataDict(data):
         data_dict[data[item]] = data[item+1] + "T" + data[item+2]
     return data_dict
 
-def getUserSlackId():
-    app.client.users_identity
-
 def checkAvailable(vehicle, startTime, endTime):
-    available = API.Calendar.checkIfReservationAvailable(vehicle.calendarGroupID, vehicle.calendarID, startTime, endTime)
+    available = API.Calendar.check_if_reservation_available(vehicle.calendarGroupID, vehicle.calendarID, startTime, endTime)
     return available
 
 
@@ -169,7 +166,7 @@ def handle_message(event_data):
                 Example - reserve vehicle from 2022-06-15T15:00:00 to 2022-06-15T16:00:00
             """            
             if command.lower() == RESERVE_COMMAND:
-                data = createDataDict(commands)
+                data = create_data_dict(commands)
                 if "Error" in data:
                     responseText = f"{data['Error']}"
                 else:                
@@ -195,7 +192,7 @@ def handle_message(event_data):
                                         if not available:
                                             responseText = f"{vehicle_name} is reserved at that time!"
                                         else:
-                                            response = API.Calendar.scheduleEvent(vehicle.calendarGroupID, vehicle.calendarID, data['from'], data['to'])
+                                            response = API.Calendar.schedule_event(vehicle.calendarGroupID, vehicle.calendarID, data['from'], data['to'])
                                             if "ERROR" in response:
                                                 responseText = response['ERROR']
                                                 continue
@@ -224,8 +221,8 @@ def handle_message(event_data):
                         with app.app_context():
                             vehicle = Vehicle.query.filter(Vehicle.name == vehicle_name).first()
                             # try:
-                            events = API.Calendar.listSpecificCalendarInGroupEvents(vehicle.calendarGroupID, vehicle.calendarID)
-                            responseText = API.Calendar.prettyPrintEvents(events, vehicle_name)
+                            events = API.Calendar.list_specific_calendar_in_group_events(vehicle.calendarGroupID, vehicle.calendarID)
+                            responseText = API.Calendar.pretty_print_events(events, vehicle_name)
                             # except:
                             #     responseText = 'An error has occured when trying to complete your request'
                 slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'], text=responseText)
@@ -248,7 +245,7 @@ def handle_message(event_data):
                Format : check {vehicle_name} from {startTime} to {endTime}
             """
             if command.lower() == CHECK_VEHICLE_COMMAND:
-                data = createDataDict(commands)
+                data = create_data_dict(commands)
                 if "Error" in data:
                     responseText = (f"Error : Did not provide correct amount of information")
                 else:
@@ -295,11 +292,11 @@ def handle_message(event_data):
     thread.start()
     return Response(status=200)
 
-def getUserSlackId():
+def get_user_slack_id():
     return user_client.users_identity()['user']['id'] 
 
-def sendDirectMessage(responseText):
-    user_slack_id = getUserSlackId()
+def send_direct_message(responseText):
+    user_slack_id = get_user_slack_id()
     slack_client.chat_postEphemeral(channel=user_slack_id, text=responseText, user=user_slack_id)
 
 if __name__ == "__main__":
