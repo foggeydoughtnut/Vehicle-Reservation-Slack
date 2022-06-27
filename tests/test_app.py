@@ -1,4 +1,21 @@
-from app import create_data_dict
+from app import create_data_dict, app as testApp
+import pytest
+
+@pytest.fixture()
+def app():
+    testApp.config.update({
+        "TESTING": True,
+    })
+    yield testApp
+
+@pytest.fixture()
+def client(app):
+    return app.test_client()
+
+@pytest.fixture()
+def runner(app):
+    return app.test_cli_runner()
+
 
 def test_create_data_dict():
     valid_input_data = ['slack_user_id', 'command', 'vehicle_name', 'from', 'date_start', 'time_start', 'to', 'date_end', 'time_end']
@@ -13,4 +30,10 @@ def test_create_data_dict():
     assert type(data) == dict
     assert error_data["Error"]
 
+def test_logout_redirect(client):
+    response = client.get("/logout")
+    print(response.status)
+    print(response.request.path)
+    # assert len(response.history) == 1
+    # assert response.request.path == "/login"
 

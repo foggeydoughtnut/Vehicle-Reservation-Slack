@@ -8,7 +8,7 @@ user_token = os.getenv('SLACK_USER_TOKEN')
 VERIFICATION_TOKEN = os.getenv('VERIFICATION_TOKEN')
 
 
-DEBUG = True
+DEBUG = False
 SECRET_KEY = os.getenv('SECRET_KEY')
 FLASK_ADMIN_SWATCH = 'darkly'
 
