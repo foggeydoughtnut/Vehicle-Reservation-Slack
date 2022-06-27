@@ -1,6 +1,7 @@
 from time import strftime
 from datetime import datetime, timedelta
 from urllib import request
+from uuid import RESERVED_MICROSOFT
 # Flask Imports
 from flask import Flask, Response, redirect, request, render_template, session
 from flask_admin import Admin
@@ -70,9 +71,12 @@ slack_client = WebClient(slack_token)
 user_client = WebClient(user_token)
 
 
-vehicleNames = []
+# COMMANDS
+RESERVE_COMMAND = "reserve"
+
+vehicle_names = []
 for vehicle in Vehicle.query.all():
-    vehicleNames.append(vehicle.name)
+    vehicle_names.append(vehicle.name)
  
 
 @app.route("/")
@@ -124,14 +128,15 @@ def createDataDict(data):
         Keyword arguments\n
         data    -- The commands the user inputed
     """
-    dataDict = {}
+    data_dict = {}
     # If user provided too much or too little information return dictionary containing error message
-    if (len(data) != 7): 
-        dataDict['Error'] = "ERROR : Did not provide correct information"        
-        return dataDict
-    for item in range(1, len(data), 2):
-        dataDict[data[item]] = data[item+1]
-    return dataDict
+    if (len(data) != 9): 
+        data_dict['Error'] = "ERROR : Did not provide correct information"        
+        return data_dict
+    data_dict[data[1]] = data[2]
+    for item in range(3, len(data), 3):
+        data_dict[data[item]] = data[item+1] + "T" + data[item+2]
+    return data_dict
 
 def getUserSlackId():
     app.client.users_identity
@@ -160,23 +165,24 @@ def handle_message(event_data):
             
                 Example - reserve vehicle from 2022-06-15T15:00:00 to 2022-06-15T16:00:00
             """            
-            if command.lower() == 'reserve':
+            if command.lower() == RESERVE_COMMAND:
                 data = createDataDict(commands)
+                print(data)
                 if "Error" in data:
                     responseText = f"{data['Error']}"
                 else:                
-                    vehicleName = data['reserve']
-                    similarVehicleNames = []
-                    for vehicle in vehicleNames:
-                        if vehicle.startswith(vehicleName):
-                            similarVehicleNames.append(vehicle)
-                    if vehicleName not in vehicleNames and similarVehicleNames == []:
+                    vehicle_name = data['reserve']
+                    similar_vehicle_names = []
+                    for vehicle in vehicle_names:
+                        if vehicle.startswith(vehicle_name):
+                            similar_vehicle_names.append(vehicle)
+                    if vehicle_name not in vehicle_names and similar_vehicle_names == []:
                         responseText = ("Error : Did not provide a valid vehicle name")
                     else:
                         with app.app_context():
                             errorOccured = False
                             reserved = False
-                            for vehicles in similarVehicleNames:
+                            for vehicles in similar_vehicle_names:
                                 if reserved and not errorOccured:
                                     break
                                 elif not reserved and not errorOccured:
@@ -185,7 +191,7 @@ def handle_message(event_data):
                                         available = checkAvailable(vehicle, data['from'], data['to'])
                                         # Schedule reservation for vehicle
                                         if not available:
-                                            responseText = f"{vehicleName} is reserved at that time!"
+                                            responseText = f"{vehicle_name} is reserved at that time!"
                                         else:
                                             response = API.Calendar.scheduleEvent(vehicle.calendarGroupID, vehicle.calendarID, data['from'], data['to'])
                                             if "ERROR" in response:
@@ -209,15 +215,15 @@ def handle_message(event_data):
                 if len(commands) != 4:
                     responseText = (f"Error : Did not provide correct amount of information")
                 else:
-                    vehicleName = commands[3]
-                    if vehicleName not in vehicleNames:
+                    vehicle_name = commands[3]
+                    if vehicle_name not in vehicle_names:
                         responseText = ("Error : Did not provide a valid vehicle name")
                     else:
                         with app.app_context():
-                            vehicle = Vehicle.query.filter(Vehicle.name == vehicleName).first()
+                            vehicle = Vehicle.query.filter(Vehicle.name == vehicle_name).first()
                             # try:
                             events = API.Calendar.listSpecificCalendarInGroupEvents(vehicle.calendarGroupID, vehicle.calendarID)
-                            responseText = API.Calendar.prettyPrintEvents(events, vehicleName)
+                            responseText = API.Calendar.prettyPrintEvents(events, vehicle_name)
                             # except:
                             #     responseText = 'An error has occured when trying to complete your request'
                 slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'], text=responseText)
@@ -237,25 +243,25 @@ def handle_message(event_data):
                 slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'], text=responseText)
             
             """Check if vehicle is available from startTime to endTime
-               Format : check {vehicleName} from {startTime} to {endTime}
+               Format : check {vehicle_name} from {startTime} to {endTime}
             """
             if command.lower() == 'check':
                 if len(commands) != 7:
                     responseText = (f"Error : Did not provide correct amount of information")
                 else:
-                    vehicleName = commands[2]
-                    if vehicleName not in vehicleNames:
-                        responseText = (f"Error : Did not provide a valid vehicle name : {vehicleName}")
+                    vehicle_name = commands[2]
+                    if vehicle_name not in vehicle_names:
+                        responseText = (f"Error : Did not provide a valid vehicle name : {vehicle_name}")
                     else:
                         with app.app_context():
-                            vehicle = Vehicle.query.filter(Vehicle.name == vehicleName).first()
+                            vehicle = Vehicle.query.filter(Vehicle.name == vehicle_name).first()
                             startTime = commands[4]
                             endTime = commands[6]
                             
                             try:
                                 available = checkAvailable(vehicle, startTime, endTime)
                                 availableMessage = 'available' if available else 'not available'
-                                responseText = f'{vehicleName} is {availableMessage}'
+                                responseText = f'{vehicle_name} is {availableMessage}'
                             except:
                                 responseText = 'An error has occured when trying to complete your request'
                 slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'], text=responseText)
