@@ -1,7 +1,6 @@
 from time import strftime
 from datetime import datetime, timedelta
 from urllib import request
-from uuid import RESERVED_MICROSOFT
 # Flask Imports
 from flask import Flask, Response, redirect, request, render_template, session
 from flask_admin import Admin
@@ -73,6 +72,10 @@ user_client = WebClient(user_token)
 
 # COMMANDS
 RESERVE_COMMAND = "reserve"
+GET_ALL_RESERVATIONS_COMMAND = "reservations"
+VEHICLES_COMMAND = "vehicles"
+CHECK_VEHICLE_COMMAND = "check"
+HELP_COMMAND = "help"
 
 vehicle_names = []
 for vehicle in Vehicle.query.all():
@@ -211,7 +214,7 @@ def handle_message(event_data):
                 slack_client.chat_postMessage(channel=channel_id, text=responseText, thread_ts=message['ts'])
             
             """Gets reservations on the calendar"""
-            if command.lower() == 'reservations':
+            if command.lower() == GET_ALL_RESERVATIONS_COMMAND:
                 if len(commands) != 4:
                     responseText = (f"Error : Did not provide correct amount of information")
                 else:
@@ -229,7 +232,7 @@ def handle_message(event_data):
                 slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'], text=responseText)
             
             """Lists all of the vehicle's names and displays if they are available"""
-            if command.lower() == 'vehicles':
+            if command.lower() == VEHICLES_COMMAND:
                 responseText = ""
                 startTime = strftime("%Y-%m-%dT%H:%M:%S")
                 offsetMinutes = 15 # 15 Minute offset for check availability
@@ -245,7 +248,7 @@ def handle_message(event_data):
             """Check if vehicle is available from startTime to endTime
                Format : check {vehicle_name} from {startTime} to {endTime}
             """
-            if command.lower() == 'check':
+            if command.lower() == CHECK_VEHICLE_COMMAND:
                 if len(commands) != 7:
                     responseText = (f"Error : Did not provide correct amount of information")
                 else:
@@ -266,7 +269,7 @@ def handle_message(event_data):
                                 responseText = 'An error has occured when trying to complete your request'
                 slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'], text=responseText)
 
-            if command.lower() == 'help':
+            if command.lower() == HELP_COMMAND:
                 responseText = """ Usage Manual
                 Command 1 - reserve
                 Command used to reserve a vehicle.
