@@ -170,7 +170,6 @@ def handle_message(event_data):
             """            
             if command.lower() == RESERVE_COMMAND:
                 data = createDataDict(commands)
-                print(data)
                 if "Error" in data:
                     responseText = f"{data['Error']}"
                 else:                
@@ -249,17 +248,18 @@ def handle_message(event_data):
                Format : check {vehicle_name} from {startTime} to {endTime}
             """
             if command.lower() == CHECK_VEHICLE_COMMAND:
-                if len(commands) != 7:
+                data = createDataDict(commands)
+                if "Error" in data:
                     responseText = (f"Error : Did not provide correct amount of information")
                 else:
-                    vehicle_name = commands[2]
+                    vehicle_name = data["check"]
                     if vehicle_name not in vehicle_names:
                         responseText = (f"Error : Did not provide a valid vehicle name : {vehicle_name}")
                     else:
                         with app.app_context():
                             vehicle = Vehicle.query.filter(Vehicle.name == vehicle_name).first()
-                            startTime = commands[4]
-                            endTime = commands[6]
+                            startTime = data['from']
+                            endTime = data['to']
                             
                             try:
                                 available = checkAvailable(vehicle, startTime, endTime)
@@ -274,7 +274,7 @@ def handle_message(event_data):
                 Command 1 - reserve
                 Command used to reserve a vehicle.
                 USAGE : reserve vehicle_name from start_time to end_time
-                EXAMPLE : reserve golf-cart-1 from 2022-06-15T15:00:00 to 2022-06-15T16:00:00
+                EXAMPLE : reserve golf-cart-1 from 2022-06-15 15:00:00 to 2022-06-15 16:00:00
 
                 Command 2 - reservations
                 Gets the events/reservations of a specific vehicle for today
