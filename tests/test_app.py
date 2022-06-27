@@ -1,4 +1,3 @@
-import pytest
 from app import create_data_dict
 
 def test_create_data_dict():
