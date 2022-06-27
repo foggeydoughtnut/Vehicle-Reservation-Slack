@@ -143,3 +143,28 @@ def test_available_fails_if_event(requests_mock, mocker):
     resp = API.Calendar.check_if_reservation_available(test_calendar_group_id, test_calendar_id, start_time, end_time)
     assert resp == False
     assert type(resp) == bool
+
+
+def test_pretty_print_events_return_message_empty():
+    """Tests that pretty_print_events returns that there are no reservations when events is empty"""
+    message = API.Calendar.pretty_print_events({}, 'test')
+    assert message == "There are no reservations for test"
+
+def test_pretty_print_events():
+    message = API.Calendar.pretty_print_events({'event0': {
+        'event' : 'test event',
+        'Subject' : 'test subject',
+        'bodyPreview' : 'test body preview',
+        'webLink' : 'test web link',
+        'start' : {'dateTime' : '2022-06-27T14:30:00'},
+        'end' : {'dateTime' : '2022-06-27T15:00:00'},
+    }}, 'test')
+    test_message = "test's calendar looks like this : \n"
+    test_message += 'Event         :  test event\n'
+    test_message += 'Subject      :  test subject\n'
+    test_message += 'Body          :  test body preview\n'
+    test_message += 'Start Time :  Today at 02:30 PM\n'
+    test_message += 'End Time   :  Today at 03:00 PM\n'
+    test_message += 'Web Link   :  test web link\n'
+    test_message += '\n\n'
+    assert message == test_message

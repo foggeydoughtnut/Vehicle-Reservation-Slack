@@ -11,9 +11,7 @@ from flask_migrate import Migrate
 # Slack Imports
 from slackeventsapi import SlackEventAdapter
 from slack import WebClient
-
 from threading import Thread
-
 # Local Imports
 import API.Calendar
 import API.admin.user
@@ -33,11 +31,15 @@ with app.app_context():
     db.create_all()
 
 # Creates Admin User if there is no users in the database
-if (len(User.query.all()) == 0):
+def create_admin_user():
     admin = User('admin')
     admin.set_password('password')
     db.session.add(admin)
     db.session.commit()
+
+if (len(User.query.all()) == 0):
+    create_admin_user()
+    
 
 
 migrate = Migrate(app, db)
