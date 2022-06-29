@@ -1,13 +1,13 @@
-from app import create_data_dict, app as testApp
+from app import create_data_dict, app as test_app
 from models import User, db
 import pytest
 
 @pytest.fixture()
 def app():
-    testApp.config.update({
+    test_app.config.update({
         "TESTING": True,
     })
-    yield testApp
+    yield test_app
 
 @pytest.fixture()
 def client(app):

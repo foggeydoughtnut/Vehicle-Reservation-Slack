@@ -4,14 +4,14 @@ from models import User, db
 
 def test_user_loader():
     # Create User to get
-    testUser = User('test-user')
-    testUser.set_password('test')
-    testUser.password_hash
-    db.session.add(testUser)
+    test_user = User('test-user')
+    test_user.set_password('test')
+    test_user.password_hash
+    db.session.add(test_user)
     db.session.commit()
 
     # Get the User
-    test = load_user(testUser.id)
+    test = load_user(test_user.id)
     assert test.username == 'test-user'
     assert test.check_password('test')
 

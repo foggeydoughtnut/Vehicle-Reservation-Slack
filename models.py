@@ -11,9 +11,9 @@ class Vehicle(db.Model):
     calendarID = db.Column(db.String(500), unique=True)
     calendarGroupID = db.Column(db.String(500), unique=False)
 
-    def __init__(self, name=None, calendarID=None):
+    def __init__(self, name=None, calendar_id=None):
         self.name = name
-        self.calendarID = calendarID
+        self.calendar_id = calendar_id
     
     def __repr__(self):
         return f'<Calendar for : {self.name!r}>'

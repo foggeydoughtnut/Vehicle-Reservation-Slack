@@ -1,10 +1,10 @@
 import requests
 import os
-from API.graphAPI import generateAccessToken, GRAPH_API_ENDPOINT, SCOPES
+from API.graphAPI import generate_access_token, GRAPH_API_ENDPOINT, SCOPES
 from dotenv import load_dotenv
 load_dotenv()
 
-def getUserByAccessToken(access_token):
+def get_user_by_access_token(access_token):
     """ Gets the user by using the Outlook Graph api
     
         Keyword arguments:\n
@@ -16,20 +16,20 @@ def getUserByAccessToken(access_token):
     return response.json()
 
 
-def getUser():
-    """ Gets the User by using the getUserByAccessToken method """
+def get_user():
+    """ Gets the User by using the get_user_by_access_token method """
     application_id = os.getenv('APPLICATION_ID')
-    access_token = generateAccessToken(application_id, SCOPES)
-    return getUserByAccessToken(access_token)
+    access_token = generate_access_token(application_id, SCOPES)
+    return get_user_by_access_token(access_token)
 
-def getUsersName():
-    """ Uses the getUser method to find the user, then returns the name associated with that user"""
-    user = getUser()
+def get_users_name():
+    """ Uses the get_user method to find the user, then returns the name associated with that user"""
+    user = get_user()
     name = user['displayName']
     return name
 
-def getUsersEmail():
-    """ Uses the getUser method to find the user, then returns the email associated with that user"""
-    user = getUser()
+def get_users_email():
+    """ Uses the get_user method to find the user, then returns the email associated with that user"""
+    user = get_user()
     email = user['userPrincipalName']
     return email
