@@ -9,4 +9,3 @@ def test_get_user():
 
         invalid_user = API.admin.user.getUser('test')
         assert invalid_user == 'ERROR'        
-    

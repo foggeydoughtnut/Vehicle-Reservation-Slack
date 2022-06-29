@@ -1,4 +1,3 @@
-# from ...app import app as testApp, create_admin_user, load_user
 from app import load_user, create_admin_user
 from models import User, db
 
