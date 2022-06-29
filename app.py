@@ -284,6 +284,17 @@ def handle_message(event_data):
                 EXAMPLE : check golf-cart-1 from 2022-06-22T08:00:00 to 2022-06-22T09:00:00
                 """
                 slack_client.chat_postMessage(channel = channel_id, thread_ts=message['ts'], text = response_text)
+            # if command.lower() == "test":
+            #     review_message = [
+            #         {
+            #         "type": "section",
+            #         "text": {
+            #             "type": "mrkdwn",
+            #             "text": "Danny Torrence left the following review for your property:"
+            #         }
+            #         }
+            #     ]
+            #     slack_client.chat_postMessage(channel = channel_id, thread_ts=message['ts'], text ="Please fill out the form", blocks = review_message)
         
     thread = Thread(target=send_reply, kwargs={"value": event_data})
     thread.start()
