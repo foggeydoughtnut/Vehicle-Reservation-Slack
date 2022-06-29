@@ -1,32 +1,53 @@
 from app import load_user, create_admin_user
 from models import User, db
+import API.db.index
 
 
 def test_user_loader():
-    # Create User to get
-    test_user = User('test-user')
-    test_user.set_password('test')
-    test_user.password_hash
-    db.session.add(test_user)
-    db.session.commit()
+    test_user = API.db.index.create_user('test-user', 'test')
 
     # Get the User
     test = load_user(test_user.id)
     assert test.username == 'test-user'
     assert test.check_password('test')
 
-    # Delete the User
-    User.query.filter_by(id=test.id).delete()
-    db.session.commit() 
+    API.db.index.delete_user_by_id(test.id)
 
 def test_create_admin_user():
-    # Delete admin user if it exists
-    old_admin_user = User.query.filter_by(username = 'admin').first()
+    old_admin_user = API.db.index.get_user_by_username('admin')
     if (old_admin_user is not None):
-        User.query.filter_by(id=old_admin_user.id).delete()
-        db.session.commit()
+        # Delete admin user if it exists
+        API.db.index.delete_user_by_id(old_admin_user.id)
     create_admin_user()
     # Check that the admin user is in the database
-    admin = User.query.filter_by(username = 'admin').first()
+    admin = API.db.index.get_user_by_username('admin')
     assert admin.username == 'admin'
     assert admin.check_password('password')
+
+def test_create_user():
+    user = API.db.index.create_user('test-user', 'test-password')
+    assert user.username == 'test-user'
+    assert user.check_password('test-password')
+    API.db.index.delete_user_by_id(user.id)
+
+def test_delete_user_by_id():
+    user = API.db.index.create_user('test-user', 'test-password')
+    API.db.index.delete_user_by_id(user.id)
+    assert API.db.index.get_user_by_id(user.id) is None   
+
+def test_get_user_by_id():
+    user = API.db.index.create_user('test-user', 'test-password')
+    queried_user = API.db.index.get_user_by_id(user.id)
+    assert queried_user.username == 'test-user'
+    assert queried_user.id == user.id
+    assert queried_user.check_password('test-password')
+    API.db.index.delete_user_by_id(user.id)
+
+def test_get_user_by_username():
+    user = API.db.index.create_user('test-user', 'test-password')
+    queried_user = API.db.index.get_user_by_username(user.username)
+    assert queried_user.username == 'test-user'
+    assert queried_user.id == user.id
+    assert queried_user.check_password('test-password')
+    API.db.index.delete_user_by_id(user.id)
+
