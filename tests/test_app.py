@@ -1,5 +1,6 @@
 from app import create_data_dict, app as test_app
 from models import User, db
+import API.db.index
 import pytest
 
 @pytest.fixture()
@@ -33,15 +34,11 @@ def test_create_data_dict():
 
 def test_login(client):
     # create test admin user to log in
-    test_user = User.query.filter_by(username = 'test-user').first()
+    test_user = API.db.index.get_user_by_username('test-user')
     if (test_user):
-        User.query.filter_by(id=test_user.id).delete()
-        db.session.commit()
-    test_user = User('test-user')
-    test_user.password_hash
-    test_user.set_password('test')
-    db.session.add(test_user)
-    db.session.commit()
+        API.db.index.delete_user_by_id(test_user.id)
+    
+    test_user = API.db.index.create_user('test-user', 'test')
 
     response = client.post("/login", data = {
         'username' : 'test-user',
@@ -81,8 +78,8 @@ def test_login(client):
     assert empty_form_response.request.path == '/login'
 
 
-    User.query.filter_by(id=test_user.id).delete()
-    db.session.commit()
+    API.db.index.delete_user_by_id(test_user.id)
+    
 
 def test_logout(client):
     response = client.get('/logout', follow_redirects=True)

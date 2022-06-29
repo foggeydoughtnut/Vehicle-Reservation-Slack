@@ -18,6 +18,7 @@ import API.admin.user
 from models import Vehicle, User
 from models import db
 from config import SLACK_SIGNING_SECRET, slack_token, user_token, VERIFICATION_TOKEN
+import API.db.index
 
 # This function is required or else there will be a context error
 def create_app():
@@ -32,12 +33,9 @@ with app.app_context():
 
 # Creates Admin User if there is no users in the database
 def create_admin_user():
-    admin = User('admin')
-    admin.set_password('password')
-    db.session.add(admin)
-    db.session.commit()
+    admin = API.db.index.create_user('admin', 'password')
 
-if (len(User.query.all()) == 0):
+if (len(API.db.index.get_all_users()) == 0):
     create_admin_user()
     
 
@@ -50,7 +48,7 @@ login = LoginManager(app)
 
 @login.user_loader
 def load_user(user_id):
-    return User.query.get(user_id)
+    return API.db.index.get_user_by_id(user_id)
 
 class MyModelView(ModelView):
     """Overide's flask_admin ModelView so that way it only displays if you are authenticated to see it"""
@@ -79,10 +77,7 @@ VEHICLES_COMMAND = "vehicles"
 CHECK_VEHICLE_COMMAND = "check"
 HELP_COMMAND = "help"
 
-vehicle_names = []
-for vehicle in Vehicle.query.all():
-    vehicle_names.append(vehicle.name)
- 
+vehicle_names = API.db.index.get_vehicle_names()
 
 @app.route("/")
 def event_hook(request):
@@ -187,7 +182,7 @@ def handle_message(event_data):
                                 if reserved and not error_occured:
                                     break
                                 elif not reserved and not error_occured:
-                                    vehicle = Vehicle.query.filter(Vehicle.name == vehicles).first()
+                                    vehicle = API.db.index.get_vehicle_by_name(vehicles)
                                     try:
                                         available = checkAvailable(vehicle, data['from'], data['to'])
                                         # Schedule reservation for vehicle
@@ -221,7 +216,7 @@ def handle_message(event_data):
                         response_text = ("Error : Did not provide a valid vehicle name")
                     else:
                         with app.app_context():
-                            vehicle = Vehicle.query.filter(Vehicle.name == vehicle_name).first()
+                            vehicle = API.db.index.get_vehicle_by_name(vehicle_name)
                             # try:
                             events = API.Calendar.list_specific_calendar_in_group_events(vehicle.calendarGroupID, vehicle.calendarID)
                             response_text = API.Calendar.pretty_print_events(events, vehicle_name)
@@ -237,7 +232,7 @@ def handle_message(event_data):
                 offset_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S') + timedelta(minutes=offset_minutes)
                 end_time = offset_time.strftime('%Y-%m-%dT%H:%M:%S')
                 with app.app_context():
-                    for vehicle in Vehicle.query.all():
+                    for vehicle in API.db.index.get_all_vehicles():
                         available = checkAvailable(vehicle, start_time, end_time)
                         availablity_message = "available" if available else "not available"
                         response_text += f"{vehicle.name} - {availablity_message}\n"
@@ -256,7 +251,7 @@ def handle_message(event_data):
                         response_text = (f"Error : Did not provide a valid vehicle name : {vehicle_name}")
                     else:
                         with app.app_context():
-                            vehicle = Vehicle.query.filter(Vehicle.name == vehicle_name).first()
+                            vehicle = API.db.index.get_vehicle_by_name(vehicle_name)
                             start_time = data['from']
                             end_time = data['to']
                             
