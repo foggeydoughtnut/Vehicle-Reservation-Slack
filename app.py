@@ -1,6 +1,9 @@
+import json
 from time import strftime
 from datetime import datetime, timedelta
 from urllib import request
+import requests
+from urllib.parse import parse_qs
 # Flask Imports
 from flask import Flask, Response, redirect, request, render_template, session
 from flask_admin import Admin
@@ -19,6 +22,8 @@ from models import Vehicle, User
 from models import db
 from config import SLACK_SIGNING_SECRET, slack_token, user_token, VERIFICATION_TOKEN
 import API.db.index
+
+
 
 # This function is required or else there will be a context error
 def create_app():
@@ -117,6 +122,20 @@ def logout():
     logout_user()
     return redirect('/login')
 
+@app.route('/test', methods = ['POST', 'GET'])
+def test():
+    if request.method == 'POST':
+        data = request.form.to_dict()
+        payload = json.loads(data['payload'])
+        if payload['actions'][0]['action_id'] != 'submit':
+            return {'status' : 200}
+        else:
+            requests.post(payload['response_url'], json = { "text": "Thanks for your request."})
+
+            pretty = json.dumps(payload, indent=4)
+            print(pretty)
+            return {'status': 200}
+        
 
 slack_events_adapter = SlackEventAdapter(
     SLACK_SIGNING_SECRET, "/slack/events", app
@@ -284,17 +303,10 @@ def handle_message(event_data):
                 EXAMPLE : check golf-cart-1 from 2022-06-22T08:00:00 to 2022-06-22T09:00:00
                 """
                 slack_client.chat_postMessage(channel = channel_id, thread_ts=message['ts'], text = response_text)
-            # if command.lower() == "test":
-            #     review_message = [
-            #         {
-            #         "type": "section",
-            #         "text": {
-            #             "type": "mrkdwn",
-            #             "text": "Danny Torrence left the following review for your property:"
-            #         }
-            #         }
-            #     ]
-            #     slack_client.chat_postMessage(channel = channel_id, thread_ts=message['ts'], text ="Please fill out the form", blocks = review_message)
+            if command.lower() == "test":
+                with open('slack_blocks.json') as f:
+                    data = json.load(f)                
+                slack_client.chat_postMessage(channel  = channel_id, thread_ts=message['ts'], text ="Please fill out the form", blocks = data['blocks'])
         
     thread = Thread(target=send_reply, kwargs={"value": event_data})
     thread.start()
