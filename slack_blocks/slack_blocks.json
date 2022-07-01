@@ -55,7 +55,7 @@
             "type": "input",
             "element": {
                 "type": "datepicker",
-                "initial_date": "1990-04-28",
+                "initial_date": "2022-07-01",
                 "placeholder": {
                     "type": "plain_text",
                     "text": "Select a date",
@@ -73,7 +73,7 @@
             "type": "input",
             "element": {
                 "type": "timepicker",
-                "initial_time": "13:37",
+                "initial_time": "13:00",
                 "placeholder": {
                     "type": "plain_text",
                     "text": "Select time",
@@ -94,7 +94,7 @@
             "type": "input",
             "element": {
                 "type": "datepicker",
-                "initial_date": "1990-04-28",
+                "initial_date": "2022-07-01",
                 "placeholder": {
                     "type": "plain_text",
                     "text": "Select a date",
@@ -112,7 +112,7 @@
             "type": "input",
             "element": {
                 "type": "timepicker",
-                "initial_time": "13:37",
+                "initial_time": "14:00",
                 "placeholder": {
                     "type": "plain_text",
                     "text": "Select time",

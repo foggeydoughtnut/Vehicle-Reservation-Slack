@@ -1,3 +1,5 @@
+from concurrent.futures import thread
+from distutils.command.build_scripts import first_line_re
 import json
 from time import strftime
 from datetime import datetime, timedelta
@@ -122,20 +124,7 @@ def logout():
     logout_user()
     return redirect('/login')
 
-@app.route('/test', methods = ['POST', 'GET'])
-def test():
-    if request.method == 'POST':
-        data = request.form.to_dict()
-        payload = json.loads(data['payload'])
-        if payload['actions'][0]['action_id'] != 'submit':
-            return {'status' : 200}
-        else:
-            requests.post(payload['response_url'], json = { "text": "Thanks for your request."})
 
-            pretty = json.dumps(payload, indent=4)
-            print(pretty)
-            return {'status': 200}
-        
 
 slack_events_adapter = SlackEventAdapter(
     SLACK_SIGNING_SECRET, "/slack/events", app
@@ -161,6 +150,76 @@ def checkAvailable(vehicle, start_time, end_time):
     available = API.Calendar.check_if_reservation_available(vehicle.calendarGroupID, vehicle.calendarID, start_time, end_time)
     return available
 
+def get_selected_vehicle_name_from_payload(payload):
+    selected_option = list(payload['state']['values'].items())[0][1]['static_select-action']['selected_option']
+    if selected_option is None:
+        return selected_option
+    else:
+        vehicle_name = selected_option.get('text').get('text', None)
+        return vehicle_name
+
+def get_start_end_time_from_payload(payload):
+    state = list(payload['state']['values'].items())
+    start_date = state[1][1]['datepicker-action']['selected_date']
+    start_time = state[2][1]['timepicker-action']['selected_time']
+    end_date = state[3][1]['datepicker-action']['selected_date']
+    end_time = state[4][1]['timepicker-action']['selected_time']
+    start = f"{start_date}T{start_time}"
+    end = f"{end_date}T{end_time}"
+    return (start, end)
+
+def check_if_valid_time(start_time, end_time):
+    return
+    
+
+def reserve_vehicle(payload, selected_vehicle):
+    vehicle = API.db.index.get_vehicle_by_name(selected_vehicle)
+    start_time, end_time = get_start_end_time_from_payload(payload)
+    channel_id = payload['channel']['id']
+    user_id = payload['user']['id']
+    thread_id = payload['message']['ts']
+    try:
+        available = checkAvailable(vehicle, start_time, end_time)
+        # Schedule reservation for vehicle
+        if not available:
+            send_message(f"{selected_vehicle} is not available at that time", channel_id, user_id, thread_id)
+        else:
+            response = API.Calendar.schedule_event(vehicle.calendarGroupID, vehicle.calendarID, start_time, end_time)
+            if "ERROR" in response:
+                send_message(f"{response['ERROR']}", channel_id, user_id, thread_id)
+            else:
+                send_message(f"{selected_vehicle} was successfully reserved", channel_id, user_id, thread_id)
+    except:
+        send_message(f"Sorry, an error has occured, so I was unable to complete your request", channel_id, user_id, thread_id)
+
+
+
+
+@app.route('/interactions', methods = ['POST', 'GET'])
+def interactions():
+    if request.method == 'POST':
+        data = request.form.to_dict()
+        payload = json.loads(data['payload'])
+        if payload['actions'][0]['action_id'] != 'submit':
+            return {'status' : 200}
+        else:
+            selected_vehicle = get_selected_vehicle_name_from_payload(payload)
+            if selected_vehicle == None:
+                requests.post(payload['response_url'], json = { "text": "Did not select a vehicle"})
+                return {'status': 404}
+            else:
+                requests.post(payload['response_url'], json = { "text": "Thanks for your request. We will process that shortly"})
+
+
+
+            
+            block_command_type = payload['message']['blocks'][0]['text']['text']
+            if block_command_type == 'Reserve':
+                reserve_vehicle(payload, selected_vehicle)
+            else:
+                print(payload['message']['blocks'][0]['text']['text'])
+            return {'status': 200}
+        
 
 @slack_events_adapter.on("app_mention")
 def handle_message(event_data):
@@ -177,53 +236,12 @@ def handle_message(event_data):
             command = commands[1]
             channel_id = message["channel"]
             # This is where slack messages are handled            
-            """Makes an event on the calendar. INPUT FORMAT : reserve {vehicle} from {start_time} to {end_time}
-            
-                Example - reserve vehicle from 2022-06-15T15:00:00 to 2022-06-15T16:00:00
-            """            
+            """Makes an event on the calendar."""            
             if command.lower() == RESERVE_COMMAND:
-                data = create_data_dict(commands)
-                if "Error" in data:
-                    response_text = f"{data['Error']}"
-                else:                
-                    vehicle_name = data['reserve']
-                    similar_vehicle_names = []
-                    for vehicle in vehicle_names:
-                        if vehicle.startswith(vehicle_name):
-                            similar_vehicle_names.append(vehicle)
-                    if vehicle_name not in vehicle_names and similar_vehicle_names == []:
-                        response_text = ("Error : Did not provide a valid vehicle name")
-                    else:
-                        with app.app_context():
-                            error_occured = False
-                            reserved = False
-                            for vehicles in similar_vehicle_names:
-                                if reserved and not error_occured:
-                                    break
-                                elif not reserved and not error_occured:
-                                    vehicle = API.db.index.get_vehicle_by_name(vehicles)
-                                    try:
-                                        available = checkAvailable(vehicle, data['from'], data['to'])
-                                        # Schedule reservation for vehicle
-                                        if not available:
-                                            response_text = f"{vehicle_name} is reserved at that time!"
-                                        else:
-                                            response = API.Calendar.schedule_event(vehicle.calendarGroupID, vehicle.calendarID, data['from'], data['to'])
-                                            if "ERROR" in response:
-                                                response_text = response['ERROR']
-                                                continue
-                                                
-                                            else:
-                                                response_text = (f"Reserved {vehicle.name} for <@{message['user']}> from {data['from']} to {data['to']}")
-                                                reserved = True
-                                    except:
-                                        error_occured = True
-                                        response_text = 'An error has occured when trying to complete your request'
-                                else:
-                                    break
-
+                with open('slack_blocks/slack_blocks.json') as f:
+                    data = json.load(f)                
+                slack_client.chat_postMessage(channel  = channel_id, thread_ts=message['ts'], text ="Please fill out the form", blocks = data['blocks'])
                                 
-                slack_client.chat_postMessage(channel=channel_id, text=response_text, thread_ts=message['ts'])
             
             """Gets reservations on the calendar"""
             if command.lower() == GET_ALL_RESERVATIONS_COMMAND:
@@ -304,7 +322,7 @@ def handle_message(event_data):
                 """
                 slack_client.chat_postMessage(channel = channel_id, thread_ts=message['ts'], text = response_text)
             if command.lower() == "test":
-                with open('slack_blocks.json') as f:
+                with open('slack_blocks/slack_blocks.json') as f:
                     data = json.load(f)                
                 slack_client.chat_postMessage(channel  = channel_id, thread_ts=message['ts'], text ="Please fill out the form", blocks = data['blocks'])
         
@@ -318,6 +336,10 @@ def get_user_slack_id():
 def send_direct_message(response_text):
     user_slack_id = get_user_slack_id()
     slack_client.chat_postEphemeral(channel=user_slack_id, text=response_text, user=user_slack_id)
+
+def send_message(text, channel_id, user_id, ts_id):
+    slack_client.chat_postEphemeral(channel=channel_id, text=text, user=user_id, thread_ts=ts_id)
+
 
 if __name__ == "__main__":
     app.run(port=3000)
