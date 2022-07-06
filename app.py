@@ -130,22 +130,6 @@ slack_events_adapter = SlackEventAdapter(
     SLACK_SIGNING_SECRET, "/slack/events", app
 )  
 
-def create_data_dict(data):
-    """ Takes in the command the user inputs into slack and returns a dictionary that contains the commands they used
-    
-        Keyword arguments\n
-        data    -- The commands the user inputed
-    """
-    data_dict = {}
-    # If user provided too much or too little information return dictionary containing error message
-    if (len(data) != 9): 
-        data_dict['Error'] = "ERROR : Did not provide correct information"        
-        return data_dict
-    data_dict[data[1]] = data[2]
-    for item in range(3, len(data), 3):
-        data_dict[data[item]] = data[item+1] + "T" + data[item+2]
-    return data_dict
-
 def check_available(vehicle, start_time, end_time):
     available = API.Calendar.check_if_reservation_available(vehicle.calendarGroupID, vehicle.calendarID, start_time, end_time)
     return available
@@ -168,8 +152,6 @@ def get_start_end_time_from_payload(payload):
     end = f"{end_date}T{end_time}"
     return (start, end)
 
-def check_if_valid_time(start_time, end_time):
-    return
     
 
 def reserve_vehicle(payload, selected_vehicle):
@@ -242,6 +224,7 @@ def interactions():
             elif block_command_type == 'Check':
                 check_vehicle(payload, selected_vehicle)
             elif block_command_type == 'Reservations':
+                print(payload)
                 get_reservations(payload, selected_vehicle)
             else:
                 print(payload['message']['blocks'][0]['text']['text'])
@@ -276,9 +259,7 @@ def handle_message(event_data):
                     data = json.load(f)        
                 slack_client.chat_postMessage(channel = channel_id, thread_ts=message['ts'], text ="Please fill out the form", blocks = data['blocks'])
 
-            """Check if vehicle is available from start_time to end_time
-               Format : check {vehicle_name} from {start_time} to {end_time}
-            """
+            """Check if vehicle is available from start_time to end_time"""
             if command.lower() == CHECK_VEHICLE_COMMAND:    
                 with open('slack_blocks/check_vehicle_block.json') as f:
                     data = json.load(f)                
@@ -314,11 +295,6 @@ def handle_message(event_data):
                 Checks if a vehicle is available from start-time to end-time
                 """
                 send_message(response_text, channel_id, message['user'], message['ts'] )
-
-            # if command.lower() == "test":
-            #     with open('slack_blocks/slack_blocks.json') as f:
-            #         data = json.load(f)                
-            #     slack_client.chat_postMessage(channel  = channel_id, thread_ts=message['ts'], text ="Please fill out the form", blocks = data['blocks'])
         
     thread = Thread(target=send_reply, kwargs={"value": event_data})
     thread.start()
