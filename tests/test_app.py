@@ -1,5 +1,4 @@
 from app import app as test_app, get_selected_vehicle_name_from_payload, get_start_end_time_from_payload
-from models import User, db
 import API.db.index
 import pytest
 

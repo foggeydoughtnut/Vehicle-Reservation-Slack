@@ -1,5 +1,4 @@
 from app import load_user, create_admin_user
-from models import User, db
 import API.db.index
 
 
