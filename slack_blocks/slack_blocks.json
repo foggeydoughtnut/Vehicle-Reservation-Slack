@@ -1,0 +1,163 @@
+{
+    "blocks": [
+        {
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": "Reserve",
+                "emoji": true
+            }
+        },
+        {
+            "type": "input",
+            "element": {
+                "type": "static_select",
+                "placeholder": {
+                    "type": "plain_text",
+                    "text": "Select a vehicle",
+                    "emoji": true
+                },
+                "options": [
+                    {
+                        "text": {
+                            "type": "plain_text",
+                            "text": "test1",
+                            "emoji": true
+                        },
+                        "value": "value-0"
+                    },
+                    {
+                        "text": {
+                            "type": "plain_text",
+                            "text": "test2",
+                            "emoji": true
+                        },
+                        "value": "value-1"
+                    },
+                    {
+                        "text": {
+                            "type": "plain_text",
+                            "text": "test3",
+                            "emoji": true
+                        },
+                        "value": "value-2"
+                    }
+                ],
+                "action_id": "static_select-action"
+            },
+            "label": {
+                "type": "plain_text",
+                "text": "Choose a Vehicle",
+                "emoji": true
+            }
+        },
+        {
+            "type": "input",
+            "element": {
+                "type": "datepicker",
+                "initial_date": "2022-07-01",
+                "placeholder": {
+                    "type": "plain_text",
+                    "text": "Select a date",
+                    "emoji": true
+                },
+                "action_id": "datepicker-action"
+            },
+            "label": {
+                "type": "plain_text",
+                "text": "Start Date",
+                "emoji": true
+            }
+        },
+        {
+            "type": "input",
+            "element": {
+                "type": "timepicker",
+                "initial_time": "13:00",
+                "placeholder": {
+                    "type": "plain_text",
+                    "text": "Select time",
+                    "emoji": true
+                },
+                "action_id": "timepicker-action"
+            },
+            "label": {
+                "type": "plain_text",
+                "text": "Start Time",
+                "emoji": true
+            }
+        },
+        {
+            "type": "divider"
+        },
+        {
+            "type": "input",
+            "element": {
+                "type": "datepicker",
+                "initial_date": "2022-07-01",
+                "placeholder": {
+                    "type": "plain_text",
+                    "text": "Select a date",
+                    "emoji": true
+                },
+                "action_id": "datepicker-action"
+            },
+            "label": {
+                "type": "plain_text",
+                "text": "End Date",
+                "emoji": true
+            }
+        },
+        {
+            "type": "input",
+            "element": {
+                "type": "timepicker",
+                "initial_time": "14:00",
+                "placeholder": {
+                    "type": "plain_text",
+                    "text": "Select time",
+                    "emoji": true
+                },
+                "action_id": "timepicker-action"
+            },
+            "label": {
+                "type": "plain_text",
+                "text": "End Time",
+                "emoji": true
+            }
+        },
+        {
+            "type": "actions",
+            "elements": [
+                {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Reserve",
+                        "emoji": true
+                    },
+                    "value": "click_me_123",
+                    "action_id": "submit",
+                    "confirm": {
+                        "title": {
+                            "type": "plain_text",
+                            "text": "Are you sure?"
+                        },
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "button text smaller description"
+                        },
+                        "confirm": {
+                            "type": "plain_text",
+                            "text": "Do it"
+                        },
+                        "deny": {
+                            "type": "plain_text",
+                            "text": "Stop, I've changed my mind!"
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}
