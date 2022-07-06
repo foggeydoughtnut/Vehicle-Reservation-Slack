@@ -4,7 +4,7 @@
             "type": "header",
             "text": {
                 "type": "plain_text",
-                "text": "Check",
+                "text": "Reservations",
                 "emoji": true
             }
         },
@@ -52,88 +52,13 @@
             }
         },
         {
-            "type": "input",
-            "element": {
-                "type": "datepicker",
-                "initial_date": "2022-07-01",
-                "placeholder": {
-                    "type": "plain_text",
-                    "text": "Select a date",
-                    "emoji": true
-                },
-                "action_id": "datepicker-action"
-            },
-            "label": {
-                "type": "plain_text",
-                "text": "Start Date",
-                "emoji": true
-            }
-        },
-        {
-            "type": "input",
-            "element": {
-                "type": "timepicker",
-                "initial_time": "13:00",
-                "placeholder": {
-                    "type": "plain_text",
-                    "text": "Select time",
-                    "emoji": true
-                },
-                "action_id": "timepicker-action"
-            },
-            "label": {
-                "type": "plain_text",
-                "text": "Start Time",
-                "emoji": true
-            }
-        },
-        {
-            "type": "divider"
-        },
-        {
-            "type": "input",
-            "element": {
-                "type": "datepicker",
-                "initial_date": "2022-07-01",
-                "placeholder": {
-                    "type": "plain_text",
-                    "text": "Select a date",
-                    "emoji": true
-                },
-                "action_id": "datepicker-action"
-            },
-            "label": {
-                "type": "plain_text",
-                "text": "End Date",
-                "emoji": true
-            }
-        },
-        {
-            "type": "input",
-            "element": {
-                "type": "timepicker",
-                "initial_time": "14:00",
-                "placeholder": {
-                    "type": "plain_text",
-                    "text": "Select time",
-                    "emoji": true
-                },
-                "action_id": "timepicker-action"
-            },
-            "label": {
-                "type": "plain_text",
-                "text": "End Time",
-                "emoji": true
-            }
-        },
-        {
             "type": "actions",
             "elements": [
                 {
                     "type": "button",
                     "text": {
                         "type": "plain_text",
-                        "text": "Check",
+                        "text": "Submit",
                         "emoji": true
                     },
                     "value": "click_me_123",
