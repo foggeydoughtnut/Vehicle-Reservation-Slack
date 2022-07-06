@@ -230,7 +230,30 @@ def interactions():
                 print(payload['message']['blocks'][0]['text']['text'])
             return {'status': 200}
         
+def get_slack_block(path_to_file):
+    vehicle_options = create_vehicle_options_slack_block()
+    with open(path_to_file) as f:
+        data = json.load(f)
+    data['blocks'][1]['element']['options'] = vehicle_options
+    with open(path_to_file, "w") as write_f:
+        json.dump(data, write_f)    
+    with open(path_to_file, "r") as new_f:
+        new_data = json.load(new_f)
+    return new_data
 
+def create_vehicle_options_slack_block():
+    vehicle_options = []
+    for vehicle in vehicle_names:
+        vehicle_obj = {
+            "text": {
+                "type": "plain_text",
+                "text": f"{vehicle}"
+            },
+            "value": "value-0"
+        }
+        vehicle_options.append(vehicle_obj)
+    return vehicle_options
+    
 @slack_events_adapter.on("app_mention")
 def handle_message(event_data):
     def send_reply(value):
@@ -245,25 +268,21 @@ def handle_message(event_data):
             commands = message.get('text').split()
             command = commands[1]
             channel_id = message["channel"]
-            # This is where slack messages are handled            
+            # This is where slack messages are handled
             """Makes an event on the calendar."""            
             if command.lower() == RESERVE_COMMAND:
-                with open('slack_blocks/slack_blocks.json') as f:
-                    data = json.load(f)                
-                slack_client.chat_postMessage(channel = channel_id, thread_ts=message['ts'], text ="Please fill out the form", blocks = data['blocks'])
+                data = get_slack_block('slack_blocks/slack_blocks.json')        
+                slack_client.chat_postMessage(channel = channel_id, thread_ts=message['ts'], text = "Please fill out the form", blocks = data['blocks'])
                                 
-            
             """Gets reservations on the calendar"""
             if command.lower() == GET_ALL_RESERVATIONS_COMMAND:
-                with open('slack_blocks/reservations_block.json') as f:
-                    data = json.load(f)        
-                slack_client.chat_postMessage(channel = channel_id, thread_ts=message['ts'], text ="Please fill out the form", blocks = data['blocks'])
+                data = get_slack_block('slack_blocks/reservations_block.json')
+                slack_client.chat_postMessage(channel = channel_id, thread_ts=message['ts'], text = "Please fill out the form", blocks = data['blocks'])
 
             """Check if vehicle is available from start_time to end_time"""
             if command.lower() == CHECK_VEHICLE_COMMAND:    
-                with open('slack_blocks/check_vehicle_block.json') as f:
-                    data = json.load(f)                
-                slack_client.chat_postMessage(channel  = channel_id, thread_ts=message['ts'], text ="Please fill out the form", blocks = data['blocks'])
+                data = get_slack_block('slack_blocks/check_vehicle_block.json')
+                slack_client.chat_postMessage(channel = channel_id, thread_ts=message['ts'], text = "Please fill out the form", blocks = data['blocks'])
 
             """Lists all of the vehicle's names and displays if they are available"""
             offset_minutes = 15 # 15 Minute offset for check availability. NOTE this variable is outside the scope so that way the help command can use it
