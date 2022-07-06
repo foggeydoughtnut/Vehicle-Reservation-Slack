@@ -297,7 +297,7 @@ def handle_message(event_data):
                         available = check_available(vehicle, start_time, end_time)
                         availablity_message = "available" if available else "not available"
                         response_text += f"{vehicle.name} - {availablity_message}\n"
-                send_message(response_text, channel_id, message['user'], message['ts'] )
+                slack_client.chat_postMessage(text=response_text, channel=channel_id, thread_ts=message['ts'] )
             
             if command.lower() == HELP_COMMAND:
                 response_text = f""" Usage Manual
@@ -313,7 +313,7 @@ def handle_message(event_data):
                 Command 4 - check  
                 Checks if a vehicle is available from start-time to end-time
                 """
-                send_message(response_text, channel_id, message['user'], message['ts'] )
+                slack_client.chat_postMessage(text=response_text, channel=channel_id, thread_ts=message['ts'] )
         
     thread = Thread(target=send_reply, kwargs={"value": event_data})
     thread.start()
