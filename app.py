@@ -146,7 +146,7 @@ def create_data_dict(data):
         data_dict[data[item]] = data[item+1] + "T" + data[item+2]
     return data_dict
 
-def checkAvailable(vehicle, start_time, end_time):
+def check_available(vehicle, start_time, end_time):
     available = API.Calendar.check_if_reservation_available(vehicle.calendarGroupID, vehicle.calendarID, start_time, end_time)
     return available
 
@@ -179,7 +179,7 @@ def reserve_vehicle(payload, selected_vehicle):
     user_id = payload['user']['id']
     thread_id = payload['message']['ts']
     try:
-        available = checkAvailable(vehicle, start_time, end_time)
+        available = check_available(vehicle, start_time, end_time)
         # Schedule reservation for vehicle
         if not available:
             send_message(f"{selected_vehicle} is not available at that time", channel_id, user_id, thread_id)
@@ -192,6 +192,21 @@ def reserve_vehicle(payload, selected_vehicle):
     except:
         send_message(f"Sorry, an error has occured, so I was unable to complete your request", channel_id, user_id, thread_id)
 
+def check_vehicle(payload, selected_vehicle):
+        vehicle = API.db.index.get_vehicle_by_name(selected_vehicle)
+        start_time, end_time = get_start_end_time_from_payload(payload)
+        channel_id = payload['channel']['id']
+        user_id = payload['user']['id']
+        thread_id = payload['message']['ts']
+        try:
+            available = check_available(vehicle, start_time, end_time)
+            # Schedule reservation for vehicle
+            if not available:
+                send_message(f"{selected_vehicle} is not available at that time", channel_id, user_id, thread_id)
+            else:
+                send_message(f"{selected_vehicle} is available at that time", channel_id, user_id, thread_id)
+        except:
+            send_message(f"Sorry, an error has occured, so I was unable to complete your request", channel_id, user_id, thread_id)
 
 
 
@@ -216,6 +231,8 @@ def interactions():
             block_command_type = payload['message']['blocks'][0]['text']['text']
             if block_command_type == 'Reserve':
                 reserve_vehicle(payload, selected_vehicle)
+            elif block_command_type == 'Check':
+                check_vehicle(payload, selected_vehicle)
             else:
                 print(payload['message']['blocks'][0]['text']['text'])
             return {'status': 200}
@@ -270,7 +287,7 @@ def handle_message(event_data):
                 end_time = offset_time.strftime('%Y-%m-%dT%H:%M:%S')
                 with app.app_context():
                     for vehicle in API.db.index.get_all_vehicles():
-                        available = checkAvailable(vehicle, start_time, end_time)
+                        available = check_available(vehicle, start_time, end_time)
                         availablity_message = "available" if available else "not available"
                         response_text += f"{vehicle.name} - {availablity_message}\n"
                 slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'], text=response_text)
@@ -279,26 +296,29 @@ def handle_message(event_data):
                Format : check {vehicle_name} from {start_time} to {end_time}
             """
             if command.lower() == CHECK_VEHICLE_COMMAND:
-                data = create_data_dict(commands)
-                if "Error" in data:
-                    response_text = (f"Error : Did not provide correct amount of information")
-                else:
-                    vehicle_name = data["check"]
-                    if vehicle_name not in vehicle_names:
-                        response_text = (f"Error : Did not provide a valid vehicle name : {vehicle_name}")
-                    else:
-                        with app.app_context():
-                            vehicle = API.db.index.get_vehicle_by_name(vehicle_name)
-                            start_time = data['from']
-                            end_time = data['to']
+                with open('slack_blocks/check_vehicle_block.json') as f:
+                    data = json.load(f)                
+                slack_client.chat_postMessage(channel  = channel_id, thread_ts=message['ts'], text ="Please fill out the form", blocks = data['blocks'])
+                # data = create_data_dict(commands)
+                # if "Error" in data:
+                #     response_text = (f"Error : Did not provide correct amount of information")
+                # else:
+                #     vehicle_name = data["check"]
+                #     if vehicle_name not in vehicle_names:
+                #         response_text = (f"Error : Did not provide a valid vehicle name : {vehicle_name}")
+                #     else:
+                #         with app.app_context():
+                #             vehicle = API.db.index.get_vehicle_by_name(vehicle_name)
+                #             start_time = data['from']
+                #             end_time = data['to']
                             
-                            try:
-                                available = checkAvailable(vehicle, start_time, end_time)
-                                available_message = 'available' if available else 'not available'
-                                response_text = f'{vehicle_name} is {available_message}'
-                            except:
-                                response_text = 'An error has occured when trying to complete your request'
-                slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'], text=response_text)
+                #             try:
+                #                 available = check_available(vehicle, start_time, end_time)
+                #                 available_message = 'available' if available else 'not available'
+                #                 response_text = f'{vehicle_name} is {available_message}'
+                #             except:
+                #                 response_text = 'An error has occured when trying to complete your request'
+                # slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'], text=response_text)
 
             if command.lower() == HELP_COMMAND:
                 response_text = """ Usage Manual
