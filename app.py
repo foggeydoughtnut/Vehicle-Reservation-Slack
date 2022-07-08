@@ -267,8 +267,11 @@ def handle_message(event_data):
         message = event_data["event"]
         if message.get("subtype") is None:
             commands = message.get('text').split()
-            command = commands[1]
             channel_id = message["channel"]
+            if len(commands) == 1:
+                send_message("Did not provide a command", channel_id, get_user_slack_id(), message['ts'])
+                return
+            command = commands[1]
             # This is where slack messages are handled
             """Makes an event on the calendar."""            
             if command.lower() == RESERVE_COMMAND:
