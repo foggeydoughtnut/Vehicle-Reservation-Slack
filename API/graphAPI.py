@@ -4,9 +4,13 @@ import msal
 import os
 import app
 
+from dotenv import load_dotenv
+load_dotenv()
+
 
 GRAPH_API_ENDPOINT = 'https://graph.microsoft.com/v1.0/'
 SCOPES = ['User.Read', 'Calendars.ReadWrite']
+application_id = os.getenv('APPLICATION_ID')
 
 
 def generate_access_token_response(application_id, SCOPES):
@@ -17,23 +21,24 @@ def generate_access_token_response(application_id, SCOPES):
         SCOPES              -- The permissions that the app has access to
     """
     cache = msal.SerializableTokenCache()
-    if os.path.exists('api_token_access.bin'):
-        cache.deserialize(open('api_token_access.bin', 'r').read())
+    # NOTE uncomment the commented out stuff for testing
+    if os.path.exists('api_token_access.bin'): #TEST
+        cache.deserialize(open('api_token_access.bin', 'r').read()) #TEST
 
     
     client = msal.PublicClientApplication(client_id=application_id, token_cache=cache)
-    accounts = client.get_accounts()
-    if accounts:
-        token_response = client.acquire_token_silent(SCOPES, accounts[0])
-    else:
+    accounts = client.get_accounts() #TEST
+    if accounts: #TEST
+        token_response = client.acquire_token_silent(SCOPES, accounts[0]) #TEST
+    else: #TEST
         flow = client.initiate_device_flow(scopes=SCOPES)
         auth_code = flow['user_code']
-        app.send_direct_message(f"Your Authentication Code : {auth_code}")
-        webbrowser.open(flow['verification_uri'])
+        app.send_direct_message(f"Please visit {flow['verification_uri']} and enter the authentication code : {auth_code}")
+        # webbrowser.open(flow['verification_uri'])
         token_response = client.acquire_token_by_device_flow(flow)
     
-    with open('api_token_access.bin', 'w') as f:
-        f.write(cache.serialize())
+    with open('api_token_access.bin', 'w') as f: #TEST
+        f.write(cache.serialize()) #TEST
 
     return token_response
 
@@ -47,3 +52,7 @@ def generate_access_token(application_id, SCOPES):
     token_response = generate_access_token_response(application_id, SCOPES)
     return token_response['access_token']
 
+
+access_token = generate_access_token(application_id, SCOPES)
+def get_access_token():
+    return access_token
