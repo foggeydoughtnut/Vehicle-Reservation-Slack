@@ -1,6 +1,7 @@
+from webbrowser import get
 import requests
 import os
-from API.graphAPI import generate_access_token, GRAPH_API_ENDPOINT, SCOPES, get_access_token
+from API.graphAPI import generate_access_token, GRAPH_API_ENDPOINT, SCOPES
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -18,9 +19,11 @@ def get_user_by_access_token(access_token):
 
 def get_user():
     """ Gets the User by using the get_user_by_access_token method """
-    # application_id = os.getenv('APPLICATION_ID')
-    # access_token = generate_access_token(application_id, SCOPES)
-    access_token = get_access_token()
+    application_id = os.getenv('APPLICATION_ID')
+    access_token = generate_access_token(application_id, SCOPES)
+    # access_token = get_access_token()
+    # if access_token == '':
+    #     access_token = set_access_token(application_id)
     return get_user_by_access_token(access_token)
 
 def get_users_name():
