@@ -123,9 +123,7 @@ def login():
 def logout():
     logout_user()
     return redirect('/login')
-
-
-
+    
 slack_events_adapter = SlackEventAdapter(
     SLACK_SIGNING_SECRET, "/slack/events", app
 )  
@@ -152,8 +150,6 @@ def get_start_end_time_from_payload(payload):
     end = f"{end_date}T{end_time}"
     return (start, end)
 
-    
-
 def reserve_vehicle(payload, selected_vehicle):
     vehicle = API.db.index.get_vehicle_by_name(selected_vehicle)
     start_time, end_time = get_start_end_time_from_payload(payload)
@@ -162,7 +158,6 @@ def reserve_vehicle(payload, selected_vehicle):
     thread_id = payload['message']['ts']
     try:
         available = check_available(vehicle, start_time, end_time)
-        # Schedule reservation for vehicle
         if not available:
             send_message(f"{selected_vehicle} is not available at that time", channel_id, user_id, thread_id)
         else:
@@ -182,7 +177,6 @@ def check_vehicle(payload, selected_vehicle):
         thread_id = payload['message']['ts']
         try:
             available = check_available(vehicle, start_time, end_time)
-            # Schedule reservation for vehicle
             if not available:
                 send_message(f"{selected_vehicle} is not available at that time", channel_id, user_id, thread_id)
             else:
@@ -199,7 +193,6 @@ def get_reservations(payload, selected_vehicle):
         events = API.Calendar.list_specific_calendar_in_group_events(vehicle.calendarGroupID, vehicle.calendarID)
         message = API.Calendar.pretty_print_events(events, selected_vehicle)
         send_message(message, channel_id, user_id, thread_id)
-        # Schedule reservation for vehicle
     except:
         send_message(f"Sorry, an error has occured, so I was unable to complete your request", channel_id, user_id, thread_id)
 
