@@ -14,6 +14,9 @@ application_id = os.getenv('APPLICATION_ID')
 
 def generate_headers():
     access_token = API.graphAPI.generate_access_token(application_id, API.graphAPI.SCOPES)
+    # access_token = API.graphAPI.get_access_token()
+    # if access_token == '':
+    #     access_token = API.graphAPI.set_access_token(application_id)
     headers = {
         'Authorization': 'Bearer ' + access_token
     }

@@ -191,17 +191,17 @@ def check_vehicle(payload, selected_vehicle):
             send_message(f"Sorry, an error has occured, so I was unable to complete your request", channel_id, user_id, thread_id)
 
 def get_reservations(payload, selected_vehicle):
-        vehicle = API.db.index.get_vehicle_by_name(selected_vehicle)
-        channel_id = payload['channel']['id']
-        user_id = payload['user']['id']
-        thread_id = payload['message']['ts']
-        try:
-            events = API.Calendar.list_specific_calendar_in_group_events(vehicle.calendarGroupID, vehicle.calendarID)
-            message = API.Calendar.pretty_print_events(events, selected_vehicle)
-            send_message(message, channel_id, user_id, thread_id)
-            # Schedule reservation for vehicle
-        except:
-            send_message(f"Sorry, an error has occured, so I was unable to complete your request", channel_id, user_id, thread_id)
+    vehicle = API.db.index.get_vehicle_by_name(selected_vehicle)
+    channel_id = payload['channel']['id']
+    user_id = payload['user']['id']
+    thread_id = payload['message']['ts']
+    try:
+        events = API.Calendar.list_specific_calendar_in_group_events(vehicle.calendarGroupID, vehicle.calendarID)
+        message = API.Calendar.pretty_print_events(events, selected_vehicle)
+        send_message(message, channel_id, user_id, thread_id)
+        # Schedule reservation for vehicle
+    except:
+        send_message(f"Sorry, an error has occured, so I was unable to complete your request", channel_id, user_id, thread_id)
 
 
 @app.route('/interactions', methods = ['POST', 'GET'])
@@ -224,7 +224,6 @@ def interactions():
             elif block_command_type == 'Check':
                 check_vehicle(payload, selected_vehicle)
             elif block_command_type == 'Reservations':
-                print(payload)
                 get_reservations(payload, selected_vehicle)
             else:
                 print(payload['message']['blocks'][0]['text']['text'])
@@ -243,15 +242,17 @@ def get_slack_block(path_to_file):
 
 def create_vehicle_options_slack_block():
     vehicle_options = []
+    i = 0
     for vehicle in vehicle_names:
         vehicle_obj = {
             "text": {
                 "type": "plain_text",
                 "text": f"{vehicle}"
             },
-            "value": "value-0"
+            "value": f"value-{i}"
         }
         vehicle_options.append(vehicle_obj)
+        i += 1
     return vehicle_options
     
 @slack_events_adapter.on("app_mention")
