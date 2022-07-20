@@ -1,5 +1,7 @@
-from app import app as test_app, get_selected_vehicle_name_from_payload, get_start_end_time_from_payload
+from app import app as test_app, get_selected_vehicle_name_from_payload, get_start_end_time_from_payload, check_available
+
 import API.db.index
+import API.Calendar
 import pytest
 
 @pytest.fixture()
@@ -394,3 +396,12 @@ def test_start_end_time_from_payload():
     start, end = get_start_end_time_from_payload(test_payload)
     assert start == '2022-07-07T13:00'
     assert end == '2022-07-07T14:00'
+
+def test_check_available(mocker):
+    mocker.patch('API.Calendar.check_if_reservation_available', return_value=True)
+    class Vehicle:
+        calendarGroupID = 'test'
+        calendarID = 'test'
+    vehicle = Vehicle()
+    available = check_available(vehicle, 'start_time', 'end_time')
+    assert available == True
