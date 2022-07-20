@@ -4,9 +4,9 @@
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 {% endblock %}
 {% block body %}
-<div class="center add-padding">
+<div class="center">
     <h2>Welcome to the Admin Page</h2>
-    <form method="post" action="/logout" class="add-padding">
+    <form method="post" action="/logout" class="add-padding center-div">
         <input class="btn-lg btn-default btn-primary" type="submit" value="Logout" name="logout" />
     </form>
 </div>
