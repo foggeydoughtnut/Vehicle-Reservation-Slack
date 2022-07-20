@@ -314,7 +314,7 @@ def handle_message(event_data):
                 """
                 slack_client.chat_postMessage(text=response_text, channel=channel_id, thread_ts=message['ts'] )
                 return
-            else:
+            else: #Command that was used doesn't exist
                 similar_commands = difflib.get_close_matches(command.lower(), [RESERVE_COMMAND, GET_ALL_RESERVATIONS_COMMAND, VEHICLES_COMMAND, HELP_COMMAND, CHECK_VEHICLE_COMMAND])
                 similar_command_response = ''
                 index = 0
