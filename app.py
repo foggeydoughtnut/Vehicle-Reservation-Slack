@@ -268,16 +268,19 @@ def handle_message(event_data):
             if command.lower() == RESERVE_COMMAND:
                 data = get_slack_block('slack_blocks/slack_blocks.json')        
                 slack_client.chat_postMessage(channel = channel_id, thread_ts=message['ts'], text = "Please fill out the form", blocks = data['blocks'])
+                return
                                 
             """Gets reservations on the calendar"""
             if command.lower() == GET_ALL_RESERVATIONS_COMMAND:
                 data = get_slack_block('slack_blocks/reservations_block.json')
                 slack_client.chat_postMessage(channel = channel_id, thread_ts=message['ts'], text = "Please fill out the form", blocks = data['blocks'])
+                return
 
             """Check if vehicle is available from start_time to end_time"""
             if command.lower() == CHECK_VEHICLE_COMMAND:    
                 data = get_slack_block('slack_blocks/check_vehicle_block.json')
                 slack_client.chat_postMessage(channel = channel_id, thread_ts=message['ts'], text = "Please fill out the form", blocks = data['blocks'])
+                return
 
             """Lists all of the vehicle's names and displays if they are available"""
             offset_minutes = 15 # 15 Minute offset for check availability. NOTE this variable is outside the scope so that way the help command can use it
@@ -293,6 +296,7 @@ def handle_message(event_data):
                         availablity_message = "available" if available else "not available"
                         response_text += f"{vehicle.name} - {availablity_message}\n"
                 slack_client.chat_postMessage(text=response_text, channel=channel_id, thread_ts=message['ts'] )
+                return
             
             if command.lower() == HELP_COMMAND:
                 response_text = f""" Usage Manual
@@ -309,6 +313,7 @@ def handle_message(event_data):
                 Checks if a vehicle is available from start-time to end-time
                 """
                 slack_client.chat_postMessage(text=response_text, channel=channel_id, thread_ts=message['ts'] )
+                return
             else:
                 similar_commands = difflib.get_close_matches(command.lower(), [RESERVE_COMMAND, GET_ALL_RESERVATIONS_COMMAND, VEHICLES_COMMAND, HELP_COMMAND, CHECK_VEHICLE_COMMAND])
                 similar_command_response = ''
@@ -322,6 +327,7 @@ def handle_message(event_data):
                     
                 response_text = f"Did not recognize command: {command.lower()}\nDid you mean to do {similar_command_response}?"
                 slack_client.chat_postMessage(text=response_text, channel=channel_id, thread_ts=message['ts'] )
+                return
         
     thread = Thread(target=send_reply, kwargs={"value": event_data})
     thread.start()
