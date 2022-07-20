@@ -66,7 +66,6 @@ def test_get_vehicle_by_name():
     db.session.commit()
 
 def test_get_all_vehicles():
-    # TODO
     # Create vehicles to get
     vehicle0 = Vehicle(f'test_name0', f'test_calendar_id_0', f'test_calendar_group_id_0')
     vehicle1 = Vehicle(f'test_name1', f'test_calendar_id_1', f'test_calendar_group_id_1')
