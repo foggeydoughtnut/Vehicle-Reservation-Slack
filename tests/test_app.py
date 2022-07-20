@@ -1,6 +1,6 @@
 from decimal import InvalidOperation
 from tabnanny import check
-from app import app as test_app, get_selected_vehicle_name_from_payload, get_start_end_time_from_payload, check_available, reserve_vehicle
+from app import app as test_app, get_selected_vehicle_name_from_payload, get_start_end_time_from_payload, check_available, reserve_vehicle, check_vehicle, get_reservations
 
 import API.db.index
 import API.Calendar
@@ -441,4 +441,46 @@ def test_reserve_vehicle_exception(mocker):
     mocker.patch('app.check_available', side_effect=Exception("mocked error"))
     mocker.patch('app.send_message', return_value='')
     res = reserve_vehicle(test_payload, 'test')
+    assert res['status'] == 500
+
+
+def test_check_vehicle_success(mocker):
+    mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
+    mocker.patch('app.check_available', return_value=True)
+    mocker.patch('app.send_message', return_value='')
+    res = check_vehicle(test_payload, 'test')
+    assert res['status'] == 200
+
+def test_check_vehicle_unavailable(mocker):
+    mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
+    mocker.patch('app.check_available', return_value=False)
+    mocker.patch('app.send_message', return_value='')
+    res = check_vehicle(test_payload, 'test')
+    assert res['status'] == 400
+
+def test_check_vehicle_exception(mocker):
+    mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
+    mocker.patch('app.check_available', side_effect=Exception('mocked exception'))
+    mocker.patch('app.send_message', return_value='')
+    res = check_vehicle(test_payload, 'test')
+    assert res['status'] == 500
+
+
+def test_get_reservations(mocker):
+    """Returns a status of 200 when no exceptions occur NOTE only checking
+    because API.calendar already checked that list_specific_calendar_in_group_events worked
+    """
+    mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
+    mocker.patch('API.Calendar.list_specific_calendar_in_group_events', return_value={})
+    mocker.patch('API.Calendar.pretty_print_events', return_value={})
+    mocker.patch('app.send_message', return_value='')
+    res = get_reservations(test_payload, 'test')
+    assert res['status'] == 200
+
+def test_get_reservations_excpetion(mocker):
+    """Tests that 500 status is returned when exception occurs"""
+    mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
+    mocker.patch('API.Calendar.list_specific_calendar_in_group_events', side_effect=Exception('mocked exception'))
+    mocker.patch('app.send_message', return_value='')
+    res = get_reservations(test_payload, 'test')
     assert res['status'] == 500

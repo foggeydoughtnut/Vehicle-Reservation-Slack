@@ -157,7 +157,7 @@ def reserve_vehicle(payload, selected_vehicle):
         available = check_available(vehicle, start_time, end_time)
         if not available:
             send_message(f"{selected_vehicle} is not available at that time", channel_id, user_id, thread_id)
-            return {'status': 400}
+            return {'status': 400} # NOTE These return statements are not necessary. Used for testing
         else:
             response = API.Calendar.schedule_event(vehicle.calendarGroupID, vehicle.calendarID, start_time, end_time)
             if "ERROR" in response:
@@ -180,10 +180,13 @@ def check_vehicle(payload, selected_vehicle):
             available = check_available(vehicle, start_time, end_time)
             if not available:
                 send_message(f"{selected_vehicle} is not available at that time", channel_id, user_id, thread_id)
+                return {'status': 400}
             else:
                 send_message(f"{selected_vehicle} is available at that time", channel_id, user_id, thread_id)
+                return {'status': 200}
         except:
             send_message(f"Sorry, an error has occured, so I was unable to complete your request", channel_id, user_id, thread_id)
+            return {'status': 500}
 
 def get_reservations(payload, selected_vehicle):
     vehicle = API.db.index.get_vehicle_by_name(selected_vehicle)
@@ -194,8 +197,10 @@ def get_reservations(payload, selected_vehicle):
         events = API.Calendar.list_specific_calendar_in_group_events(vehicle.calendarGroupID, vehicle.calendarID)
         message = API.Calendar.pretty_print_events(events, selected_vehicle)
         send_message(message, channel_id, user_id, thread_id)
+        return {'status': 200}
     except:
         send_message(f"Sorry, an error has occured, so I was unable to complete your request", channel_id, user_id, thread_id)
+        return {'status': 500}
 
 
 @app.route('/interactions', methods = ['POST', 'GET'])
