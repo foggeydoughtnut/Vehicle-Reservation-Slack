@@ -157,14 +157,18 @@ def reserve_vehicle(payload, selected_vehicle):
         available = check_available(vehicle, start_time, end_time)
         if not available:
             send_message(f"{selected_vehicle} is not available at that time", channel_id, user_id, thread_id)
+            return {'status': 400}
         else:
             response = API.Calendar.schedule_event(vehicle.calendarGroupID, vehicle.calendarID, start_time, end_time)
             if "ERROR" in response:
                 send_message(f"{response['ERROR']}", channel_id, user_id, thread_id)
+                return {'status': 500}
             else:
                 send_message(f"{selected_vehicle} was successfully reserved", channel_id, user_id, thread_id)
+                return {'status': 200}
     except:
         send_message(f"Sorry, an error has occured, so I was unable to complete your request", channel_id, user_id, thread_id)
+        return {'status': 500}
 
 def check_vehicle(payload, selected_vehicle):
         vehicle = API.db.index.get_vehicle_by_name(selected_vehicle)
