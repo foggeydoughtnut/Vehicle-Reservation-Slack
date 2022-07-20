@@ -1,3 +1,60 @@
 .center {
     text-align: center;
 }
+
+.center-div {
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+
+}
+
+.background-color {
+    background-color: #222;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #375a7f;
+    border-color: #375a7f
+}
+
+.btn-primary:hover {
+    color: #fff;
+    background-color: #2b4764;
+    border-color: #28415b
+}
+
+.btn-primary.focus,
+.btn-primary:focus {
+    color: #fff;
+    background-color: #2b4764;
+    border-color: #28415b;
+    box-shadow: 0 0 0 .2rem rgba(85, 115, 146, .5)
+}
+
+.btn-primary.disabled,
+.btn-primary:disabled {
+    color: #fff;
+    background-color: #375a7f;
+    border-color: #375a7f
+}
+
+.btn-primary:not(:disabled):not(.disabled).active,
+.btn-primary:not(:disabled):not(.disabled):active,
+.show>.btn-primary.dropdown-toggle {
+    color: #fff;
+    background-color: #28415b;
+    border-color: #243a53
+}
+
+.btn-primary:not(:disabled):not(.disabled).active:focus,
+.btn-primary:not(:disabled):not(.disabled):active:focus,
+.show>.btn-primary.dropdown-toggle:focus {
+    box-shadow: 0 0 0 .2rem rgba(85, 115, 146, .5)
+}
+
+
+.add-padding {
+    padding: 8pt;
+}
