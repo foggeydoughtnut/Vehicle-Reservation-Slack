@@ -29,7 +29,7 @@ def generate_access_token_response(application_id, SCOPES):
     accounts = client.get_accounts()
     if accounts:
         token_response = client.acquire_token_silent(SCOPES, accounts[0])
-    else: #TEST
+    else:
         flow = client.initiate_device_flow(scopes=SCOPES)
         auth_code = flow['user_code']
         app.send_direct_message(f"Authentication code : {auth_code}")
