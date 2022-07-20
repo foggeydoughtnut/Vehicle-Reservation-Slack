@@ -1,11 +1,9 @@
-from concurrent.futures import thread
-from distutils.command.build_scripts import first_line_re
 import json
 from time import strftime
 from datetime import datetime, timedelta
 from urllib import request
 import requests
-from urllib.parse import parse_qs
+import difflib
 # Flask Imports
 from flask import Flask, Response, redirect, request, render_template, session
 from flask_admin import Admin
@@ -310,6 +308,19 @@ def handle_message(event_data):
                 Command 4 - check  
                 Checks if a vehicle is available from start-time to end-time
                 """
+                slack_client.chat_postMessage(text=response_text, channel=channel_id, thread_ts=message['ts'] )
+            else:
+                similar_commands = difflib.get_close_matches(command.lower(), [RESERVE_COMMAND, GET_ALL_RESERVATIONS_COMMAND, VEHICLES_COMMAND, HELP_COMMAND, CHECK_VEHICLE_COMMAND])
+                similar_command_response = ''
+                index = 0
+                for item in similar_commands:
+                    index += 1
+                    if index >= len(similar_commands):
+                        similar_command_response += item
+                    else:
+                        similar_command_response += (item + ', ')
+                    
+                response_text = f"Did not recognize command: {command.lower()}\nDid you mean to do {similar_command_response}?"
                 slack_client.chat_postMessage(text=response_text, channel=channel_id, thread_ts=message['ts'] )
         
     thread = Thread(target=send_reply, kwargs={"value": event_data})
