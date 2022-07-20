@@ -394,7 +394,3 @@ def test_start_end_time_from_payload():
     start, end = get_start_end_time_from_payload(test_payload)
     assert start == '2022-07-07T13:00'
     assert end == '2022-07-07T14:00'
-
-    
-# def test_fail():
-#     assert 1 == 2
