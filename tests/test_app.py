@@ -1,5 +1,3 @@
-from decimal import InvalidOperation
-from tabnanny import check
 from app import app as test_app, get_selected_vehicle_name_from_payload, get_start_end_time_from_payload, check_available, reserve_vehicle, check_vehicle, get_reservations
 
 import API.db.index
