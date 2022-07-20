@@ -24,7 +24,7 @@ from config import SLACK_SIGNING_SECRET, slack_token, user_token, VERIFICATION_T
 import API.db.index
 
 
-
+# TESTNG IF AUTO TEST WORKS
 # This function is required or else there will be a context error
 def create_app():
     app = Flask(__name__)
