@@ -37,7 +37,7 @@ with app.app_context():
 
 # Creates Admin User if there is no users in the database
 def create_admin_user():
-    admin = API.db.index.create_user('admin', 'password')
+    API.db.index.create_user('admin', 'password')
 
 if (len(API.db.index.get_all_users()) == 0):
     create_admin_user()
@@ -58,8 +58,30 @@ class MyModelView(ModelView):
     """Overide's flask_admin ModelView so that way it only displays if you are authenticated to see it"""
     def is_accessible(self):
         return current_user.is_authenticated
-# Creates Admin Page
+
 admin = Admin(app, name='Vehicle Reservation', template_mode='bootstrap3')
+class AnalyticsView(BaseView):
+    @expose('/')
+    def index(self):
+        return self.render('analytics_index.html')
+admin.add_view(AnalyticsView(name='Analytics', endpoint='analytics'))
+# Creates Admin Page
+
+# class UserView(ModelView):
+#     @expose('/new/', methods=('GET', 'POST'))
+#     def create_view(self):
+#         """Custom create view"""
+#         create_template = 'create.html'
+#         return self.render('create.html')
+class UserView(ModelView):
+    # @expose('/new/', methods=('GET', 'POST'))
+    # def create_view(self):
+    #     """
+    #     Custom create view.
+    #     """
+    #     return self.render('create_user.html')
+    pass
+
 admin.add_view(MyModelView(User, db.session))
 admin.add_view(MyModelView(Vehicle, db.session))
 
