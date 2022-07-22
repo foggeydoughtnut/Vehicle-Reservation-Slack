@@ -48,7 +48,7 @@ def schedule_event(calendar_group_id, calendar_id, start_time, end_time):
     event_name = "Reserve Vehicle"
     body = {
         'contentType' : 'text',
-        'content' : f'Vehicle Reservation for {API.User.get_users_name()}'
+        'content' : f'Reservation for {API.User.get_users_name()}'
     }
     start = {
         'dateTime' : start_time,
@@ -109,8 +109,6 @@ def list_specific_calendar_in_group_events(calendar_group_id, calendar_id):
     i = 0
     for event in events.json()['value']:
         eventDict = {}
-        eventDict['event'] = f'event{i}'
-        eventDict['Subject'] = event['subject']
         eventDict['bodyPreview'] = event['bodyPreview']
         eventDict['webLink'] = event['webLink']
         eventDict['start'] = event['start']
@@ -129,19 +127,16 @@ def pretty_print_events(events, vehicle_name):
     if events == {}:
         message = f"There are no reservations for {vehicle_name}"
     else:            
-        message = f'{vehicle_name}\'s calendar looks like this : \n'
+        message = f'Reservations for {vehicle_name}\n'
         for i in range(len(events)):
             start_time = events[f"event{i}"]["start"]["dateTime"]
             cleaned_up_start_time = start_time.split('.')[0].split('T')[1][:-3] # Gets rid of microseconds, seconds and date
-
             cleaned_up_start_time = datetime.datetime.strptime(f'{cleaned_up_start_time}', '%H:%M').strftime('%I:%M %p') # Converts from military time to standard time
 
             end_time = events[f"event{i}"]["end"]["dateTime"]
             cleaned_up_end_time = end_time.split('.')[0].split('T')[1][:-3] # Gets rid of microseconds, seconds and date
             cleaned_up_end_time = datetime.datetime.strptime(f'{cleaned_up_end_time}', '%H:%M').strftime('%I:%M %p') # Converts from military time to standard time
 
-            message += f'Event         :  {events[f"event{i}"]["event"]}\n'
-            message += f'Subject      :  {events[f"event{i}"]["Subject"]}\n'
             message += f'Body          :  {events[f"event{i}"]["bodyPreview"]}\n'
             message += f'Start Time :  Today at {cleaned_up_start_time}\n'
             message += f'End Time   :  Today at {cleaned_up_end_time}\n'
@@ -157,19 +152,3 @@ def check_if_reservation_available(calendar_group_id, calendar_id, start_time, e
         headers=calendar_headers
     )
     return events.json()['value'] == []
-
-
-# #  Delete an event
-# event_id1 = response1_create.json()['id'] # get event id then do a delete request
-# response1_delete = requests.delete(
-#     GRAPH_API_ENDPOINT + f'/me/events/{event_id1}',
-#     headers=headers
-# )
-# print(response1_delete.status_code)
-
-# # Cancel an event
-# event_id1 = response1_create.json()['id'] # get event id then do a post request to the /cancel route
-# response1_delete = requests.post(
-#     GRAPH_API_ENDPOINT + f'/me/events/{event_id1}/cancel',
-#     headers=headers
-# )
