@@ -82,7 +82,6 @@ def test_list_specific_calendar_events(requests_mock, mocker):
         f"{API.graphAPI.GRAPH_API_ENDPOINT}/me/calendarGroups/{test_calendar_group_id}/calendars/{test_calendar_id}/calendarview?startdatetime={start_date_time}-06:00&endDateTime={end_date_time}-06:00",
         json = {'value' : [
             {
-                'bodyPreview' : 'test event',
                 'webLink' : 'test link',
                 'start' : '2022-06-27T12:00:00',
                 'end' : '2022-06-27T13:00:00',
@@ -93,7 +92,6 @@ def test_list_specific_calendar_events(requests_mock, mocker):
     )
     resp = API.Calendar.list_specific_calendar_in_group_events(test_calendar_group_id, test_calendar_id)
     assert type(resp) == dict
-    assert resp['event0']['bodyPreview'] == 'test event'
     assert resp['event0']['webLink'] == 'test link'
     assert resp['event0']['start'] == '2022-06-27T12:00:00'
     assert resp['event0']['end'] == '2022-06-27T13:00:00'
@@ -128,8 +126,6 @@ def test_available_fails_if_event(requests_mock, mocker):
         f"{API.graphAPI.GRAPH_API_ENDPOINT}/me/calendarGroups/{test_calendar_group_id}/calendars/{test_calendar_id}/calendarview?startdatetime={start_time}-06:00&endDateTime={end_time}-06:00",
         json = {'value' : [
             {
-                'subject' : 'test',
-                'bodyPreview' : 'test event',
                 'webLink' : 'test link',
                 'start' : '2022-06-27T12:00:00',
                 'end' : '2022-06-27T13:00:00',
@@ -149,13 +145,11 @@ def test_pretty_print_events_return_message_empty():
 
 def test_pretty_print_events():
     message = API.Calendar.pretty_print_events({'event0': {
-        'bodyPreview' : 'test body preview',
         'webLink' : 'test web link',
         'start' : {'dateTime' : '2022-06-27T14:30:00'},
         'end' : {'dateTime' : '2022-06-27T15:00:00'},
     }}, 'test')
     test_message = "Reservations for test\n"
-    test_message += 'Body          :  test body preview\n'
     test_message += 'Start Time :  Today at 02:30 PM\n'
     test_message += 'End Time   :  Today at 03:00 PM\n'
     test_message += 'Web Link   :  test web link\n'

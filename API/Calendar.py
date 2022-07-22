@@ -48,7 +48,7 @@ def schedule_event(calendar_group_id, calendar_id, start_time, end_time):
     event_name = "Reserve Vehicle"
     body = {
         'contentType' : 'text',
-        'content' : f'Reservation for {API.User.get_users_name()}'
+        'content' : f'Reservation'
     }
     start = {
         'dateTime' : start_time,
@@ -109,7 +109,6 @@ def list_specific_calendar_in_group_events(calendar_group_id, calendar_id):
     i = 0
     for event in events.json()['value']:
         eventDict = {}
-        eventDict['bodyPreview'] = event['bodyPreview']
         eventDict['webLink'] = event['webLink']
         eventDict['start'] = event['start']
         eventDict['end'] = event['end']
@@ -137,7 +136,6 @@ def pretty_print_events(events, vehicle_name):
             cleaned_up_end_time = end_time.split('.')[0].split('T')[1][:-3] # Gets rid of microseconds, seconds and date
             cleaned_up_end_time = datetime.datetime.strptime(f'{cleaned_up_end_time}', '%H:%M').strftime('%I:%M %p') # Converts from military time to standard time
 
-            message += f'Body          :  {events[f"event{i}"]["bodyPreview"]}\n'
             message += f'Start Time :  Today at {cleaned_up_start_time}\n'
             message += f'End Time   :  Today at {cleaned_up_end_time}\n'
             message += f'Web Link   :  {events[f"event{i}"]["webLink"]}\n'
