@@ -2,7 +2,7 @@
 
 ## Setup  
 Run the app.py
-Then navigate to localhost:3000/login and login to the admin page with username: admin password: password 
+Then navigate to localhost:3000/login and login to the admin page with username: admin password: password  
 Then from the admin (/admin) page you can add vehicles  
 
 ### Create Admin User  
