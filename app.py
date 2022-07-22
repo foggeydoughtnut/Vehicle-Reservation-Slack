@@ -6,7 +6,7 @@ import requests
 import difflib
 # Flask Imports
 from flask import Flask, Response, redirect, request, render_template, session
-from flask_admin import Admin
+from flask_admin import Admin, BaseView, expose
 from flask_admin.contrib.sqla import ModelView
 from flask_login import LoginManager, current_user, login_user, logout_user
 from flask_debugtoolbar import DebugToolbarExtension
@@ -58,12 +58,10 @@ class MyModelView(ModelView):
     """Overide's flask_admin ModelView so that way it only displays if you are authenticated to see it"""
     def is_accessible(self):
         return current_user.is_authenticated
-    
 # Creates Admin Page
 admin = Admin(app, name='Vehicle Reservation', template_mode='bootstrap3')
-admin.add_view(MyModelView(Vehicle, db.session))
 admin.add_view(MyModelView(User, db.session))
-
+admin.add_view(MyModelView(Vehicle, db.session))
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
