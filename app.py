@@ -226,7 +226,7 @@ def interactions():
                 print(payload['message']['blocks'][0]['text']['text'])
             return {'status': 200}
         
-def get_slack_block(path_to_file):
+def get_slack_block_and_add_vehicles(path_to_file):
     vehicle_options = create_vehicle_options_slack_block()
     with open(path_to_file) as f:
         data = json.load(f)
@@ -272,19 +272,19 @@ def handle_message(event_data):
             # This is where slack messages are handled
             """Makes an event on the calendar."""            
             if command.lower() == RESERVE_COMMAND:
-                data = get_slack_block('slack_blocks/slack_blocks.json')        
+                data = get_slack_block_and_add_vehicles('slack_blocks/slack_blocks.json')
                 slack_client.chat_postMessage(channel = channel_id, thread_ts=message['ts'], text = "Please fill out the form", blocks = data['blocks'])
                 return
                                 
             """Gets reservations on the calendar"""
             if command.lower() == GET_ALL_RESERVATIONS_COMMAND:
-                data = get_slack_block('slack_blocks/reservations_block.json')
+                data = get_slack_block_and_add_vehicles('slack_blocks/reservations_block.json')
                 slack_client.chat_postMessage(channel = channel_id, thread_ts=message['ts'], text = "Please fill out the form", blocks = data['blocks'])
                 return
 
             """Check if vehicle is available from start_time to end_time"""
             if command.lower() == CHECK_VEHICLE_COMMAND:    
-                data = get_slack_block('slack_blocks/check_vehicle_block.json')
+                data = get_slack_block_and_add_vehicles('slack_blocks/check_vehicle_block.json')
                 slack_client.chat_postMessage(channel = channel_id, thread_ts=message['ts'], text = "Please fill out the form", blocks = data['blocks'])
                 return
 
@@ -305,20 +305,9 @@ def handle_message(event_data):
                 return
             
             if command.lower() == HELP_COMMAND:
-                response_text = f""" Usage Manual
-                Command 1 - reserve
-                Command used to reserve a vehicle.
-
-                Command 2 - reservations
-                Gets the events/reservations of a specific vehicle for today
-
-                Command 3 - vehicles
-                Lists all of the vehicles and checks if they are available in the next {offset_minutes} minutes
-
-                Command 4 - check  
-                Checks if a vehicle is available from start-time to end-time
-                """
-                slack_client.chat_postMessage(text=response_text, channel=channel_id, thread_ts=message['ts'] )
+                with open('slack_blocks/help_block.json') as f:
+                    data = json.load(f)
+                slack_client.chat_postMessage(text="Here is the usage manual", channel=channel_id, thread_ts=message['ts'], blocks = data['blocks'] )
                 return
             else: #Command that was used doesn't exist
                 similar_commands = difflib.get_close_matches(command.lower(), [RESERVE_COMMAND, GET_ALL_RESERVATIONS_COMMAND, VEHICLES_COMMAND, HELP_COMMAND, CHECK_VEHICLE_COMMAND])
