@@ -69,7 +69,8 @@
     padding: 8pt;
 }
 
-h1 {
+h1,
+h2 {
     color: white;
     font-family: sans-serif;
 }
