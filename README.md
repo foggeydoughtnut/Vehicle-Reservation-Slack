@@ -30,4 +30,6 @@ coverage run -m pytest and then any tests to would like to run with coverage (ex
 coverage report or coverage html
 ```
 Note:  
-Whenever you commit to the repository it will automatically run all of the tests that pytest can find and make sure that they pass in order for the commit to go through.
+Whenever you commit to the repository it will automatically run all of the tests that pytest can find and make sure that they pass in order for the commit to go through.  
+To commit without checking (useful for when you just change markdown files and it will get mad for the spaces after a line) run  
+git commit -m "" --no-verify
