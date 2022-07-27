@@ -1,14 +1,12 @@
 import json
 from time import strftime
 from datetime import datetime, timedelta
-from urllib import request
-import requests
 import difflib
 # Flask Imports
-from flask import Flask, Response, redirect, request, render_template, session, flash
-from flask_admin import Admin, BaseView, expose
+from flask import Flask, Response
+from flask_admin import Admin, expose
 from flask_admin.contrib.sqla import ModelView
-from flask_login import LoginManager, current_user, login_user, logout_user
+from flask_login import LoginManager, current_user
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_migrate import Migrate
 # Slack Imports
@@ -22,6 +20,7 @@ from models import Vehicle, User
 from models import db
 from config import SLACK_SIGNING_SECRET, slack_token, user_token, VERIFICATION_TOKEN
 import API.db.index
+import routes
 
 
 # This function is required or else there will be a context error
@@ -35,19 +34,26 @@ app.app_context().push()
 with app.app_context():
     db.create_all()
 
+# Define routes
+app.add_url_rule('/login', view_func=routes.login, methods=['POST', 'GET'])
+app.add_url_rule('/logout', view_func=routes.logout, methods = ['POST', 'GET'])
+app.add_url_rule('/create/new/user', view_func=routes.create_new_user, methods = ['POST'])
+app.add_url_rule('/interactions', view_func=routes.interactions, methods = ['POST'])
+app.add_url_rule('/', view_func=routes.event_hook)
+########
+
+migrate = Migrate(app, db)
+app.config.from_pyfile('config.py')
+toolbar = DebugToolbarExtension(app) # tool bar only works when app.debug is True
+login = LoginManager(app)
+
+
 # Creates Admin User if there is no users in the database
 def create_admin_user():
     API.db.index.create_user('admin', 'password')
 
 if (len(API.db.index.get_all_users()) == 0):
     create_admin_user()
-    
-
-
-migrate = Migrate(app, db)
-app.config.from_pyfile('config.py')
-toolbar = DebugToolbarExtension(app) # tool bar only works when app.debug is True
-login = LoginManager(app)
 
 
 @login.user_loader
@@ -92,65 +98,6 @@ CHECK_VEHICLE_COMMAND = "check"
 HELP_COMMAND = "help"
 
 vehicle_names = API.db.index.get_vehicle_names()
-
-@app.route("/")
-def event_hook(request):
-    json_dict = json.loads(request.body.decode("utf-8"))
-    if json_dict["token"] != VERIFICATION_TOKEN:
-        return {"status": 403}
-
-    if "type" in json_dict:
-        if json_dict["type"] == "url_verification":
-            response_dict = {"challenge": json_dict["challenge"]}
-            return response_dict
-    return {"status": 500}
-
-@app.route('/login', methods = ['POST', 'GET'])
-def login():
-    """Login URL for the admin page"""
-    if (request.method == 'POST'):
-        username = request.form.get('username')
-        password = request.form.get('password')
-
-        if (not username or not password):
-            return redirect('/login')
-            
-        user = API.admin.user.get_user(username)
-        if (user == 'ERROR'):
-            return redirect('/login')
-        if (user.username and user.check_password(password)):
-            session['user'] = user.username
-            login_user(user)
-            return redirect('/admin')
-        
-        
-    return render_template('login.html')
-
-@app.route('/logout', methods = ['POST', 'GET'])
-def logout():
-    logout_user()
-    return redirect('/login')
-
-@app.route('/create/new/user', methods = ['POST', 'GET'])
-def create_new_user():
-    if (request.method == 'POST'):
-        username = request.form.get('username')
-        password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
-        password_are_same = (password == confirm_password)
-        username_exists = API.db.index.check_if_user_exists(username)
-
-        if password_are_same and not username_exists:
-            API.db.index.create_user(username, password)
-            flash('Successfully created account')
-            return redirect('/admin/user/')
-        else:
-            if not password_are_same:
-                flash('Passwords did not match')
-                return redirect('/admin/user/new')
-            elif username_exists:
-                flash('That username already exists')
-                return redirect('/admin/user/new')
     
 slack_events_adapter = SlackEventAdapter(
     SLACK_SIGNING_SECRET, "/slack/events", app
@@ -232,32 +179,6 @@ def get_reservations(payload, selected_vehicle):
     except:
         send_message(f"Sorry, an error has occured, so I was unable to complete your request", channel_id, user_id, thread_id)
         return {'status': 500}
-
-
-@app.route('/interactions', methods = ['POST', 'GET'])
-def interactions():
-    if request.method == 'POST':
-        data = request.form.to_dict()
-        payload = json.loads(data['payload'])
-        if payload['actions'][0]['action_id'] != 'submit':
-            return {'status' : 200}
-        else:
-            selected_vehicle = get_selected_vehicle_name_from_payload(payload)
-            if selected_vehicle == None:
-                requests.post(payload['response_url'], json = { "text": "Did not select a vehicle"})
-                return {'status': 404}
-            else:
-                requests.post(payload['response_url'], json = { "text": "Thanks for your request. We will process that shortly"})
-            block_command_type = payload['message']['blocks'][0]['text']['text']
-            if block_command_type == 'Reserve':
-                reserve_vehicle(payload, selected_vehicle)
-            elif block_command_type == 'Check':
-                check_vehicle(payload, selected_vehicle)
-            elif block_command_type == 'Reservations':
-                get_reservations(payload, selected_vehicle)
-            else:
-                print(payload['message']['blocks'][0]['text']['text'])
-            return {'status': 200}
         
 def get_slack_block_and_add_vehicles(path_to_file):
     vehicle_options = create_vehicle_options_slack_block()
