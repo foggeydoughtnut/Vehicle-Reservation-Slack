@@ -5,7 +5,7 @@ from urllib import request
 import requests
 import difflib
 # Flask Imports
-from flask import Flask, Response, redirect, request, render_template, session
+from flask import Flask, Response, redirect, request, render_template, session, flash
 from flask_admin import Admin, BaseView, expose
 from flask_admin.contrib.sqla import ModelView
 from flask_login import LoginManager, current_user, login_user, logout_user
@@ -59,30 +59,20 @@ class MyModelView(ModelView):
     def is_accessible(self):
         return current_user.is_authenticated
 
+class MyUserView(ModelView):
+    """Overide's flask_admin ModelView so that way it only displays if you are authenticated to see it"""
+    def is_accessible(self):
+        return current_user.is_authenticated
+    @expose('/new', methods=('GET', 'POST'))
+    def create_view(self):
+        """
+        Custom create view.
+        """
+        return self.render('user_create.html')
+
 admin = Admin(app, name='Vehicle Reservation', template_mode='bootstrap3')
-class AnalyticsView(BaseView):
-    @expose('/')
-    def index(self):
-        return self.render('analytics_index.html')
-admin.add_view(AnalyticsView(name='Analytics', endpoint='analytics'))
 # Creates Admin Page
-
-# class UserView(ModelView):
-#     @expose('/new/', methods=('GET', 'POST'))
-#     def create_view(self):
-#         """Custom create view"""
-#         create_template = 'create.html'
-#         return self.render('create.html')
-class UserView(ModelView):
-    # @expose('/new/', methods=('GET', 'POST'))
-    # def create_view(self):
-    #     """
-    #     Custom create view.
-    #     """
-    #     return self.render('create_user.html')
-    pass
-
-admin.add_view(MyModelView(User, db.session))
+admin.add_view(MyUserView(User, db.session))
 admin.add_view(MyModelView(Vehicle, db.session))
 
 @app.teardown_appcontext
@@ -140,6 +130,27 @@ def login():
 def logout():
     logout_user()
     return redirect('/login')
+
+@app.route('/create/new/user', methods = ['POST', 'GET'])
+def create_new_user():
+    if (request.method == 'POST'):
+        username = request.form.get('username')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        password_are_same = (password == confirm_password)
+        username_exists = API.db.index.check_if_user_exists(username)
+
+        if password_are_same and not username_exists:
+            API.db.index.create_user(username, password)
+            flash('Successfully created account')
+            return redirect('/admin/user/')
+        else:
+            if not password_are_same:
+                flash('Passwords did not match')
+                return redirect('/admin/user/new')
+            elif username_exists:
+                flash('That username already exists')
+                return redirect('/admin/user/new')
     
 slack_events_adapter = SlackEventAdapter(
     SLACK_SIGNING_SECRET, "/slack/events", app

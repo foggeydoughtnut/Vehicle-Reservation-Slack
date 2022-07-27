@@ -31,3 +31,7 @@ def create_user(username, password):
     db.session.add(user)
     db.session.commit()
     return user
+
+def check_if_user_exists(username):
+    user = User.query.filter_by(username = username).first()
+    return user != None
