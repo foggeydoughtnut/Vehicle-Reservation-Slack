@@ -24,9 +24,6 @@ def test_base_index_redirects(client):
     assert res_follow_redirect.status_code == 200
     assert res_follow_redirect.request.path == '/login'
 
-
-
-
 def test_login(client):
     # create test admin user to log in
     test_user = API.db.index.get_user_by_username('test-user')

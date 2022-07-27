@@ -9,6 +9,16 @@
 
 }
 
+.move-to-right-side {
+    float: right;
+}
+
+.create-user-btn {
+    width: 80pt;
+    height: 40pt;
+    font-size: large;
+}
+
 .background-color {
     background-color: #222;
 }

@@ -30,6 +30,8 @@ def logout():
 
 def create_new_user():
     if (request.method == 'POST'):
+        if (request.form.get('Cancel')):
+            return redirect('/admin/user/')
         username = request.form.get('username')
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
