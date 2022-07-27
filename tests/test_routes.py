@@ -96,7 +96,8 @@ def test_create_user_success(client, mocker):
     create_test_user_success = client.post('/create/new/user', data = {
         'username' : 'r8ZdYvguLuhrdPyp',
         'password' : 'yio2lmiTyU2uHzbf',
-        'confirm_password' : 'yio2lmiTyU2uHzbf'
+        'confirm_password' : 'yio2lmiTyU2uHzbf',
+        'Submit' :  'Submit'
     }, follow_redirects=True)
     assert create_test_user_success.status_code == 200
     assert create_test_user_success.request.path == '/admin/user/'
@@ -116,7 +117,8 @@ def test_create_user_not_matching_passwords(client, mocker):
     create_test_user_not_matching_passwords_redirect = client.post('/create/new/user', data = {
         'username' : 'r8ZdYvguLuhrdPyp',
         'password' : 'yio2lmiTyU2uHzbf',
-        'confirm_password' : 'yio'
+        'confirm_password' : 'yio',
+        'Submit' :  'Submit'
     }, follow_redirects=True)
     assert create_test_user_not_matching_passwords_redirect.status_code == 200
     assert create_test_user_not_matching_passwords_redirect.request.path == '/admin/user/new'
@@ -128,7 +130,8 @@ def test_create_user_existing_username(client, mocker):
     create_test_user_existing_username_redirect = client.post('/create/new/user', data = {
         'username' : 'r8ZdYvguLuhrdPyp',
         'password' : 'yio2lmiTyU2uHzbf',
-        'confirm_password' : 'yio2lmiTyU2uHzbf'
+        'confirm_password' : 'yio2lmiTyU2uHzbf',
+        'Submit' :  'Submit'
     }, follow_redirects=True)
     assert create_test_user_existing_username_redirect.status_code == 200
     assert create_test_user_existing_username_redirect.request.path == '/admin/user/new'
@@ -139,8 +142,29 @@ def test_create_user_existing_username(client, mocker):
     create_test_user_existing_username = client.post('/create/new/user', data = {
         'username' : 'r8ZdYvguLuhrdPyp',
         'password' : 'yio2lmiTyU2uHzbf',
-        'confirm_password' : 'yio2lmiTyU2uHzbf'
+        'confirm_password' : 'yio2lmiTyU2uHzbf',
+        'Submit' :  'Submit'
     }, follow_redirects=False)
     assert create_test_user_existing_username.status_code == 302
     assert create_test_user_existing_username.request.path == '/create/new/user'
     API.db.index.delete_user_by_id(user1.id)
+
+def test_create_user_canceled(client, mocker):
+    mocker.patch('app.MyUserView.is_accessible', return_value=True)
+    res = client.post('/create/new/user', data = {
+        'username' : '',
+        'password' : '',
+        'confirm_password' : '',
+        'Cancel' : 'Cancel'
+    })
+    assert res.status_code == 302
+    assert res.request.path == '/create/new/user'
+
+    res = client.post('/create/new/user', data = {
+        'username' : '',
+        'password' : '',
+        'confirm_password' : '',
+        'Cancel' : 'Cancel'
+    }, follow_redirects=True)
+    assert res.status_code == 200
+    assert res.request.path == '/admin/user/'

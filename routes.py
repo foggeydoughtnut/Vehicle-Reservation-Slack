@@ -3,7 +3,6 @@ from flask_login import login_user, logout_user
 import API.admin.user
 import requests
 import json
-# from app import get_selected_vehicle_name_from_payload, reserve_vehicle, check_vehicle, get_reservations
 import app
 from config import VERIFICATION_TOKEN
 
