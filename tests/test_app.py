@@ -1,3 +1,4 @@
+from calendar import c
 from app import app as test_app, get_selected_vehicle_name_from_payload, get_start_end_time_from_payload, check_available, reserve_vehicle, check_vehicle, get_reservations
 
 import API.db.index
@@ -85,6 +86,61 @@ def test_check_access_forbidden(client):
     assert user_response.status_code == 403
     vehicle_response = client.get('/admin/vehicle', follow_redirects=True)
     assert vehicle_response.status_code == 403
+
+def test_create_user_success(client, mocker):
+    mocker.patch('app.MyUserView.is_accessible', return_value=True)
+    create_test_user_success = client.post('/create/new/user', data = {
+        'username' : 'r8ZdYvguLuhrdPyp',
+        'password' : 'yio2lmiTyU2uHzbf',
+        'confirm_password' : 'yio2lmiTyU2uHzbf'
+    }, follow_redirects=True)
+    assert create_test_user_success.status_code == 200
+    assert create_test_user_success.request.path == '/admin/user/'
+    API.db.index.delete_user_by_username('r8ZdYvguLuhrdPyp')
+
+def test_create_user_not_matching_passwords(client, mocker):
+    mocker.patch('app.MyUserView.is_accessible', return_value=True)
+    create_test_user_not_matching_passwords = client.post('/create/new/user', data = {
+        'username' : 'r8ZdYvguLuhrdPyp',
+        'password' : 'yio2lmiTyU2uHzbf',
+        'confirm_password' : 'yio'
+    }, follow_redirects=False)
+    assert create_test_user_not_matching_passwords.status_code == 302
+    assert create_test_user_not_matching_passwords.request.path == '/create/new/user'
+    API.db.index.delete_user_by_username('r8ZdYvguLuhrdPyp')
+
+    create_test_user_not_matching_passwords_redirect = client.post('/create/new/user', data = {
+        'username' : 'r8ZdYvguLuhrdPyp',
+        'password' : 'yio2lmiTyU2uHzbf',
+        'confirm_password' : 'yio'
+    }, follow_redirects=True)
+    assert create_test_user_not_matching_passwords_redirect.status_code == 200
+    assert create_test_user_not_matching_passwords_redirect.request.path == '/admin/user/new'
+    API.db.index.delete_user_by_username('r8ZdYvguLuhrdPyp')
+
+def test_create_user_existing_username(client, mocker):
+    user0 = API.db.index.create_user('r8ZdYvguLuhrdPyp', 'yio2lmiTyU2uHzbf')
+    mocker.patch('app.MyUserView.is_accessible', return_value=True)
+    create_test_user_existing_username_redirect = client.post('/create/new/user', data = {
+        'username' : 'r8ZdYvguLuhrdPyp',
+        'password' : 'yio2lmiTyU2uHzbf',
+        'confirm_password' : 'yio2lmiTyU2uHzbf'
+    }, follow_redirects=True)
+    assert create_test_user_existing_username_redirect.status_code == 200
+    assert create_test_user_existing_username_redirect.request.path == '/admin/user/new'
+    API.db.index.delete_user_by_id(user0.id)
+
+    user1 = API.db.index.create_user('r8ZdYvguLuhrdPyp', 'yio2lmiTyU2uHzbf')
+    mocker.patch('app.MyUserView.is_accessible', return_value=True)
+    create_test_user_existing_username = client.post('/create/new/user', data = {
+        'username' : 'r8ZdYvguLuhrdPyp',
+        'password' : 'yio2lmiTyU2uHzbf',
+        'confirm_password' : 'yio2lmiTyU2uHzbf'
+    }, follow_redirects=False)
+    assert create_test_user_existing_username.status_code == 302
+    assert create_test_user_existing_username.request.path == '/create/new/user'
+    API.db.index.delete_user_by_id(user1.id)
+
 
 test_payload = {
     "type": "block_actions",

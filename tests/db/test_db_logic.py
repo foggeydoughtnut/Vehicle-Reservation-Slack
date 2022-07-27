@@ -81,3 +81,11 @@ def test_get_all_vehicles():
     Vehicle.query.filter_by(id=vehicle0.id).delete()
     Vehicle.query.filter_by(id=vehicle1.id).delete()
     db.session.commit()
+
+def test_check_if_username_exists():
+    user = API.db.index.create_user('test-user', 'test-password')
+    user_exists = API.db.index.check_if_user_exists(user.username)
+    non_existent_user = API.db.index.check_if_user_exists(';al;skjdfaeq')
+    assert user_exists == True
+    assert non_existent_user == False
+    API.db.index.delete_user_by_id(user.id)

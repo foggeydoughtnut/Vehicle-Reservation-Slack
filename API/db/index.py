@@ -25,6 +25,10 @@ def delete_user_by_id(id):
     User.query.filter_by(id=id).delete()
     db.session.commit()
 
+def delete_user_by_username(username):
+    User.query.filter_by(username=username).delete()
+    db.session.commit()
+
 def create_user(username, password):
     user = User(username)
     user.set_password(password)
