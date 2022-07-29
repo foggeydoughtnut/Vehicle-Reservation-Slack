@@ -13,25 +13,24 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         if (not username or not password):
-            error = "Invalid Credentials. Please try again"
-            return render_template('login.html', error=error)
-            # return redirect('/login')
+            flash('Invalid Credentials. Please try again', 'error')
+            return redirect('/login')
         user = API.db.index.get_user_by_username(username)
         if (user == None):
-            error = "Invalid Credentials. Please try again"
-            return render_template('login.html', error=error)
-            # return redirect('/login')
+            flash('Invalid Credentials. Please try again', 'error')
+            return redirect('/login')
         if (user.username and user.check_password(password)):
             session['user'] = user.username
             login_user(user)
             return redirect('/admin')
         else:
-            error = "Invalid Credentials. Please try again"
-            return render_template('login.html', error=error)
-    return render_template('login.html', error=error)
+            flash('Invalid Credentials. Please try again', 'error')
+            return redirect('/login')
+    return render_template('login.html')
 
 def logout():
     logout_user()
+    flash('Successfully logged out', 'message')
     return redirect('/login')
 
 def create_new_user():
@@ -47,16 +46,15 @@ def create_new_user():
 
         if password_are_same and not username_exists:
             API.db.index.create_user(username, password)
-            flash('Successfully created account')
+            flash('Successfully created account', 'success')
             return redirect('/admin/user/')
         else:
             if not password_are_same:
-                flash('Passwords did not match')
+                flash('Passwords did not match', 'error')
                 return redirect('/admin/user/new')
             elif username_exists:
-                flash('That username already exists')
+                flash('That username already exists', 'error')
                 return redirect('/admin/user/new')
-
 
 def interactions():
     """The route that slack blocks call when you click submit"""

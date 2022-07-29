@@ -11,9 +11,13 @@
 <body class="background-color">
     <div class="center-div" style="width: 33%;">
         <h1 class="add-padding">Log in</h1>
-        {% if error %}
-            <p class="error"><strong>Error:</strong> {{ error }}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="{{ category }}">{{ message }}</div>
+        {% endfor %}
         {% endif %}
+        {% endwith %}
         <form action="/login" method="POST" class="add-padding">
             <div class="form-floating mb-3">
                 <input type="text" class="form-control form-control-lg" id="username" placeholder="username"
