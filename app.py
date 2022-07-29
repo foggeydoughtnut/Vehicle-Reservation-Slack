@@ -43,7 +43,7 @@ app.add_url_rule('/', view_func=routes.event_hook)
 
 migrate = Migrate(app, db)
 app.config.from_pyfile('config.py')
-toolbar = DebugToolbarExtension(app) # tool bar only works when app.debug is True
+# toolbar = DebugToolbarExtension(app) # tool bar only works when app.debug is True
 login = LoginManager(app)
 
 
@@ -242,8 +242,8 @@ def handle_message(event_data):
                 return
 
             """Lists all of the vehicle's names and displays if they are available"""
-            offset_minutes = 15 # 15 Minute offset for check availability. NOTE this variable is outside the scope so that way the help command can use it
             if command.lower() == VEHICLES_COMMAND:
+                offset_minutes = 15 # 15 Minute offset for check availability
                 response_text = ""
                 start_time = strftime("%Y-%m-%dT%H:%M:%S")
                 
@@ -262,7 +262,7 @@ def handle_message(event_data):
                     data = json.load(f)
                 slack_client.chat_postMessage(text="Here is the usage manual", channel=channel_id, thread_ts=message['ts'], blocks = data['blocks'] )
                 return
-            else: #Command that was used doesn't exist
+            else: #Command that was used doesn't exist. Trys to get closest command to what the user typed
                 similar_commands = difflib.get_close_matches(command.lower(), [RESERVE_COMMAND, GET_ALL_RESERVATIONS_COMMAND, VEHICLES_COMMAND, HELP_COMMAND, CHECK_VEHICLE_COMMAND])
                 similar_command_response = ''
                 index = 0
@@ -272,8 +272,10 @@ def handle_message(event_data):
                         similar_command_response += item
                     else:
                         similar_command_response += (item + ', ')
-                    
-                response_text = f"Did not recognize command: {command.lower()}\nDid you mean to do {similar_command_response}?"
+                if similar_command_response:
+                    response_text = f"Did not recognize command: {command.lower()}\nDid you mean to use the command: {similar_command_response}?"
+                else:
+                    response_text = f"Did not recognize command: {command.lower()}"
                 slack_client.chat_postMessage(text=response_text, channel=channel_id, thread_ts=message['ts'] )
                 return
         
