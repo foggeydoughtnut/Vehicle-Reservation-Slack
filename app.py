@@ -125,6 +125,12 @@ def get_start_end_time_from_payload(payload):
     return (start, end)
 
 def reserve_vehicle(payload, selected_vehicle):
+    """Uses the api to check that vehicle is available. If it is, it will reserve the vehicle
+
+    Keyword arguments\n
+            payload   --    The slack block payload that was sent from submitting the reserve block\n
+            selected_vehicle -- The vehicle the user selected to reserve
+    """
     vehicle = API.db.index.get_vehicle_by_name(selected_vehicle)
     start_time, end_time = get_start_end_time_from_payload(payload)
     channel_id = payload['channel']['id']
@@ -148,6 +154,12 @@ def reserve_vehicle(payload, selected_vehicle):
         return {'status': 500}
 
 def check_vehicle(payload, selected_vehicle):
+        """Checks a specific vehicle from start time to end time
+
+        Keyword arguments\n
+                payload   --    The slack block payload that was sent from submitting the check_vehicle slack block\n
+                selected_vehicle -- The vehicle the user selected
+        """
         vehicle = API.db.index.get_vehicle_by_name(selected_vehicle)
         start_time, end_time = get_start_end_time_from_payload(payload)
         channel_id = payload['channel']['id']
@@ -166,6 +178,12 @@ def check_vehicle(payload, selected_vehicle):
             return {'status': 500}
 
 def get_reservations(payload, selected_vehicle):
+    """Gets all of the reservations for the selected_vehicle
+
+    Keyword arguments\n
+            payload   --    The slack block payload that was sent\n
+            selected_vehicle -- The vehicle the user selected
+    """
     vehicle = API.db.index.get_vehicle_by_name(selected_vehicle)
     channel_id = payload['channel']['id']
     user_id = payload['user']['id']
@@ -180,6 +198,11 @@ def get_reservations(payload, selected_vehicle):
         return {'status': 500}
         
 def get_slack_block_and_add_vehicles(path_to_file):
+    """Gets the slack block that is at path_to_file then it adds all of the vehicle options to that block
+
+    Keyword arguments\n
+        path_to_file  -- The path to the slack block
+    """
     vehicle_options = create_vehicle_options_slack_block()
     with open(path_to_file) as f:
         data = json.load(f)
@@ -191,6 +214,7 @@ def get_slack_block_and_add_vehicles(path_to_file):
     return new_data
 
 def create_vehicle_options_slack_block():
+    """Creates the vehicle_options that will be used in the get_slack_block_and_add_vehicles method"""
     vehicle_options = []
     i = 0
     for vehicle in vehicle_names:
@@ -262,7 +286,7 @@ def handle_message(event_data):
                     data = json.load(f)
                 slack_client.chat_postMessage(text="Here is the usage manual", channel=channel_id, thread_ts=message['ts'], blocks = data['blocks'] )
                 return
-            else: #Command that was used doesn't exist. Trys to get closest command to what the user typed
+            else: #Command that was used doesn't exist. Tries to get closest command to what the user typed
                 similar_commands = difflib.get_close_matches(command.lower(), [RESERVE_COMMAND, GET_ALL_RESERVATIONS_COMMAND, VEHICLES_COMMAND, HELP_COMMAND, CHECK_VEHICLE_COMMAND])
                 similar_command_response = ''
                 index = 0

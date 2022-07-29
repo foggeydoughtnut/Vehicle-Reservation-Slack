@@ -28,6 +28,7 @@ def logout():
     return redirect('/login')
 
 def create_new_user():
+    """Route to create a new user for the admin page"""
     if (request.method == 'POST'):
         if (request.form.get('Cancel')):
             return redirect('/admin/user/')
@@ -51,6 +52,7 @@ def create_new_user():
 
 
 def interactions():
+    """The route that slack blocks call when you click submit"""
     if request.method == 'POST':
         data = request.form.to_dict()
         payload = json.loads(data['payload'])
@@ -75,6 +77,7 @@ def interactions():
             return {'status': 200}
 
 def event_hook(request = None):
+    """The base url route. Needed for the request url verification for slack"""
     if request != None:
         json_dict = json.loads(request.body.decode("utf-8"))
         if json_dict["token"] != VERIFICATION_TOKEN:

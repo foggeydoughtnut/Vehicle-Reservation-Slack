@@ -140,6 +140,14 @@ def pretty_print_events(events, vehicle_name):
     return message
 
 def check_if_reservation_available(calendar_group_id, calendar_id, start_time, end_time):
+    """Returns true or false if there is a reservation between start_time and end_time
+
+    Keyword arguments:\n
+        calendar_group_id      -- The calendar group id for outlook
+        calendar_id            -- The calendar id for outlook
+        start_time             -- The start time of the check
+        end_time               -- The end time of the check
+    """
     calendar_headers = generate_headers()
     calendar_headers['Prefer'] = 'outlook.timezone="America/Denver"'
     events = requests.get(
