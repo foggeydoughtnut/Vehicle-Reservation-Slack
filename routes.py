@@ -8,20 +8,27 @@ from config import VERIFICATION_TOKEN
 
 def login():
     """Login URL for the admin page"""
+    error = None
     if (request.method == 'POST'):
         username = request.form.get('username')
         password = request.form.get('password')
-
         if (not username or not password):
-            return redirect('/login')
+            error = "Invalid Credentials. Please try again"
+            return render_template('login.html', error=error)
+            # return redirect('/login')
         user = API.db.index.get_user_by_username(username)
         if (user == None):
-            return redirect('/login')
+            error = "Invalid Credentials. Please try again"
+            return render_template('login.html', error=error)
+            # return redirect('/login')
         if (user.username and user.check_password(password)):
             session['user'] = user.username
             login_user(user)
             return redirect('/admin')
-    return render_template('login.html')
+        else:
+            error = "Invalid Credentials. Please try again"
+            return render_template('login.html', error=error)
+    return render_template('login.html', error=error)
 
 def logout():
     logout_user()

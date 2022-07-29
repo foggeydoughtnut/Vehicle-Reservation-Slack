@@ -54,19 +54,12 @@ def test_login(client):
     }, follow_redirects=False)
     assert response.status_code == 302
 
-    # Check that it redirects the user back to /login if they don't fill in a username or password
+    # Check that it doesn't route them to /admin if they enter no username or password
     empty_form_response = client.post('/login', data = {
-        'username' : 'test',
+        'username' : '',
         'password' : ''
     }, follow_redirects=True)
     assert empty_form_response.status_code == 200
-    assert empty_form_response.request.path == '/login'
-    # Check that it redirects the user if they don't fill in username or password
-    empty_form_response = client.post('/login', data = {
-        'username' : 'test',
-        'password' : ''
-    }, follow_redirects=False)
-    assert empty_form_response.status_code == 302
     assert empty_form_response.request.path == '/login'
 
 
