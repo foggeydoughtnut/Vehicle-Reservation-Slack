@@ -34,7 +34,7 @@
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "Command 3 - *vehicles* \n Lists all of the vehicles and checks if they are available in the next 15 minutes"
+                "text": "Command 3 - *vehicles* \n Lists all of the vehicles and checks if they are available"
             }
         },
         {
