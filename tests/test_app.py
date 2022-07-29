@@ -265,6 +265,12 @@ test_payload = {
                     "type": "timepicker",
                     "selected_time": "14:00"
                 }
+            },
+            "9N2": {
+                "plain_text_input-action": {
+                    "type": "plain_text_input",
+                    "value": "test"
+                }
             }
         }
     },

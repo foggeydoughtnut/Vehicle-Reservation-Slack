@@ -55,20 +55,20 @@ def test_schedule_event():
     start = offset_start_time.strftime('%Y-%m-%dT%H:%M:%S')
     end = offset_end_time.strftime('%Y-%m-%dT%H:%M:%S')
 
-    status = API.Calendar.schedule_event('', '', start, end)
+    status = API.Calendar.schedule_event('', '', start, end, '')
 
     assert status["SUCCESS"]
     assert type(status) == dict
 
 def test_schedule_event_fails_past():
     """Tests if schedule_event returns ERROR when event is made in the past"""
-    status = API.Calendar.schedule_event('', '', '2022-06-27T08:00:00', '2022-06-27T08:30:00')
+    status = API.Calendar.schedule_event('', '', '2022-06-27T08:00:00', '2022-06-27T08:30:00', '')
     assert type(status) == dict
     assert status["ERROR"]
 
 def test_schedule_event_fails_no_time():
     """Tests if Error is returned when no start/end time is given"""
-    status = API.Calendar.schedule_event('', '', '', '')
+    status = API.Calendar.schedule_event('', '', '', '', '')
     assert type(status) == dict
     assert status["ERROR"]
 

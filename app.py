@@ -133,6 +133,8 @@ def reserve_vehicle(payload, selected_vehicle):
     """
     vehicle = API.db.index.get_vehicle_by_name(selected_vehicle)
     start_time, end_time = get_start_end_time_from_payload(payload)
+    print(payload['state']['values'])
+    users_name = list(payload['state']['values'].items())[5][1]['plain_text_input-action']['value']
     channel_id = payload['channel']['id']
     user_id = payload['user']['id']
     thread_id = payload['message']['ts']
@@ -142,7 +144,7 @@ def reserve_vehicle(payload, selected_vehicle):
             send_message(f"{selected_vehicle} is not available at that time", channel_id, user_id, thread_id)
             return {'status': 400} # NOTE These return statements are not necessary. Used for testing
         else:
-            response = API.Calendar.schedule_event(vehicle.calendarGroupID, vehicle.calendarID, start_time, end_time)
+            response = API.Calendar.schedule_event(vehicle.calendarGroupID, vehicle.calendarID, start_time, end_time, users_name)
             if "ERROR" in response:
                 send_message(f"{response['ERROR']}", channel_id, user_id, thread_id)
                 return {'status': 500}

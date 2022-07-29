@@ -34,7 +34,7 @@ def construct_event_detail(event_name, **event_details):
         request_body[key] = value
     return request_body
 
-def schedule_event(calendar_group_id, calendar_id, start_time, end_time):
+def schedule_event(calendar_group_id, calendar_id, start_time, end_time, users_name):
     """Uses Outlook's Graph api to schedule an event based off the information provided
     
         Keyword arguments:\n
@@ -42,10 +42,10 @@ def schedule_event(calendar_group_id, calendar_id, start_time, end_time):
         end_time         -- The end time for the reservation
 
     """
-    event_name = "Reserve Vehicle"
+    event_name = f"Reservation for {users_name}"
     body = {
         'contentType' : 'text',
-        'content' : f'Reservation'
+        'content' : f'Reservation for {users_name}'
     }
     start = {
         'dateTime' : start_time,
