@@ -15,7 +15,6 @@ from slack import WebClient
 from threading import Thread
 # Local Imports
 import API.Calendar
-import API.admin.user
 from models import Vehicle, User
 from models import db
 from config import SLACK_SIGNING_SECRET, slack_token, user_token, VERIFICATION_TOKEN

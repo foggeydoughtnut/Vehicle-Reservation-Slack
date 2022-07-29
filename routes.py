@@ -1,6 +1,6 @@
 from flask import redirect, request, render_template, session, flash
 from flask_login import login_user, logout_user
-import API.admin.user
+import API.db.index
 import requests
 import json
 import app
@@ -14,8 +14,8 @@ def login():
 
         if (not username or not password):
             return redirect('/login')
-        user = API.admin.user.get_user(username)
-        if (user == 'ERROR'):
+        user = API.db.index.get_user_by_username(username)
+        if (user == None):
             return redirect('/login')
         if (user.username and user.check_password(password)):
             session['user'] = user.username
