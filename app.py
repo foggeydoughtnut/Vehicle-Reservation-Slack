@@ -137,6 +137,9 @@ def reserve_vehicle(payload, selected_vehicle):
     channel_id = payload['channel']['id']
     user_id = payload['user']['id']
     thread_id = payload['message']['ts']
+    if start_time == 'NoneTNone' or end_time == 'NoneTNone':
+        send_message("Time of reservation is required", channel_id, user_id, thread_id)
+        return {'status': 400}
     if not users_name:
         send_message("Name is required for reservation", channel_id, user_id, thread_id)
         return {'status': 400}

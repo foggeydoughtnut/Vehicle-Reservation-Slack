@@ -66,6 +66,13 @@ def test_reserve_vehicle_no_name(mocker):
     res = reserve_vehicle(payload, 'test')
     assert res['status'] == 400
 
+def test_reserve_vehicle_no_time(mocker):
+    mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
+    mocker.patch('app.send_message', return_value='')
+    mocker.patch('app.get_start_end_time_from_payload', return_value=('NoneTNone', 'NoneTNone'))
+    res = reserve_vehicle(test_payload, 'test')
+    assert res['status'] == 400
+
 def test_check_vehicle_success(mocker):
     mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
     mocker.patch('app.check_available', return_value=True)
