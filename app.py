@@ -133,11 +133,13 @@ def reserve_vehicle(payload, selected_vehicle):
     """
     vehicle = API.db.index.get_vehicle_by_name(selected_vehicle)
     start_time, end_time = get_start_end_time_from_payload(payload)
-    print(payload['state']['values'])
     users_name = list(payload['state']['values'].items())[5][1]['plain_text_input-action']['value']
     channel_id = payload['channel']['id']
     user_id = payload['user']['id']
     thread_id = payload['message']['ts']
+    if not users_name:
+        send_message("Name is required for reservation", channel_id, user_id, thread_id)
+        return {'status': 400}
     try:
         available = check_available(vehicle, start_time, end_time)
         if not available:
