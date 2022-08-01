@@ -19,7 +19,6 @@ def generate_headers():
     }
     return headers
 
-
 def construct_event_detail(event_name, **event_details):
     """ Constructs a calendar event with the name and details given
 
@@ -82,7 +81,6 @@ def schedule_event(calendar_group_id, calendar_id, start_time, end_time, users_n
             return {"SUCCESS" : "Successfully created an event"}
         except:
             return {"ERROR" : "Something went wrong with scheduling the event"}
-
 
 def list_specific_calendar_in_group_events(calendar_group_id, calendar_id):
     """Uses the outlook api to get the events of a specific calendar in a calendar group and returns the events happening that day in an object with only the information needed. NOTE: events variable has all of the calendar information and I use a portion of the information found in events\n    

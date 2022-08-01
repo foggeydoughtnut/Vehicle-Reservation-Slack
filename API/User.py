@@ -16,7 +16,6 @@ def get_user_by_access_token(access_token):
     response = requests.get(url, headers=headers)
     return response.json()
 
-
 def get_user():
     """ Gets the User by using the get_user_by_access_token method """
     application_id = os.getenv('APPLICATION_ID')
