@@ -99,17 +99,23 @@ def test_list_specific_calendar_events(requests_mock, mocker):
 def test_check_if_reservation_available(requests_mock, mocker):
     test_calendar_group_id = 'calendar_group_id'
     test_calendar_id = 'calendar_id'
-    start_time = strftime("%Y-%m-%dT%H:%M:%S")
+    s_time = strftime("%Y-%m-%dT%H:%M")
     offset_minutes = 15 # 15 Minute offset for check availability
-    offset_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S') + timedelta(minutes=offset_minutes)
-    end_time = offset_time.strftime('%Y-%m-%dT%H:%M:%S')
+    offset_time = datetime.strptime(s_time, '%Y-%m-%dT%H:%M') + timedelta(minutes=offset_minutes)
+    e_time = offset_time.strftime('%Y-%m-%dT%H:%M')
+    # offset needed for correct mock url
+    s_time_offset = datetime.strptime(s_time, '%Y-%m-%dT%H:%M') + timedelta(minutes=1)
+    e_time_offset = datetime.strptime(e_time, '%Y-%m-%dT%H:%M') - timedelta(minutes=1)
+    s_time_offset_formatted = s_time_offset.strftime('%Y-%m-%dT%H:%M')
+    e_time_offset_formatted = e_time_offset.strftime('%Y-%m-%dT%H:%M')
+    ####
     mocker.patch('API.Calendar.generate_headers', return_value={'test': 'testing'})
     requests_mock.get(
-        f"{API.graphAPI.GRAPH_API_ENDPOINT}/me/calendarGroups/{test_calendar_group_id}/calendars/{test_calendar_id}/calendarview?startdatetime={start_time}-06:00&endDateTime={end_time}-06:00",
+        f"{API.graphAPI.GRAPH_API_ENDPOINT}/me/calendarGroups/{test_calendar_group_id}/calendars/{test_calendar_id}/calendarview?startDateTime={s_time_offset_formatted}-06:00&endDateTime={e_time_offset_formatted}-06:00",
         json = {'value' : []},
         status_code=200,
     )
-    resp = API.Calendar.check_if_reservation_available(test_calendar_group_id, test_calendar_id, start_time, end_time)
+    resp = API.Calendar.check_if_reservation_available(test_calendar_group_id, test_calendar_id, s_time, e_time)
     assert resp == True
     assert type(resp) == bool
 
@@ -117,13 +123,19 @@ def test_available_fails_if_event(requests_mock, mocker):
     """Checks that it returns false if there is an event in the time"""
     test_calendar_group_id = 'calendar_group_id'
     test_calendar_id = 'calendar_id'
-    start_time = strftime("%Y-%m-%dT%H:%M:%S")
+    s_time = strftime("%Y-%m-%dT%H:%M")
     offset_minutes = 15 # 15 Minute offset for check availability
-    offset_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S') + timedelta(minutes=offset_minutes)
-    end_time = offset_time.strftime('%Y-%m-%dT%H:%M:%S')
+    offset_time = datetime.strptime(s_time, '%Y-%m-%dT%H:%M') + timedelta(minutes=offset_minutes)
+    e_time = offset_time.strftime('%Y-%m-%dT%H:%M')
+
+    s_time_offset = datetime.strptime(s_time, '%Y-%m-%dT%H:%M') + timedelta(minutes=1)
+    e_time_offset = datetime.strptime(e_time, '%Y-%m-%dT%H:%M') - timedelta(minutes=1)
+    s_time_offset_formatted = s_time_offset.strftime('%Y-%m-%dT%H:%M')
+    e_time_offset_formatted = e_time_offset.strftime('%Y-%m-%dT%H:%M')
+
     mocker.patch('API.Calendar.generate_headers', return_value={'test': 'testing'})
     requests_mock.get(
-        f"{API.graphAPI.GRAPH_API_ENDPOINT}/me/calendarGroups/{test_calendar_group_id}/calendars/{test_calendar_id}/calendarview?startdatetime={start_time}-06:00&endDateTime={end_time}-06:00",
+        f"{API.graphAPI.GRAPH_API_ENDPOINT}/me/calendarGroups/{test_calendar_group_id}/calendars/{test_calendar_id}/calendarview?startdatetime={s_time_offset_formatted}-06:00&endDateTime={e_time_offset_formatted}-06:00",
         json = {'value' : [
             {
                 'webLink' : 'test link',
@@ -133,7 +145,7 @@ def test_available_fails_if_event(requests_mock, mocker):
         ]},
         status_code=200,
     )
-    resp = API.Calendar.check_if_reservation_available(test_calendar_group_id, test_calendar_id, start_time, end_time)
+    resp = API.Calendar.check_if_reservation_available(test_calendar_group_id, test_calendar_id, s_time, e_time)
     assert resp == False
     assert type(resp) == bool
 

@@ -1,7 +1,7 @@
 import requests
 import os
 from time import strftime
-import datetime
+from datetime import datetime, timedelta
 import API.graphAPI
 import API.User
 from dotenv import load_dotenv
@@ -125,11 +125,11 @@ def pretty_print_events(events, vehicle_name):
         for i in range(len(events)):
             start_time = events[f"event{i}"]["start"]["dateTime"]
             cleaned_up_start_time = start_time.split('.')[0].split('T')[1][:-3] # Gets rid of microseconds, seconds and date
-            cleaned_up_start_time = datetime.datetime.strptime(f'{cleaned_up_start_time}', '%H:%M').strftime('%I:%M %p') # Converts from military time to standard time
+            cleaned_up_start_time = datetime.strptime(f'{cleaned_up_start_time}', '%H:%M').strftime('%I:%M %p') # Converts from military time to standard time
 
             end_time = events[f"event{i}"]["end"]["dateTime"]
             cleaned_up_end_time = end_time.split('.')[0].split('T')[1][:-3] # Gets rid of microseconds, seconds and date
-            cleaned_up_end_time = datetime.datetime.strptime(f'{cleaned_up_end_time}', '%H:%M').strftime('%I:%M %p') # Converts from military time to standard time
+            cleaned_up_end_time = datetime.strptime(f'{cleaned_up_end_time}', '%H:%M').strftime('%I:%M %p') # Converts from military time to standard time
 
             message += f'Start Time :  Today at {cleaned_up_start_time}\n'
             message += f'End Time   :  Today at {cleaned_up_end_time}\n'
@@ -146,10 +146,16 @@ def check_if_reservation_available(calendar_group_id, calendar_id, start_time, e
         start_time             -- The start time of the check
         end_time               -- The end time of the check
     """
+    # Offset start time and end time by one minute to allow reservations like 9-10 and 10-11 to happen.
+    start_offset_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M') + timedelta(minutes=1)
+    s_time = start_offset_time.strftime('%Y-%m-%dT%H:%M')
+    end_offset_time = datetime.strptime(end_time, '%Y-%m-%dT%H:%M') - timedelta(minutes=1)
+    e_time = end_offset_time.strftime('%Y-%m-%dT%H:%M')
+
     calendar_headers = generate_headers()
     calendar_headers['Prefer'] = 'outlook.timezone="America/Denver"'
     events = requests.get(
-        API.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendar_group_id}/calendars/{calendar_id}/calendarView?startDateTime={start_time}-06:00&endDateTime={end_time}-06:00', # NOTE: offset is needed or else this won't work
+        API.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendar_group_id}/calendars/{calendar_id}/calendarView?startDateTime={s_time}-06:00&endDateTime={e_time}-06:00', # NOTE: offset is needed or else this won't work
         headers=calendar_headers
     )
     return events.json()['value'] == []

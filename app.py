@@ -188,8 +188,8 @@ def get_reservations(payload, selected_vehicle):
     """Gets all of the reservations for the selected_vehicle
 
     Keyword arguments\n
-            payload   --    The slack block payload that was sent\n
-            selected_vehicle -- The vehicle the user selected
+        payload   --    The slack block payload that was sent\n
+        selected_vehicle -- The vehicle the user selected
     """
     vehicle = API.db.index.get_vehicle_by_name(selected_vehicle)
     channel_id = payload['channel']['id']
@@ -276,10 +276,10 @@ def handle_message(event_data):
             if command.lower() == VEHICLES_COMMAND:
                 offset_minutes = 15 # 15 Minute offset for check availability
                 response_text = ""
-                start_time = strftime("%Y-%m-%dT%H:%M:%S")
+                start_time = strftime("%Y-%m-%dT%H:%M")
                 
-                offset_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S') + timedelta(minutes=offset_minutes)
-                end_time = offset_time.strftime('%Y-%m-%dT%H:%M:%S')
+                offset_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M') + timedelta(minutes=offset_minutes)
+                end_time = offset_time.strftime('%Y-%m-%dT%H:%M')
                 with app.app_context():
                     for vehicle in API.db.index.get_all_vehicles():
                         available = check_available(vehicle, start_time, end_time)
