@@ -7,16 +7,16 @@ Run the app.py
 Then navigate to localhost:3000/login and login to the admin page with username: admin password: password  
 Then from the admin (/admin) page you can add vehicles and create admin users  
 
-Start ngrok (or anything similar) on port 3000 so that way the slack commands and such can be forwarded to localhost:3000.  
+Start ngrok (or anything similar) on port 3000 so that way traffic can be forwarded to localhost:3000.  
 Run the following command to start ngrok
 ```
 ngrok http 3000
 ```
 Copy the forwarding https url and go to the slack app's homepage.  
 Navigate to Event Subscriptions and set the Request URL to be that forwarding https url with /slack/events added on to it.  
-ex. https://e446-129-123-107-137.ngrok.io/slack/events  
+ex. https://e446-blah-blah.ngrok.io/slack/events  
 Navigate to Interactivity & Shortcuts and set the Request URL to be that forwarding https url with /interactions added to it.  
-ex. https://e446-129-123-107-137.ngrok.io/interactions  
+ex. https://e446-blah-blah.ngrok.io/interactions  
 Reinstall the app to the workplace through the Install App tab
 
 ## Create Admin User  
