@@ -2,6 +2,7 @@ import json
 from time import strftime
 from datetime import datetime, timedelta
 import difflib
+from threading import Thread
 # Flask Imports
 from flask import Flask, Response
 from flask_admin import Admin, expose
@@ -12,7 +13,6 @@ from flask_migrate import Migrate
 # Slack Imports
 from slackeventsapi import SlackEventAdapter
 from slack_sdk import WebClient
-from threading import Thread
 # Local Imports
 import API.Calendar
 from models import Vehicle, User
@@ -85,7 +85,7 @@ def shutdown_session(exception=None):
     db.session.remove()
 
 #instantiating slack client
-slack_client = WebClient(slack_token)
+slack_client = WebClient(token=slack_token)
 user_client = WebClient(user_token)
 
 
