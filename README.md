@@ -2,6 +2,7 @@
 
 ## Setup  
 Install everything needed with poetry  
+Copy the .env-example into a .env file and enter the needed data  
 Run the app.py
 Then navigate to localhost:3000/login and login to the admin page with username: admin password: password  
 Then from the admin (/admin) page you can add vehicles and create admin users    
