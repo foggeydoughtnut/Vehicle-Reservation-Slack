@@ -258,7 +258,7 @@ def handle_message(event_data):
             # This is where slack messages are handled
             """Makes an event on the calendar."""            
             if command.lower() == RESERVE_COMMAND:
-                data = get_slack_block_and_add_vehicles('slack_blocks/slack_blocks.json')
+                data = get_slack_block_and_add_vehicles('slack_blocks/reserve_block.json')
                 slack_client.chat_postMessage(channel = channel_id, thread_ts=message['ts'], text = "Please fill out the form", blocks = data['blocks'])
                 return
                                 
