@@ -12,6 +12,7 @@ DEBUG = True
 SECRET_KEY = os.getenv('SECRET_KEY')
 FLASK_ADMIN_SWATCH = 'darkly'
 
+
 # For Outlook
 GRAPH_API_ENDPOINT = 'https://graph.microsoft.com/v1.0/'
 SCOPES = ['User.Read', 'Calendars.ReadWrite']
