@@ -85,8 +85,8 @@ def shutdown_session(exception=None):
     db.session.remove()
 
 #instantiating slack client
-slack_client = WebClient(token=slack_token)
-user_client = WebClient(token=user_token)
+slack_client = WebClient(slack_token)
+user_client = WebClient(user_token)
 
 
 # COMMANDS
