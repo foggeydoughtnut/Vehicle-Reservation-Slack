@@ -11,7 +11,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from flask_migrate import Migrate
 # Slack Imports
 from slackeventsapi import SlackEventAdapter
-from slack import WebClient
+from slack_sdk import WebClient
 from threading import Thread
 # Local Imports
 import API.Calendar
@@ -85,8 +85,8 @@ def shutdown_session(exception=None):
     db.session.remove()
 
 #instantiating slack client
-slack_client = WebClient(slack_token)    
-user_client = WebClient(user_token)
+slack_client = WebClient(token=slack_token)
+user_client = WebClient(token=user_token)
 
 
 # COMMANDS
