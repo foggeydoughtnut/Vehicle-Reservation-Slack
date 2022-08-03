@@ -17,6 +17,7 @@ Navigate to Event Subscriptions and set the Request URL to be that forwarding ht
 ex. https://e446-129-123-107-137.ngrok.io/slack/events  
 Navigate to Interactivity & Shortcuts and set the Request URL to be that forwarding https url with /interactions added to it.  
 ex. https://e446-129-123-107-137.ngrok.io/interactions  
+Reinstall the app to the workplace through the Install App tab
 
 ## Create Admin User  
 When you run the app.py for the first time it will make a admin account with username: admin and password: password.  
