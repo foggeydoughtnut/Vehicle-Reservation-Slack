@@ -1,4 +1,12 @@
-from app import get_selected_vehicle_name_from_payload, get_start_end_time_from_payload, check_available, reserve_vehicle, check_vehicle, get_reservations
+from app import \
+    get_selected_vehicle_name_from_payload, \
+    get_start_end_time_from_payload, \
+    check_available, \
+    reserve_vehicle, \
+    check_vehicle, \
+    get_reservations, \
+    construct_vehicles_command
+
 import json
 
 
@@ -122,3 +130,25 @@ def test_get_reservations_excpetion(mocker):
     mocker.patch('app.send_ephemeral_message', return_value='')
     res = get_reservations(test_payload, 'test')
     assert res['status'] == 500
+
+def test_construct_vehicles_command(mocker):
+    expected = {
+        "blocks": [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "test_name - *available*"
+                }
+            }
+        ]
+    }
+    mocker.patch('API.db.index.get_all_vehicles', return_value=[Vehicle()])
+    mocker.patch('app.check_available', return_value=True)
+    construct_vehicles_command()
+
+    with open('slack_blocks/vehicles_results.json', 'r') as f:
+        data = json.load(f)
+    # See https://stackoverflow.com/questions/46914222/how-can-i-assert-lists-equality-with-pytest
+    assert len(data) == len(expected)
+    assert all([a == b for a, b in zip(data, expected)])
