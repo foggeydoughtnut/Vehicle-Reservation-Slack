@@ -228,6 +228,22 @@ def get_reservations(payload, selected_vehicle):
         )
         return {'status': 500}
         
+def create_vehicle_options_slack_block():
+    """Creates the vehicle_options that will be used in the get_slack_block_and_add_vehicles method"""
+    vehicle_options = []
+    i = 0
+    for vehicle in vehicle_names:
+        vehicle_obj = {
+            "text": {
+                "type": "plain_text",
+                "text": f"{vehicle}"
+            },
+            "value": f"value-{i}"
+        }
+        vehicle_options.append(vehicle_obj)
+        i += 1
+    return vehicle_options
+
 def get_slack_block_and_add_vehicles(path_to_file):
     """Gets the slack block that is at path_to_file then it adds all of the vehicle options to that block
 
@@ -244,22 +260,6 @@ def get_slack_block_and_add_vehicles(path_to_file):
         new_data = json.load(new_f)
     return new_data
 
-def create_vehicle_options_slack_block():
-    """Creates the vehicle_options that will be used in the get_slack_block_and_add_vehicles method"""
-    vehicle_options = []
-    i = 0
-    for vehicle in vehicle_names:
-        vehicle_obj = {
-            "text": {
-                "type": "plain_text",
-                "text": f"{vehicle}"
-            },
-            "value": f"value-{i}"
-        }
-        vehicle_options.append(vehicle_obj)
-        i += 1
-    return vehicle_options
-    
 def construct_vehicles_command():
     offset_minutes = 15 # 15 Minute offset for check availability
     start_time = strftime("%Y-%m-%dT%H:%M")
