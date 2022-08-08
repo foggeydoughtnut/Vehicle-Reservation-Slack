@@ -260,6 +260,36 @@ def create_vehicle_options_slack_block():
         i += 1
     return vehicle_options
     
+def construct_vehicles_command():
+    offset_minutes = 15 # 15 Minute offset for check availability
+    start_time = strftime("%Y-%m-%dT%H:%M")
+
+    offset_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M') + timedelta(minutes=offset_minutes)
+    end_time = offset_time.strftime('%Y-%m-%dT%H:%M')
+
+    with open("slack_blocks/vehicles_results.json", "r+") as f:
+        f.truncate(0) # Clear the json file
+
+    vehicles_block = {
+        "blocks": []
+    }
+    with app.app_context():
+        for vehicle in API.db.index.get_all_vehicles():
+            available = check_available(vehicle, start_time, end_time)
+            availablity_message = "available" if available else "not available"
+            vehicles_block['blocks'].append(
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"{vehicle.name} - *{availablity_message}*"
+                    }
+                }
+            )
+    with open('slack_blocks/vehicles_results.json', 'w') as f:
+        json.dump(vehicles_block, f)
+
+
 @slack_events_adapter.on("app_mention")
 def handle_message(event_data):
     def send_reply(value):
@@ -298,18 +328,10 @@ def handle_message(event_data):
 
             """Lists all of the vehicle's names and displays if they are available"""
             if command.lower() == VEHICLES_COMMAND:
-                offset_minutes = 15 # 15 Minute offset for check availability
-                response_text = ""
-                start_time = strftime("%Y-%m-%dT%H:%M")
-                
-                offset_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M') + timedelta(minutes=offset_minutes)
-                end_time = offset_time.strftime('%Y-%m-%dT%H:%M')
-                with app.app_context():
-                    for vehicle in API.db.index.get_all_vehicles():
-                        available = check_available(vehicle, start_time, end_time)
-                        availablity_message = "available" if available else "not available"
-                        response_text += f"{vehicle.name} - {availablity_message}\n"
-                slack_client.chat_postMessage(text=response_text, channel=channel_id, thread_ts=message['ts'] )
+                construct_vehicles_command()
+                with open('slack_blocks/vehicles_results.json', 'r') as f:
+                    data = json.load(f)
+                send_ephemeral_message("List of vehicles", channel_id, get_user_slack_id(), message['ts'], data['blocks'])
                 return
             
             if command.lower() == HELP_COMMAND:
