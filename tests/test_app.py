@@ -29,7 +29,7 @@ def test_reserve_vehicle_successfull(mocker):
     mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
     mocker.patch('app.check_available', return_value=True)
     mocker.patch('API.Calendar.schedule_event', return_value={"SUCCESS" : "Successfully created an event"})
-    mocker.patch('app.send_message', return_value='SUCCESS')
+    mocker.patch('app.send_ephemeral_message', return_value='SUCCESS')
     res = reserve_vehicle(test_payload, 'test')
     assert res['status'] == 200
 
@@ -38,7 +38,7 @@ def test_reserve_vehicle_error_schedule(mocker):
     mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
     mocker.patch('app.check_available', return_value=True)
     mocker.patch('API.Calendar.schedule_event', return_value={"ERROR" : "An error occured"})
-    mocker.patch('app.send_message', return_value='')
+    mocker.patch('app.send_ephemeral_message', return_value='')
     res = reserve_vehicle(test_payload, 'test')
     assert res['status'] == 500
 
@@ -46,7 +46,7 @@ def test_reserve_vehicle_not_available(mocker):
     """Returns a 400 status if the vehicle is not available"""
     mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
     mocker.patch('app.check_available', return_value=False)
-    mocker.patch('app.send_message', return_value='')
+    mocker.patch('app.send_ephemeral_message', return_value='')
     res = reserve_vehicle(test_payload, 'test')
     assert res['status'] == 400
 
@@ -54,13 +54,13 @@ def test_reserve_vehicle_exception(mocker):
     """Returns status of 500 when exception occurs"""
     mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
     mocker.patch('app.check_available', side_effect=Exception("mocked error"))
-    mocker.patch('app.send_message', return_value='')
+    mocker.patch('app.send_ephemeral_message', return_value='')
     res = reserve_vehicle(test_payload, 'test')
     assert res['status'] == 500
 
 def test_reserve_vehicle_no_name(mocker):
     mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
-    mocker.patch('app.send_message', return_value='')
+    mocker.patch('app.send_ephemeral_message', return_value='')
     with open('tests/no_name_payload.json') as f:
         payload = json.load(f)
     res = reserve_vehicle(payload, 'test')
@@ -68,7 +68,7 @@ def test_reserve_vehicle_no_name(mocker):
 
 def test_reserve_vehicle_no_time(mocker):
     mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
-    mocker.patch('app.send_message', return_value='')
+    mocker.patch('app.send_ephemeral_message', return_value='')
     mocker.patch('app.get_start_end_time_from_payload', return_value=('NoneTNone', 'NoneTNone'))
     res = reserve_vehicle(test_payload, 'test')
     assert res['status'] == 400
@@ -76,40 +76,49 @@ def test_reserve_vehicle_no_time(mocker):
 def test_check_vehicle_success(mocker):
     mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
     mocker.patch('app.check_available', return_value=True)
-    mocker.patch('app.send_message', return_value='')
+    mocker.patch('app.send_ephemeral_message', return_value='')
     res = check_vehicle(test_payload, 'test')
     assert res['status'] == 200
 
 def test_check_vehicle_unavailable(mocker):
     mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
     mocker.patch('app.check_available', return_value=False)
-    mocker.patch('app.send_message', return_value='')
+    mocker.patch('app.send_ephemeral_message', return_value='')
     res = check_vehicle(test_payload, 'test')
     assert res['status'] == 400
 
 def test_check_vehicle_exception(mocker):
     mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
     mocker.patch('app.check_available', side_effect=Exception('mocked exception'))
-    mocker.patch('app.send_message', return_value='')
+    mocker.patch('app.send_ephemeral_message', return_value='')
     res = check_vehicle(test_payload, 'test')
     assert res['status'] == 500
 
 
 def test_get_reservations(mocker):
-    """Returns a status of 200 when no exceptions occur NOTE only checking
-    because API.calendar already checked that list_specific_calendar_in_group_events worked
-    """
+    """Returns a status of 200 when no exceptions and returns that there are reservations"""
     mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
     mocker.patch('API.Calendar.list_specific_calendar_in_group_events', return_value={})
-    mocker.patch('API.Calendar.pretty_print_events', return_value={})
-    mocker.patch('app.send_message', return_value='')
+    mocker.patch('API.Calendar.construct_calendar_events_block', return_value = {'reservations' : True})
+    mocker.patch('app.send_ephemeral_message', return_value='')
     res = get_reservations(test_payload, 'test')
     assert res['status'] == 200
+    assert res['reservations'] == True
+
+def test_get_reservations_no_reservations(mocker):
+    """Returns a status of 200 when no exceptions and returns false when there are no reservations"""
+    mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
+    mocker.patch('API.Calendar.list_specific_calendar_in_group_events', return_value={})
+    mocker.patch('API.Calendar.construct_calendar_events_block', return_value = {'reservations' : False})
+    mocker.patch('app.send_ephemeral_message', return_value='')
+    res = get_reservations(test_payload, 'test')
+    assert res['status'] == 200
+    assert res['reservations'] == False
 
 def test_get_reservations_excpetion(mocker):
     """Tests that 500 status is returned when exception occurs"""
     mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
     mocker.patch('API.Calendar.list_specific_calendar_in_group_events', side_effect=Exception('mocked exception'))
-    mocker.patch('app.send_message', return_value='')
+    mocker.patch('app.send_ephemeral_message', return_value='')
     res = get_reservations(test_payload, 'test')
     assert res['status'] == 500
