@@ -4,7 +4,6 @@ import json
 from time import strftime
 from datetime import datetime, timedelta
 import API.graphAPI
-import API.User
 from dotenv import load_dotenv
 load_dotenv()
 from time import strftime
@@ -40,7 +39,7 @@ def schedule_event(calendar_group_id, calendar_id, start_time, end_time, users_n
         Keyword arguments:\n
         start_time       -- The start time for the reservation\n
         end_time         -- The end time for the reservation
-
+        users_name       -- The name for the reservee
     """
     event_name = f"Reservation for {users_name}"
     body = {
@@ -55,14 +54,6 @@ def schedule_event(calendar_group_id, calendar_id, start_time, end_time, users_n
         'dateTime' : end_time,
         'timeZone' : 'America/Denver'
     }
-    attendees = [
-        {
-            'emailAddress' : {
-                'address' : f'{API.User.get_users_email()}'
-            },
-            'type' : 'required'
-        }
-    ]
     time_right_now = strftime('%Y-%m-%dT%H:%M:%S')
     if (start_time < time_right_now or end_time < time_right_now):
         return {"ERROR" : "Error : event was made in the past"}
@@ -76,7 +67,6 @@ def schedule_event(calendar_group_id, calendar_id, start_time, end_time, users_n
                     body=body,
                     start=start,
                     end=end,
-                    attendees=attendees,
                 )
             )
             return {"SUCCESS" : "Successfully created an event"}
