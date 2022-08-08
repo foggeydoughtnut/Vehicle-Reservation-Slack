@@ -153,6 +153,9 @@ def construct_calendar_events_block(events, vehicle_name):
                         "text": f"Reservations for {vehicle_name}",
                     }
                 },
+                {
+                    "type": "divider"
+		        },
             ]
         }
         for i in range(len(events)):

@@ -199,16 +199,33 @@ def get_reservations(payload, selected_vehicle):
     thread_id = payload['message']['ts']
     try:
         events = API.Calendar.list_specific_calendar_in_group_events(vehicle.calendarGroupID, vehicle.calendarID)
-        result_block = API.Calendar.construct_calendar_events_block(events, selected_vehicle)
-        if result_block['reservations'] == False:
-            send_message(f'There are no reservations for {selected_vehicle}', channel_id, user_id, thread_id)
+        res = API.Calendar.construct_calendar_events_block(events, selected_vehicle)
+        if res['reservations'] == False:
+            send_message(
+                f'There are no reservations for {selected_vehicle}',
+                channel_id,
+                user_id,
+                thread_id
+            )
+            return {'status': 200, 'reservations': False}
         else:
             with open('slack_blocks/reservations_results.json', 'r') as f:
                 data = json.load(f)
-            slack_client.chat_postMessage(channel = channel_id, thread_ts=thread_id, text = "Here are the reservations", blocks = data['blocks'])
-        return {'status': 200}
+            send_message(
+                "Here are the reservations",
+                channel_id,
+                user_id,
+                thread_id,
+                data['blocks']
+            )
+            return {'status': 200, 'reservations': True}
     except:
-        send_message(f"Sorry, an error has occured, so I was unable to complete your request", channel_id, user_id, thread_id)
+        send_message(
+            f"Sorry, an error has occured, so I was unable to complete your request",
+            channel_id,
+            user_id,
+            thread_id
+        )
         return {'status': 500}
         
 def get_slack_block_and_add_vehicles(path_to_file):
@@ -328,8 +345,22 @@ def send_direct_message(response_text):
     user_slack_id = get_user_slack_id()
     slack_client.chat_postEphemeral(channel=user_slack_id, text=response_text, user=user_slack_id)
 
-def send_message(text, channel_id, user_id, ts_id):
-    slack_client.chat_postEphemeral(channel=channel_id, text=text, user=user_id, thread_ts=ts_id)
+def send_message(text, channel_id, user_id, ts_id, blocks=''):
+    if blocks == '':
+        slack_client.chat_postEphemeral(
+            channel=channel_id,
+            text=text,
+            user=user_id,
+            thread_ts=ts_id,
+        )
+    else:
+        slack_client.chat_postEphemeral(
+            channel=channel_id,
+            text=text,
+            user=user_id,
+            thread_ts=ts_id,
+            blocks=blocks
+        )
 
 
 if __name__ == "__main__":

@@ -96,15 +96,24 @@ def test_check_vehicle_exception(mocker):
 
 
 def test_get_reservations(mocker):
-    """Returns a status of 200 when no exceptions occur NOTE only checking
-    because API.calendar already checked that list_specific_calendar_in_group_events worked
-    """
+    """Returns a status of 200 when no exceptions and returns that there are reservations"""
     mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
     mocker.patch('API.Calendar.list_specific_calendar_in_group_events', return_value={})
-    mocker.patch('API.Calendar.pretty_print_events', return_value={})
+    mocker.patch('API.Calendar.construct_calendar_events_block', return_value = {'reservations' : True})
     mocker.patch('app.send_message', return_value='')
     res = get_reservations(test_payload, 'test')
     assert res['status'] == 200
+    assert res['reservations'] == True
+
+def test_get_reservations_no_reservations(mocker):
+    """Returns a status of 200 when no exceptions and returns false when there are no reservations"""
+    mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
+    mocker.patch('API.Calendar.list_specific_calendar_in_group_events', return_value={})
+    mocker.patch('API.Calendar.construct_calendar_events_block', return_value = {'reservations' : False})
+    mocker.patch('app.send_message', return_value='')
+    res = get_reservations(test_payload, 'test')
+    assert res['status'] == 200
+    assert res['reservations'] == False
 
 def test_get_reservations_excpetion(mocker):
     """Tests that 500 status is returned when exception occurs"""
