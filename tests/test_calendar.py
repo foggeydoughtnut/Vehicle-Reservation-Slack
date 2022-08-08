@@ -3,6 +3,7 @@ import API.Calendar
 import API.graphAPI
 from time import strftime
 from datetime import datetime, timedelta
+import json
 
 
 def test_generate_headers():
@@ -148,3 +149,69 @@ def test_available_fails_if_event(requests_mock, mocker):
     resp = API.Calendar.check_if_reservation_available(test_calendar_group_id, test_calendar_id, s_time, e_time)
     assert resp == False
     assert type(resp) == bool
+
+def test_construct_calendar_events_block():
+    test_events = {
+        'event0': {
+            'webLink': 'https://www.google.com/',
+            'start': {
+                'dateTime': '2022-08-08T10:00:00.0000000',
+                'timeZone': 'America/Denver'
+            },
+            'end': {
+                'dateTime': '2022-08-08T11:00:00.0000000',
+                'timeZone': 'America/Denver'
+            }
+        }
+    }
+    # reservations_results.json should look like this
+    reservations_results_json_file_ex = {
+        "blocks": [
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Reservations for test"
+                }
+            },
+            {
+                "type": "divider"
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*Start Time :* Today at 10:00 AM"
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*End Time   : * Today at 11:00 AM"
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*Web Link   : * <https://www.google.com/|Link to the Calendar Event>"
+                }
+            },
+            {
+                "type": "divider"
+            }
+        ]
+    }
+    res = API.Calendar.construct_calendar_events_block(test_events, 'test')
+    with open('slack_blocks/reservations_results.json', 'r') as f:
+        data = json.load(f)
+    assert res['reservations'] == True
+    # See https://stackoverflow.com/questions/46914222/how-can-i-assert-lists-equality-with-pytest
+    assert len(data) == len(reservations_results_json_file_ex)
+    assert all([a == b for a, b in zip(data, reservations_results_json_file_ex)])
+
+
+def test_construct_calendar_events_block_no_events():
+    res = API.Calendar.construct_calendar_events_block({}, 'test')
+    assert res['reservations'] == False
