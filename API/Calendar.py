@@ -112,32 +112,6 @@ def list_specific_calendar_in_group_events(calendar_group_id, calendar_id):
         i += 1
     return calendar_events
 
-def pretty_print_events(events, vehicle_name):
-    """Makes the event object easier to read\n
-    
-        Keyword arguments:\n
-        events      -- And object containing all of the events of a calendar\n
-        vehicle_name -- The vehicle name the user inputed\n
-    """
-    if events == {}:
-        message = f"There are no reservations for {vehicle_name}"
-    else:            
-        message = f'Reservations for {vehicle_name}\n'
-        for i in range(len(events)):
-            start_time = events[f"event{i}"]["start"]["dateTime"]
-            cleaned_up_start_time = start_time.split('.')[0].split('T')[1][:-3] # Gets rid of microseconds, seconds and date
-            cleaned_up_start_time = datetime.strptime(f'{cleaned_up_start_time}', '%H:%M').strftime('%I:%M %p') # Converts from military time to standard time
-
-            end_time = events[f"event{i}"]["end"]["dateTime"]
-            cleaned_up_end_time = end_time.split('.')[0].split('T')[1][:-3] # Gets rid of microseconds, seconds and date
-            cleaned_up_end_time = datetime.strptime(f'{cleaned_up_end_time}', '%H:%M').strftime('%I:%M %p') # Converts from military time to standard time
-
-            message += f'Start Time :  Today at {cleaned_up_start_time}\n'
-            message += f'End Time   :  Today at {cleaned_up_end_time}\n'
-            message += f'Web Link   :  {events[f"event{i}"]["webLink"]}\n'
-            message += '\n\n'
-    return message
-
 def construct_calendar_events_block(events, vehicle_name):
     if events == {}:
         return {'reservations' : False}
