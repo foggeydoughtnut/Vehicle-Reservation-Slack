@@ -199,8 +199,13 @@ def get_reservations(payload, selected_vehicle):
     thread_id = payload['message']['ts']
     try:
         events = API.Calendar.list_specific_calendar_in_group_events(vehicle.calendarGroupID, vehicle.calendarID)
-        message = API.Calendar.pretty_print_events(events, selected_vehicle)
-        send_message(message, channel_id, user_id, thread_id)
+        result_block = API.Calendar.construct_calendar_events_block(events, selected_vehicle)
+        if result_block['reservations'] == False:
+            send_message(f'There are no reservations for {selected_vehicle}', channel_id, user_id, thread_id)
+        else:
+            with open('slack_blocks/reservations_results.json', 'r') as f:
+                data = json.load(f)
+            slack_client.chat_postMessage(channel = channel_id, thread_ts=thread_id, text = "Here are the reservations", blocks = data['blocks'])
         return {'status': 200}
     except:
         send_message(f"Sorry, an error has occured, so I was unable to complete your request", channel_id, user_id, thread_id)

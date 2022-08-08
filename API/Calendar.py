@@ -1,5 +1,6 @@
 import requests
 import os
+import json
 from time import strftime
 from datetime import datetime, timedelta
 import API.graphAPI
@@ -136,6 +137,64 @@ def pretty_print_events(events, vehicle_name):
             message += f'Web Link   :  {events[f"event{i}"]["webLink"]}\n'
             message += '\n\n'
     return message
+
+def construct_calendar_events_block(events, vehicle_name):
+    if events == {}:
+        return {'reservations' : False}
+    else:
+        with open("slack_blocks/reservations_results.json", "r+") as f:
+            f.truncate(0) # Clear the json file
+        reservations_dict = {
+            "blocks": [
+                {
+                    "type": "header",
+                    "text": {
+                        "type": "plain_text",
+                        "text": f"Reservations for {vehicle_name}",
+                    }
+                },
+            ]
+        }
+        for i in range(len(events)):
+            start_time = events[f"event{i}"]["start"]["dateTime"]
+            cleaned_up_start_time = start_time.split('.')[0].split('T')[1][:-3] # Gets rid of microseconds, seconds and date
+            cleaned_up_start_time = datetime.strptime(f'{cleaned_up_start_time}', '%H:%M').strftime('%I:%M %p') # Converts from military time to standard time
+
+            end_time = events[f"event{i}"]["end"]["dateTime"]
+            cleaned_up_end_time = end_time.split('.')[0].split('T')[1][:-3] # Gets rid of microseconds, seconds and date
+            cleaned_up_end_time = datetime.strptime(f'{cleaned_up_end_time}', '%H:%M').strftime('%I:%M %p') # Converts from military time to standard time
+
+            urlToEvent = events[f"event{i}"]['webLink']
+            reservations_dict['blocks'].extend([
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"*Start Time :* Today at {cleaned_up_start_time}"
+                    }
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"*End Time   : * Today at {cleaned_up_end_time}"
+                    }
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"*Web Link   : * <{urlToEvent}|Link to the Calendar Event>"
+                    }
+                },
+                {
+                    "type": "divider"
+                },
+            ])
+            jsonString = json.dumps(reservations_dict)
+            with open("slack_blocks/reservations_results.json", "w") as f:
+                f.write(jsonString)
+        return {'reservations' : True}
 
 def check_if_reservation_available(calendar_group_id, calendar_id, start_time, end_time):
     """Returns true or false if there is a reservation between start_time and end_time
