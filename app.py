@@ -139,7 +139,7 @@ def reserve_vehicle(payload, selected_vehicle):
     channel_id = payload['channel']['id']
     user_id = payload['user']['id']
     thread_id = payload['message']['ts']
-    if start_time == 'NoneTNone' or end_time == 'NoneTNone':
+    if 'None' in start_time or 'None' in end_time:
         send_ephemeral_message("Time of reservation is required", channel_id, user_id, thread_id)
         return {'status': 400}
     if not users_name:
@@ -174,6 +174,9 @@ def check_vehicle(payload, selected_vehicle):
         channel_id = payload['channel']['id']
         user_id = payload['user']['id']
         thread_id = payload['message']['ts']
+        if 'None' in start_time or 'None' in end_time:
+            send_ephemeral_message("Time of reservation is required", channel_id, user_id, thread_id)
+            return {'status': 400}
         try:
             available = check_available(vehicle, start_time, end_time)
             if not available:

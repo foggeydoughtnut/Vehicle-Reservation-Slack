@@ -74,10 +74,24 @@ def test_reserve_vehicle_no_name(mocker):
     res = reserve_vehicle(payload, 'test')
     assert res['status'] == 400
 
-def test_reserve_vehicle_no_time(mocker):
+def test_reserve_vehicle_no_date_time(mocker):
     mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
     mocker.patch('app.send_ephemeral_message', return_value='')
     mocker.patch('app.get_start_end_time_from_payload', return_value=('NoneTNone', 'NoneTNone'))
+    res = reserve_vehicle(test_payload, 'test')
+    assert res['status'] == 400
+
+def test_reserve_vehicle_missing_time(mocker):
+    mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
+    mocker.patch('app.send_ephemeral_message', return_value='')
+    mocker.patch('app.get_start_end_time_from_payload', return_value=('2022-08-10TNone', '2022-08-10TNone'))
+    res = reserve_vehicle(test_payload, 'test')
+    assert res['status'] == 400
+
+def test_reserve_vehicle_missing_date(mocker):
+    mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
+    mocker.patch('app.send_ephemeral_message', return_value='')
+    mocker.patch('app.get_start_end_time_from_payload', return_value=('NoneT13:00', 'NoneT14:00'))
     res = reserve_vehicle(test_payload, 'test')
     assert res['status'] == 400
 
@@ -102,6 +116,26 @@ def test_check_vehicle_exception(mocker):
     res = check_vehicle(test_payload, 'test')
     assert res['status'] == 500
 
+def test_check_vehicle_no_date_time(mocker):
+    mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
+    mocker.patch('app.send_ephemeral_message', return_value='')
+    mocker.patch('app.get_start_end_time_from_payload', return_value=('NoneTNone', 'NoneTNone'))
+    res = check_vehicle(test_payload, 'test')
+    assert res['status'] == 400
+
+def test_check_vehicle_missing_time(mocker):
+    mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
+    mocker.patch('app.send_ephemeral_message', return_value='')
+    mocker.patch('app.get_start_end_time_from_payload', return_value=('2022-08-10TNone', '2022-08-10TNone'))
+    res = check_vehicle(test_payload, 'test')
+    assert res['status'] == 400
+
+def test_check_vehicle_missing_date(mocker):
+    mocker.patch('API.db.index.get_vehicle_by_name', return_value=Vehicle())
+    mocker.patch('app.send_ephemeral_message', return_value='')
+    mocker.patch('app.get_start_end_time_from_payload', return_value=('NoneT13:00', 'NoneT14:00'))
+    res = check_vehicle(test_payload, 'test')
+    assert res['status'] == 400
 
 def test_get_reservations(mocker):
     """Returns a status of 200 when no exceptions and returns that there are reservations"""
