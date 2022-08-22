@@ -44,7 +44,6 @@ with app.app_context():
     db.create_all()
 
 
-
 def page_not_found(e):
     return render_template('404.html'), 404
 app.register_error_handler(404, page_not_found)
@@ -109,7 +108,7 @@ admin.add_view(MyModelView(Vehicle, db.session))
 def shutdown_session(exception=None):
     db.session.remove()
 
-
+""" Slack Bot Setup and command handeling """
 # instantiating slack client
 slack_client = WebClient(token=slack_token)
 user_client = WebClient(user_token)
