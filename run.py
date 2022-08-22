@@ -19,7 +19,7 @@ from config import SLACK_SIGNING_SECRET, VERIFICATION_TOKEN, slack_token, user_t
 import api.db.index
 from app.views import login, logout, create_new_user, interactions, event_hook
 from app.links import links
-
+from app.slack_bot import Slack_Bot_Commands
 
 # This function is required or else there will be a context error
 def create_app():
@@ -114,11 +114,11 @@ slack_client = WebClient(token=slack_token)
 user_client = WebClient(user_token)
 
 # COMMANDS
-RESERVE_COMMAND = "reserve"
-GET_ALL_RESERVATIONS_COMMAND = "reservations"
-VEHICLES_COMMAND = "vehicles"
-CHECK_VEHICLE_COMMAND = "check"
-HELP_COMMAND = "help"
+# RESERVE_COMMAND = "reserve"
+# GET_ALL_RESERVATIONS_COMMAND = "reservations"
+# VEHICLES_COMMAND = "vehicles"
+# CHECK_VEHICLE_COMMAND = "check"
+# HELP_COMMAND = "help"
 
 vehicle_names = api.db.index.get_vehicle_names()
 
@@ -353,11 +353,11 @@ def find_similar_commands(command):
     similar_commands = difflib.get_close_matches(
         command.lower(),
         [
-            RESERVE_COMMAND,
-            GET_ALL_RESERVATIONS_COMMAND,
-            VEHICLES_COMMAND,
-            HELP_COMMAND,
-            CHECK_VEHICLE_COMMAND
+            Slack_Bot_Commands.RESERVE_COMMAND,
+            Slack_Bot_Commands.GET_ALL_RESERVATIONS_COMMAND,
+            Slack_Bot_Commands.VEHICLES_COMMAND,
+            Slack_Bot_Commands.HELP_COMMAND,
+            Slack_Bot_Commands.CHECK_VEHICLE_COMMAND
         ]
     )
     similar_command_response = ''
@@ -397,28 +397,28 @@ def handle_message(event_data):
             command = commands[1]
             # This is where Slack messages are handled
             """Makes an event on the calendar."""
-            if command.lower() == RESERVE_COMMAND:
+            if command.lower() == Slack_Bot_Commands.RESERVE_COMMAND:
                 data = get_slack_block_and_add_vehicles('app/slack_blocks/reserve_block.json')
                 slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'],
                                               text="Please fill out the form", blocks=data['blocks'])
                 return
 
             """Gets reservations on the calendar"""
-            if command.lower() == GET_ALL_RESERVATIONS_COMMAND:
+            if command.lower() == Slack_Bot_Commands.GET_ALL_RESERVATIONS_COMMAND:
                 data = get_slack_block_and_add_vehicles('app/slack_blocks/reservations_block.json')
                 slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'],
                                               text="Please fill out the form", blocks=data['blocks'])
                 return
 
             """Check if vehicle is available from start_time to end_time"""
-            if command.lower() == CHECK_VEHICLE_COMMAND:
+            if command.lower() == Slack_Bot_Commands.CHECK_VEHICLE_COMMAND:
                 data = get_slack_block_and_add_vehicles('app/slack_blocks/check_vehicle_block.json')
                 slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'],
                                               text="Please fill out the form", blocks=data['blocks'])
                 return
 
             """Lists all of the vehicle's names and displays if they are available"""
-            if command.lower() == VEHICLES_COMMAND:
+            if command.lower() == Slack_Bot_Commands.VEHICLES_COMMAND:
                 construct_vehicles_command()
                 with open('app/slack_blocks/vehicles_results.json', 'r') as f:
                     data = json.load(f)
@@ -427,7 +427,7 @@ def handle_message(event_data):
                 return
 
             """Displays the usage manual which contains what commands there are and how to use them"""
-            if command.lower() == HELP_COMMAND:
+            if command.lower() == Slack_Bot_Commands.HELP_COMMAND:
                 with open('app/slack_blocks/help_block.json') as f:
                     data = json.load(f)
                 slack_client.chat_postMessage(text="Here is the usage manual", channel=channel_id,
