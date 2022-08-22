@@ -1,0 +1,32 @@
+{% extends 'admin/model/create.html' %}
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+{% endblock %}
+
+{% block body %}
+<div>
+    <div class="center-div" style="width: 33%;">
+        <h1 class="add-padding">Create User</h1>
+        <form action="/create/new/user" method="POST" class="add-padding">
+            <div style="padding-bottom: 16pt;">
+                <label for="username" class="form-label">New Username</label>
+                <input type="text" class="form-control" id="username" placeholder="Username" name="username" />
+            </div>
+            <div style="padding-bottom: 16pt;">
+                <label for="password">Create Password</label>
+                <input type="password" class="form-control form-control-lg" id="password" placeholder="Password"
+                    name="password" />
+            </div>
+            <div style="padding-bottom: 16pt;">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" class="form-control form-control-lg" id="confirm_password"
+                    placeholder="Confirm Password" name="confirm_password" />
+            </div>
+            <div>
+                <input type="submit" name="Submit" class="btn btn-primary mb-3 create-user-btn" value="Submit"/>
+                <input type="submit" name="Cancel" class="btn btn-danger mb-3 move-to-right-side create-user-btn" value="Cancel"/>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
