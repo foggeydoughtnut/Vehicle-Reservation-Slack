@@ -40,6 +40,6 @@ pytest
 ```
 To generate a coverage report, run the following:  
 ```
-coverage run -m pytest and then any tests to would like to run with coverage (ex. tests/test_app.py tests/test_calendar.py)  
+coverage run -m pytest
 coverage report or coverage html
 ```
