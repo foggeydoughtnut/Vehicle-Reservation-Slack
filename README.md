@@ -3,7 +3,7 @@
 ## Setup  
 Poetry install   
 Copy the .env-example into a .env file and enter the needed data  
-Run the app.py
+Run the run.py
 Then navigate to localhost:3000/login and login to the admin page with username: admin password: password  
 Then from the admin (/admin) page you can add vehicles and create admin users  
 
@@ -20,7 +20,7 @@ ex. https://e446-blah-blah.ngrok.io/interactions
 Reinstall the app to the workplace through the Install App tab
 
 ## Create Admin User  
-When you run the app.py for the first time it will make a admin account with username: admin and password: password.  
+When you run the run.py for the first time it will make a admin account with username: admin and password: password.  
 With that you can log into the admin page and create a more secure admin account.  
 
 ## Getting vehicle's calendar id and calendar group id  

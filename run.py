@@ -35,7 +35,7 @@ app.app_context().push()
 with app.app_context():
     db.create_all()
 
-# Define routes
+# Define views
 app.add_url_rule(links.login, view_func=login, methods=['POST', 'GET'])
 app.add_url_rule(links.logout, view_func=logout, methods=['POST', 'GET'])
 app.add_url_rule(links.create_new_user, view_func=create_new_user, methods=['POST'])
