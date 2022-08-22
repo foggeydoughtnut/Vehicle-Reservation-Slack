@@ -1,4 +1,4 @@
-# App.py  
+# run.py  
 This file is where all the slack bot logic is handled. It is also where the Flask configuration is done.  
 
 ---  

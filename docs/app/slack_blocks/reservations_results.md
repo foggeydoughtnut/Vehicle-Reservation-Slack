@@ -1,4 +1,4 @@
-# Reservations Block  
+# Reservations Results  
 - This block is the response after the user submits the `reservations` block.  
 ---  
 **Input** 
