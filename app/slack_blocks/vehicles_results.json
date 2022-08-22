@@ -1,1 +1,1 @@
-{"blocks": [{"type": "section", "text": {"type": "mrkdwn", "text": "test1 - *not available*"}}, {"type": "section", "text": {"type": "mrkdwn", "text": "test2 - *available*"}}]}
+{"blocks": [{"type": "section", "text": {"type": "mrkdwn", "text": "test_name - *available*"}}]}

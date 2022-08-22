@@ -13,19 +13,20 @@ class Slack_Bot_Commands:
     HELP_COMMAND = "help"
 
 class Slack_Bot_Logic():
-    
 
-    def send_ephemeral_message(text, channel_id, user_id, ts_id, slack_client, blocks=''):
-        print(f"Text: {text}\n Channel Id: {channel_id}\n User Id: {user_id}\n Thread Id: {ts_id}\n Slack Client : {slack_client}\n Block: {blocks}\n")
+    def __init__(self):
+        self.slack_client = WebClient(token=slack_token)
+
+    def send_ephemeral_message(self, text, channel_id, user_id, ts_id, blocks=''):
         if blocks == '':
-            slack_client.chat_postEphemeral(
+            self.slack_client.chat_postEphemeral(
                 channel=channel_id,
                 text=text,
                 user=user_id,
                 thread_ts=ts_id,
             )
         else:
-            slack_client.chat_postEphemeral(
+            self.slack_client.chat_postEphemeral(
                 channel=channel_id,
                 text=text,
                 user=user_id,
