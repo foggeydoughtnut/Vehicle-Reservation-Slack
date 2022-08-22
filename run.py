@@ -19,7 +19,7 @@ from config import SLACK_SIGNING_SECRET, VERIFICATION_TOKEN, slack_token, user_t
 import api.db.index
 from app.views import login, logout, create_new_user, interactions, event_hook
 from app.links import links
-from app.slack_bot import Slack_Bot_Commands
+from app.slack_bot import Slack_Bot_Commands, Slack_Bot_Logic
 
 # This function is required or else there will be a context error
 def create_app():
@@ -171,28 +171,28 @@ def reserve_vehicle(payload, selected_vehicle):
     user_id = payload['user']['id']
     thread_id = payload['message']['ts']
     if 'None' in start_time or 'None' in end_time:
-        send_ephemeral_message("Time of reservation is required", channel_id, user_id, thread_id)
+        Slack_Bot_Logic.send_ephemeral_message("Time of reservation is required", channel_id, user_id, thread_id, slack_client)
         return {'status': 400}
     if not users_name:
-        send_ephemeral_message("Name is required for reservation", channel_id, user_id, thread_id)
+        Slack_Bot_Logic.send_ephemeral_message("Name is required for reservation", channel_id, user_id, thread_id , slack_client)
         return {'status': 400}
     try:
         available = check_available(vehicle, start_time, end_time)
         if not available:
-            send_ephemeral_message(f"{selected_vehicle} is not available at that time", channel_id, user_id, thread_id)
+            Slack_Bot_Logic.send_ephemeral_message(f"{selected_vehicle} is not available at that time", channel_id, user_id, thread_id, slack_client)
             return {'status': 400}  # NOTE These return statements are not necessary. Used for testing
         else:
             response = api.Calendar.schedule_event(vehicle.calendarGroupID, vehicle.calendarID, start_time, end_time,
                                                    users_name)
             if "ERROR" in response:
-                send_ephemeral_message(f"{response['ERROR']}", channel_id, user_id, thread_id)
+                Slack_Bot_Logic.send_ephemeral_message(f"{response['ERROR']}", channel_id, user_id, thread_id, slack_client)
                 return {'status': 500}
             else:
-                send_ephemeral_message(f"{selected_vehicle} was successfully reserved", channel_id, user_id, thread_id)
+                Slack_Bot_Logic.send_ephemeral_message(f"{selected_vehicle} was successfully reserved", channel_id, user_id, thread_id, slack_client)
                 return {'status': 200}
     except:
-        send_ephemeral_message(f"Sorry, an error has occurred, so I was unable to complete your request", channel_id,
-                               user_id, thread_id)
+        Slack_Bot_Logic.send_ephemeral_message(f"Sorry, an error has occurred, so I was unable to complete your request", channel_id,
+                               user_id, thread_id, slack_client)
         return {'status': 500}
 
 
@@ -208,19 +208,19 @@ def check_vehicle(payload, selected_vehicle):
     user_id = payload['user']['id']
     thread_id = payload['message']['ts']
     if 'None' in start_time or 'None' in end_time:
-        send_ephemeral_message("Time of reservation is required", channel_id, user_id, thread_id)
+        Slack_Bot_Logic.send_ephemeral_message("Time of reservation is required", channel_id, user_id, thread_id, slack_client)
         return {'status': 400}
     try:
         available = check_available(vehicle, start_time, end_time)
         if not available:
-            send_ephemeral_message(f"{selected_vehicle} is not available at that time", channel_id, user_id, thread_id)
+            Slack_Bot_Logic.send_ephemeral_message(f"{selected_vehicle} is not available at that time", channel_id, user_id, thread_id, slack_client)
             return {'status': 400}
         else:
-            send_ephemeral_message(f"{selected_vehicle} is available at that time", channel_id, user_id, thread_id)
+            Slack_Bot_Logic.send_ephemeral_message(f"{selected_vehicle} is available at that time", channel_id, user_id, thread_id, slack_client)
             return {'status': 200}
     except:
-        send_ephemeral_message(f"Sorry, an error has occurred, so I was unable to complete your request", channel_id,
-                               user_id, thread_id)
+        Slack_Bot_Logic.send_ephemeral_message(f"Sorry, an error has occurred, so I was unable to complete your request", channel_id,
+                               user_id, thread_id, slack_client)
         return {'status': 500}
 
 
@@ -238,30 +238,33 @@ def get_reservations(payload, selected_vehicle):
         events = api.Calendar.list_specific_calendar_in_group_events(vehicle.calendarGroupID, vehicle.calendarID)
         res = api.Calendar.construct_calendar_events_block(events, selected_vehicle)
         if not res['reservations']:
-            send_ephemeral_message(
+            Slack_Bot_Logic.send_ephemeral_message(
                 f'There are no reservations for {selected_vehicle}',
                 channel_id,
                 user_id,
-                thread_id
+                thread_id,
+                slack_client
             )
             return {'status': 200, 'reservations': False}
         else:
             with open('app/slack_blocks/reservations_results.json', 'r') as f:
                 data = json.load(f)
-            send_ephemeral_message(
+            Slack_Bot_Logic.send_ephemeral_message(
                 "Here are the reservations",
                 channel_id,
                 user_id,
                 thread_id,
+                slack_client,
                 data['blocks']
             )
             return {'status': 200, 'reservations': True}
     except:
-        send_ephemeral_message(
+        Slack_Bot_Logic.send_ephemeral_message(
             f"Sorry, an error has occurred, so I was unable to complete your request",
             channel_id,
             user_id,
-            thread_id
+            thread_id,
+            slack_client
         )
         return {'status': 500}
 
@@ -392,7 +395,7 @@ def handle_message(event_data):
             commands = message.get('text').split()
             channel_id = message["channel"]
             if len(commands) == 1:
-                send_ephemeral_message("Did not provide a command", channel_id, get_user_slack_id(), message['ts'])
+                Slack_Bot_Logic.send_ephemeral_message("Did not provide a command", channel_id, get_user_slack_id(), message['ts'], slack_client)
                 return
             command = commands[1]
             # This is where Slack messages are handled
@@ -422,8 +425,14 @@ def handle_message(event_data):
                 construct_vehicles_command()
                 with open('app/slack_blocks/vehicles_results.json', 'r') as f:
                     data = json.load(f)
-                send_ephemeral_message("List of vehicles", channel_id, get_user_slack_id(), message['ts'],
-                                       data['blocks'])
+                Slack_Bot_Logic.send_ephemeral_message(
+                    "List of vehicles",
+                    channel_id,
+                    get_user_slack_id(),
+                    message['ts'],
+                    slack_client,
+                    data['blocks']
+                )
                 return
 
             """Displays the usage manual which contains what commands there are and how to use them"""
@@ -453,22 +462,7 @@ def send_direct_message(response_text):
     slack_client.chat_postEphemeral(channel=user_slack_id, text=response_text, user=user_slack_id)
 
 
-def send_ephemeral_message(text, channel_id, user_id, ts_id, blocks=''):
-    if blocks == '':
-        slack_client.chat_postEphemeral(
-            channel=channel_id,
-            text=text,
-            user=user_id,
-            thread_ts=ts_id,
-        )
-    else:
-        slack_client.chat_postEphemeral(
-            channel=channel_id,
-            text=text,
-            user=user_id,
-            thread_ts=ts_id,
-            blocks=blocks
-        )
+
 
 
 if __name__ == "__main__":
