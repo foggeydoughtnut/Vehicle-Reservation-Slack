@@ -27,6 +27,14 @@ def create_app():
     new_app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
     new_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(new_app)
+
+    # Define views
+    new_app.add_url_rule(links.login, view_func=login, methods=['POST', 'GET'])
+    new_app.add_url_rule(links.logout, view_func=logout, methods=['POST', 'GET'])
+    new_app.add_url_rule(links.create_new_user, view_func=create_new_user, methods=['POST'])
+    new_app.add_url_rule(links.interactions, view_func=interactions, methods=['POST'])
+    new_app.add_url_rule(links.home, view_func=event_hook)
+    ########
     return new_app
 
 
@@ -35,13 +43,7 @@ app.app_context().push()
 with app.app_context():
     db.create_all()
 
-# Define views
-app.add_url_rule(links.login, view_func=login, methods=['POST', 'GET'])
-app.add_url_rule(links.logout, view_func=logout, methods=['POST', 'GET'])
-app.add_url_rule(links.create_new_user, view_func=create_new_user, methods=['POST'])
-app.add_url_rule(links.interactions, view_func=interactions, methods=['POST'])
-app.add_url_rule(links.home, view_func=event_hook)
-########
+
 
 def page_not_found(e):
     return render_template('404.html'), 404
