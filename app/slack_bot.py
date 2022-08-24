@@ -1,5 +1,6 @@
 import difflib
 from time import time
+import json
 
 # Slack Imports
 from slack_sdk import WebClient
@@ -126,5 +127,21 @@ class Slack_Bot_Logic():
             i += 1
         return vehicle_options
 
+
+    def get_slack_block_and_add_vehicles(self, path_to_file, vehicle_names):
+        """Gets the slack block that is at path_to_file then it adds all the vehicle options to that block
+
+        Keyword arguments\n
+            path_to_file  -- The path to the slack block
+        """
+        vehicle_options = self.create_vehicle_options_slack_block(vehicle_names)
+        with open(path_to_file) as f:
+            data = json.load(f)
+        data['blocks'][1]['element']['options'] = vehicle_options
+        with open(path_to_file, "w") as write_f:
+            json.dump(data, write_f)
+        with open(path_to_file, "r") as new_f:
+            new_data = json.load(new_f)
+        return new_data
 
     

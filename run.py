@@ -242,26 +242,6 @@ def get_reservations(payload, selected_vehicle):
         return {'status': 500}
 
 
-
-
-
-def get_slack_block_and_add_vehicles(path_to_file):
-    """Gets the slack block that is at path_to_file then it adds all the vehicle options to that block
-
-    Keyword arguments\n
-        path_to_file  -- The path to the slack block
-    """
-    vehicle_options = slack_bot.create_vehicle_options_slack_block(vehicle_names)
-    with open(path_to_file) as f:
-        data = json.load(f)
-    data['blocks'][1]['element']['options'] = vehicle_options
-    with open(path_to_file, "w") as write_f:
-        json.dump(data, write_f)
-    with open(path_to_file, "r") as new_f:
-        new_data = json.load(new_f)
-    return new_data
-
-
 def construct_vehicles_command():
     """Constructs the vehicle slack block.
     This is what adds the vehicles to the block and adds if they are available or not"""
@@ -294,10 +274,6 @@ def construct_vehicles_command():
         json.dump(vehicles_block, f)
 
 
-
-
-
-
 @slack_events_adapter.on("app_mention")
 def handle_message(event_data):
     def send_reply(value):
@@ -321,21 +297,21 @@ def handle_message(event_data):
             # This is where Slack messages are handled
             """Makes an event on the calendar."""
             if command.lower() == Slack_Bot_Commands.RESERVE_COMMAND:
-                data = get_slack_block_and_add_vehicles('app/slack_blocks/reserve_block.json')
+                data = slack_bot.get_slack_block_and_add_vehicles('app/slack_blocks/reserve_block.json', vehicle_names)
                 slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'],
                                               text="Please fill out the form", blocks=data['blocks'])
                 return
 
             """Gets reservations on the calendar"""
             if command.lower() == Slack_Bot_Commands.GET_ALL_RESERVATIONS_COMMAND:
-                data = get_slack_block_and_add_vehicles('app/slack_blocks/reservations_block.json')
+                data = slack_bot.get_slack_block_and_add_vehicles('app/slack_blocks/reservations_block.json', vehicle_names)
                 slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'],
                                               text="Please fill out the form", blocks=data['blocks'])
                 return
 
             """Check if vehicle is available from start_time to end_time"""
             if command.lower() == Slack_Bot_Commands.CHECK_VEHICLE_COMMAND:
-                data = get_slack_block_and_add_vehicles('app/slack_blocks/check_vehicle_block.json')
+                data = slack_bot.get_slack_block_and_add_vehicles('app/slack_blocks/check_vehicle_block.json', vehicle_names)
                 slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'],
                                               text="Please fill out the form", blocks=data['blocks'])
                 return
