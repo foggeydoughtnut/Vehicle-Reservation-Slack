@@ -69,3 +69,13 @@ class Slack_Bot_Logic():
                             f"{similar_command_response}? "
         else:
             return f"Did not recognize command: {command.lower()}"
+
+    def get_selected_vehicle_name_from_payload(payload):
+        selected_option = list(payload['state']['values'].items())[0][1]['static_select-action']['selected_option']
+        if selected_option is None:
+            return selected_option
+        else:
+            vehicle_name = selected_option.get('text').get('text', None)
+            return vehicle_name
+
+    

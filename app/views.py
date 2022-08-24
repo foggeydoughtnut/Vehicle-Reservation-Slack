@@ -3,6 +3,7 @@ from flask_login import login_user, logout_user
 import api.db.index
 import requests
 import json
+from app.slack_bot import Slack_Bot_Logic
 import run
 from config import VERIFICATION_TOKEN
 from app.links import links
@@ -69,7 +70,7 @@ def interactions():
         if payload['actions'][0]['action_id'] != 'submit':
             return {'status': 200}
         else:
-            selected_vehicle = run.get_selected_vehicle_name_from_payload(payload)
+            selected_vehicle = Slack_Bot_Logic.get_selected_vehicle_name_from_payload(payload)
             if selected_vehicle is None:
                 requests.post(payload['response_url'], json={"text": "Did not select a vehicle"})
                 return {'status': 404}

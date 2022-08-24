@@ -107,7 +107,7 @@ admin.add_view(MyModelView(Vehicle, db.session))
 def shutdown_session(exception=None):
     db.session.remove()
 
-""" Slack Bot Setup and command handeling """
+""" Slack Bot Setup and command logic """
 # instantiating slack client
 slack_client = WebClient(token=slack_token)
 user_client = WebClient(user_token)
@@ -133,13 +133,7 @@ def check_available(vehicle, start_time, end_time):
     return available
 
 
-def get_selected_vehicle_name_from_payload(payload):
-    selected_option = list(payload['state']['values'].items())[0][1]['static_select-action']['selected_option']
-    if selected_option is None:
-        return selected_option
-    else:
-        vehicle_name = selected_option.get('text').get('text', None)
-        return vehicle_name
+
 
 
 def get_start_end_time_from_payload(payload):
