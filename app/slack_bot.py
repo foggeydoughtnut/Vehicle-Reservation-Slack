@@ -8,6 +8,7 @@ from slack_sdk import WebClient
 # Local Imports
 from config import VERIFICATION_TOKEN, slack_token
 import api.Calendar
+import api.db.index
 
 
 
@@ -18,7 +19,7 @@ class Slack_Bot_Commands:
     CHECK_VEHICLE_COMMAND = "check"
     HELP_COMMAND = "help"
 
-class Slack_Bot_Logic():
+class Slack_Bot_Logic:
 
     
 
@@ -153,5 +154,47 @@ class Slack_Bot_Logic():
             end_time
         )
         return available
+
+
+    def get_reservations(self, payload, selected_vehicle):
+        """Gets all the reservations for the selected_vehicle
+        Keyword arguments\n
+            payload   --    The slack block payload that was sent\n
+            selected_vehicle -- The vehicle the user selected
+        """
+        vehicle = api.db.index.get_vehicle_by_name(selected_vehicle)
+        channel_id = payload['channel']['id']
+        user_id = payload['user']['id']
+        thread_id = payload['message']['ts']
+        try:
+            events = api.Calendar.list_specific_calendar_in_group_events(vehicle.calendarGroupID, vehicle.calendarID)
+            res = api.Calendar.construct_calendar_events_block(events, selected_vehicle)
+            if not res['reservations']:
+                self.send_ephemeral_message(
+                    f'There are no reservations for {selected_vehicle}',
+                    channel_id,
+                    user_id,
+                    thread_id,
+                )
+                return {'status': 200, 'reservations': False}
+            else:
+                with open('app/slack_blocks/reservations_results.json', 'r') as f:
+                    data = json.load(f)
+                self.send_ephemeral_message(
+                    "Here are the reservations",
+                    channel_id,
+                    user_id,
+                    thread_id,
+                    data['blocks']
+                )
+                return {'status': 200, 'reservations': True}
+        except:
+            self.send_ephemeral_message(
+                f"Sorry, an error has occurred, so I was unable to complete your request",
+                channel_id,
+                user_id,
+                thread_id,
+            )
+            return {'status': 500}
 
     

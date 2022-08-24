@@ -64,6 +64,7 @@ def create_new_user():
 
 def interactions():
     """The route that slack blocks call when you click submit"""
+    slack_bot = Slack_Bot_Logic()
     if request.method == 'POST':
         data = request.form.to_dict()
         payload = json.loads(data['payload'])
@@ -83,7 +84,7 @@ def interactions():
             elif block_command_type == 'Check':
                 run.check_vehicle(payload, selected_vehicle)
             elif block_command_type == 'Reservations':
-                run.get_reservations(payload, selected_vehicle)
+                slack_bot.get_reservations(payload, selected_vehicle)
             else:
                 print(payload['message']['blocks'][0]['text']['text'])
             return {'status': 200}

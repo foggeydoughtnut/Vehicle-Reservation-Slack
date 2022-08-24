@@ -197,46 +197,7 @@ def check_vehicle(payload, selected_vehicle):
         return {'status': 500}
 
 
-def get_reservations(payload, selected_vehicle):
-    """Gets all the reservations for the selected_vehicle
-    Keyword arguments\n
-        payload   --    The slack block payload that was sent\n
-        selected_vehicle -- The vehicle the user selected
-    """
-    vehicle = api.db.index.get_vehicle_by_name(selected_vehicle)
-    channel_id = payload['channel']['id']
-    user_id = payload['user']['id']
-    thread_id = payload['message']['ts']
-    try:
-        events = api.Calendar.list_specific_calendar_in_group_events(vehicle.calendarGroupID, vehicle.calendarID)
-        res = api.Calendar.construct_calendar_events_block(events, selected_vehicle)
-        if not res['reservations']:
-            slack_bot.send_ephemeral_message(
-                f'There are no reservations for {selected_vehicle}',
-                channel_id,
-                user_id,
-                thread_id,
-            )
-            return {'status': 200, 'reservations': False}
-        else:
-            with open('app/slack_blocks/reservations_results.json', 'r') as f:
-                data = json.load(f)
-            slack_bot.send_ephemeral_message(
-                "Here are the reservations",
-                channel_id,
-                user_id,
-                thread_id,
-                data['blocks']
-            )
-            return {'status': 200, 'reservations': True}
-    except:
-        slack_bot.send_ephemeral_message(
-            f"Sorry, an error has occurred, so I was unable to complete your request",
-            channel_id,
-            user_id,
-            thread_id,
-        )
-        return {'status': 500}
+
 
 
 def construct_vehicles_command():
