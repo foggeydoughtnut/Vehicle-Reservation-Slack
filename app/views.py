@@ -80,7 +80,7 @@ def interactions():
                               json={"text": "Thanks for your request. We will process that shortly"})
             block_command_type = payload['message']['blocks'][0]['text']['text']
             if block_command_type == 'Reserve':
-                run.reserve_vehicle(payload, selected_vehicle)
+                slack_bot.reserve_vehicle(payload, selected_vehicle)
             elif block_command_type == 'Check':
                 slack_bot.check_vehicle(payload, selected_vehicle)
             elif block_command_type == 'Reservations':
