@@ -314,6 +314,7 @@ class Slack_Bot_Logic:
             return
         with app.app_context():
             vehicle_names = api.db.index.get_vehicle_names()
+
         message = value["event"]
         if message.get("subtype") is None:
             commands = message.get('text').split()
@@ -322,6 +323,10 @@ class Slack_Bot_Logic:
                 self.send_ephemeral_message("Did not provide a command", channel_id, self.get_user_slack_id(), message['ts'])
                 return
             command = commands[1]
+            if vehicle_names == []:
+                self.send_ephemeral_message("There are no vehicles in the database", channel_id, self.get_user_slack_id(), message['ts'])
+                return
+
             # This is where Slack messages are handled
             """Makes an event on the calendar."""
             if command.lower() == self.commands.RESERVE_COMMAND:
