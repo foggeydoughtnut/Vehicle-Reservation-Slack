@@ -1,7 +1,6 @@
 import webbrowser
 import msal
 import os
-import run
 from app.slack_bot import Slack_Bot_Logic
 
 from dotenv import load_dotenv

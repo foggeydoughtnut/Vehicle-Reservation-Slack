@@ -21,9 +21,6 @@ class Slack_Bot_Commands:
     HELP_COMMAND = "help"
 
 class Slack_Bot_Logic:
-
-    
-
     def __init__(self):
         self.slack_client = WebClient(token=slack_token)
         self.user_client = WebClient(user_token)

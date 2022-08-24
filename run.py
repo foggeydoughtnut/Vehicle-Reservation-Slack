@@ -7,7 +7,7 @@ from flask_login import LoginManager, current_user
 # Slack Imports
 from slackeventsapi import SlackEventAdapter
 # Local Imports
-import api.Calendar
+import api.Calendar # Don't delete this. For some reason when deleted, there is a circular import
 from app.models import Vehicle, User
 from app.models import db
 from config import SLACK_SIGNING_SECRET

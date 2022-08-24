@@ -4,7 +4,6 @@ import api.db.index
 import requests
 import json
 from app.slack_bot import Slack_Bot_Logic
-import run
 from config import VERIFICATION_TOKEN
 from app.links import links
 
