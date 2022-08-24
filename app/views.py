@@ -1,5 +1,5 @@
 from flask import redirect, request, render_template, session, flash
-from flask_login import login_user, logout_user
+from flask_login import login_user, logout_user, current_user
 import api.db.index
 import requests
 import json
@@ -32,8 +32,10 @@ def login():
 
 
 def logout():
-    logout_user()
-    flash('Successfully logged out', 'message')
+    authorized = current_user.is_authenticated
+    if authorized: 
+        flash('Successfully logged out', 'message')
+        logout_user()
     return redirect(links.login)
 
 
