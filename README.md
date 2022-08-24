@@ -26,11 +26,11 @@ With that you can log into the admin page and create a more secure admin account
 ## Getting vehicle's calendar id and calendar group id  
 Go to the following link https://developer.microsoft.com/en-us/graph/graph-explorer#  
 Sign in to the account that has all of the calendars needed.  
-Run the following get query with the route: https://graph.microsoft.com/v1.0/me/calendarGroups to get all of the calendar groups for that account.  
-From there find the calendar group that contains the calendars for the vehicles. The id will be the calander group id in the database.  
-  
 Run the following get query with the route: https://graph.microsoft.com/v1.0/me/calendars to get all of the calendars for the account.  
 From there find the calendars for the vehicles. The calendar id for that vehicle will be the id value in that query for the vehicle's calendar.  
+
+Run the following get query with the route: https://graph.microsoft.com/v1.0/me/calendarGroups to get all of the calendar groups for that account.  
+From there find the calendar group that contains the calendars for the vehicles. The id will be the calander group id in the database. 
 ### Tests  
 This repository uses Pytest.  
 To run the tests navigate to base directory.  
