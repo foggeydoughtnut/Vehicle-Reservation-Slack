@@ -133,24 +133,6 @@ def check_available(vehicle, start_time, end_time):
     return available
 
 
-
-
-
-def get_start_end_time_from_payload(payload):
-    """Accesses the payload and gets the date and time information from the slack command
-
-        Returns a tuple with start and end time that is formatted correctly for Graph api
-    """
-    state = list(payload['state']['values'].items())
-    start_date = state[1][1]['datepicker-action']['selected_date']
-    start_time = state[2][1]['timepicker-action']['selected_time']
-    end_date = state[3][1]['datepicker-action']['selected_date']
-    end_time = state[4][1]['timepicker-action']['selected_time']
-    start = f"{start_date}T{start_time}"
-    end = f"{end_date}T{end_time}"
-    return start, end
-
-
 def reserve_vehicle(payload, selected_vehicle):
     """Uses the api to check that vehicle is available. If it is, it will reserve the vehicle
 
@@ -159,7 +141,7 @@ def reserve_vehicle(payload, selected_vehicle):
             selected_vehicle -- The vehicle the user selected to reserve
     """
     vehicle = api.db.index.get_vehicle_by_name(selected_vehicle)
-    start_time, end_time = get_start_end_time_from_payload(payload)
+    start_time, end_time = slack_bot.get_start_end_time_from_payload(payload)
     users_name = list(payload['state']['values'].items())[5][1]['plain_text_input-action']['value']
     channel_id = payload['channel']['id']
     user_id = payload['user']['id']
@@ -197,7 +179,7 @@ def check_vehicle(payload, selected_vehicle):
             selected_vehicle -- The vehicle the user selected
         """
     vehicle = api.db.index.get_vehicle_by_name(selected_vehicle)
-    start_time, end_time = get_start_end_time_from_payload(payload)
+    start_time, end_time = slack_bot.get_start_end_time_from_payload(payload)
     channel_id = payload['channel']['id']
     user_id = payload['user']['id']
     thread_id = payload['message']['ts']
@@ -325,18 +307,7 @@ def construct_vehicles_command():
     with open('app/slack_blocks/vehicles_results.json', 'w') as f:
         json.dump(vehicles_block, f)
 
-def validate_slack_message(request):
-    """Validates slack message using the verfication token.\n
-        TODO: Verifcation tokens are going to be depracated. Use the slack-signing-secret method instead.\n
-        https://api.slack.com/authentication/verifying-requests-from-slack
-    """
-    timestamp = request['event_time']
-    if abs(time() - timestamp) > 60 * 5:
-        return False
-    token = request["token"]
-    if token != VERIFICATION_TOKEN:
-        return False
-    return True
+
 
 
 
@@ -350,7 +321,7 @@ def handle_message(event_data):
             value   -- A dictionary that contains important information like team_id, event information, ect. The main
             important one is the event sub-dictionary because it contains the message and user
         """
-        valid = validate_slack_message(value)
+        valid = slack_bot.validate_slack_message(value)
         if not valid:
             return
         message = value["event"]

@@ -1,10 +1,11 @@
 import difflib
+from time import time
 
 # Slack Imports
 from slack_sdk import WebClient
 
 # Local Imports
-from config import slack_token
+from config import VERIFICATION_TOKEN, slack_token
 
 
 class Slack_Bot_Commands:
@@ -77,5 +78,34 @@ class Slack_Bot_Logic():
         else:
             vehicle_name = selected_option.get('text').get('text', None)
             return vehicle_name
+
+    def get_start_end_time_from_payload(self, payload):
+        """Accesses the payload and gets the date and time information from the slack command
+
+            Returns a tuple with start and end time that is formatted correctly for Graph api
+        """
+        state = list(payload['state']['values'].items())
+        start_date = state[1][1]['datepicker-action']['selected_date']
+        start_time = state[2][1]['timepicker-action']['selected_time']
+        end_date = state[3][1]['datepicker-action']['selected_date']
+        end_time = state[4][1]['timepicker-action']['selected_time']
+        start = f"{start_date}T{start_time}"
+        end = f"{end_date}T{end_time}"
+        return start, end
+
+
+    def validate_slack_message(self, request):
+        """Validates slack message using the verfication token.\n
+            TODO: Verifcation tokens are going to be depracated. Use the slack-signing-secret method instead.\n
+            https://api.slack.com/authentication/verifying-requests-from-slack
+        """
+        timestamp = request['event_time']
+        if abs(time() - timestamp) > 60 * 5:
+            return False
+        token = request["token"]
+        if token != VERIFICATION_TOKEN:
+            return False
+        return True
+
 
     
