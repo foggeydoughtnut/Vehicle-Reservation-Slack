@@ -6,6 +6,8 @@ from slack_sdk import WebClient
 
 # Local Imports
 from config import VERIFICATION_TOKEN, slack_token
+import api.db.index
+
 
 
 class Slack_Bot_Commands:
@@ -106,6 +108,23 @@ class Slack_Bot_Logic():
         if token != VERIFICATION_TOKEN:
             return False
         return True
+
+
+    def create_vehicle_options_slack_block(self, vehicle_names):
+        """Creates the vehicle_options that will be used in the get_slack_block_and_add_vehicles method"""
+        vehicle_options = []
+        i = 0
+        for vehicle in vehicle_names:
+            vehicle_obj = {
+                "text": {
+                    "type": "plain_text",
+                    "text": f"{vehicle}"
+                },
+                "value": f"value-{i}"
+            }
+            vehicle_options.append(vehicle_obj)
+            i += 1
+        return vehicle_options
 
 
     

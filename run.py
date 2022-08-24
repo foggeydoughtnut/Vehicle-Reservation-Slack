@@ -242,21 +242,7 @@ def get_reservations(payload, selected_vehicle):
         return {'status': 500}
 
 
-def create_vehicle_options_slack_block():
-    """Creates the vehicle_options that will be used in the get_slack_block_and_add_vehicles method"""
-    vehicle_options = []
-    i = 0
-    for vehicle in vehicle_names:
-        vehicle_obj = {
-            "text": {
-                "type": "plain_text",
-                "text": f"{vehicle}"
-            },
-            "value": f"value-{i}"
-        }
-        vehicle_options.append(vehicle_obj)
-        i += 1
-    return vehicle_options
+
 
 
 def get_slack_block_and_add_vehicles(path_to_file):
@@ -265,7 +251,7 @@ def get_slack_block_and_add_vehicles(path_to_file):
     Keyword arguments\n
         path_to_file  -- The path to the slack block
     """
-    vehicle_options = create_vehicle_options_slack_block()
+    vehicle_options = slack_bot.create_vehicle_options_slack_block(vehicle_names)
     with open(path_to_file) as f:
         data = json.load(f)
     data['blocks'][1]['element']['options'] = vehicle_options
@@ -393,9 +379,6 @@ def get_user_slack_id():
 def send_direct_message(response_text):
     user_slack_id = get_user_slack_id()
     slack_client.chat_postEphemeral(channel=user_slack_id, text=response_text, user=user_slack_id)
-
-
-
 
 
 if __name__ == "__main__":
