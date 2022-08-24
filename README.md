@@ -8,7 +8,7 @@ Then navigate to localhost:3000/login and login to the admin page with username:
 Then from the admin (/admin) page you can add vehicles and create admin users  
 
 Start ngrok (or anything similar) on port 3000 so that way traffic can be forwarded to localhost:3000.  
-Download Link is found [here](https://ngrok.com/download)  
+Download Ngrok [here](https://ngrok.com/download)  
 Run the following command to start ngrok
 ```
 ngrok http 3000
