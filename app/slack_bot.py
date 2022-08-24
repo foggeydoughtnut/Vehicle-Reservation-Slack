@@ -229,4 +229,31 @@ class Slack_Bot_Logic:
         with open('app/slack_blocks/vehicles_results.json', 'w') as f:
             json.dump(vehicles_block, f)
 
+
+    def check_vehicle(self, payload, selected_vehicle):
+        """Checks a specific vehicle from start time to end time
+            Keyword arguments\n
+                payload -- The slack block payload that was sent from submitting the check_vehicle slack block\n
+                selected_vehicle -- The vehicle the user selected
+            """
+        vehicle = api.db.index.get_vehicle_by_name(selected_vehicle)
+        start_time, end_time = self.get_start_end_time_from_payload(payload)
+        channel_id = payload['channel']['id']
+        user_id = payload['user']['id']
+        thread_id = payload['message']['ts']
+        if 'None' in start_time or 'None' in end_time:
+            self.send_ephemeral_message("Time of reservation is required", channel_id, user_id, thread_id)
+            return {'status': 400}
+        try:
+            available = self.check_available(vehicle, start_time, end_time)
+            if not available:
+                self.send_ephemeral_message(f"{selected_vehicle} is not available at that time", channel_id, user_id, thread_id)
+                return {'status': 400}
+            else:
+                self.send_ephemeral_message(f"{selected_vehicle} is available at that time", channel_id, user_id, thread_id)
+                return {'status': 200}
+        except:
+            self.send_ephemeral_message(f"Sorry, an error has occurred, so I was unable to complete your request", channel_id,
+                                user_id, thread_id)
+            return {'status': 500}
         

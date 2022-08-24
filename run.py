@@ -169,37 +169,6 @@ def reserve_vehicle(payload, selected_vehicle):
         return {'status': 500}
 
 
-def check_vehicle(payload, selected_vehicle):
-    """Checks a specific vehicle from start time to end time
-        Keyword arguments\n
-            payload -- The slack block payload that was sent from submitting the check_vehicle slack block\n
-            selected_vehicle -- The vehicle the user selected
-        """
-    vehicle = api.db.index.get_vehicle_by_name(selected_vehicle)
-    start_time, end_time = slack_bot.get_start_end_time_from_payload(payload)
-    channel_id = payload['channel']['id']
-    user_id = payload['user']['id']
-    thread_id = payload['message']['ts']
-    if 'None' in start_time or 'None' in end_time:
-        slack_bot.send_ephemeral_message("Time of reservation is required", channel_id, user_id, thread_id)
-        return {'status': 400}
-    try:
-        available = slack_bot.check_available(vehicle, start_time, end_time)
-        if not available:
-            slack_bot.send_ephemeral_message(f"{selected_vehicle} is not available at that time", channel_id, user_id, thread_id)
-            return {'status': 400}
-        else:
-            slack_bot.send_ephemeral_message(f"{selected_vehicle} is available at that time", channel_id, user_id, thread_id)
-            return {'status': 200}
-    except:
-        slack_bot.send_ephemeral_message(f"Sorry, an error has occurred, so I was unable to complete your request", channel_id,
-                               user_id, thread_id)
-        return {'status': 500}
-
-
-
-
-
 @slack_events_adapter.on("app_mention")
 def handle_message(event_data):
     def send_reply(value):

@@ -82,7 +82,7 @@ def interactions():
             if block_command_type == 'Reserve':
                 run.reserve_vehicle(payload, selected_vehicle)
             elif block_command_type == 'Check':
-                run.check_vehicle(payload, selected_vehicle)
+                slack_bot.check_vehicle(payload, selected_vehicle)
             elif block_command_type == 'Reservations':
                 slack_bot.get_reservations(payload, selected_vehicle)
             else:
