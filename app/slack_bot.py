@@ -7,7 +7,7 @@ from slack_sdk import WebClient
 
 # Local Imports
 from config import VERIFICATION_TOKEN, slack_token
-import api.db.index
+import api.Calendar
 
 
 
@@ -143,5 +143,15 @@ class Slack_Bot_Logic():
         with open(path_to_file, "r") as new_f:
             new_data = json.load(new_f)
         return new_data
+
+
+    def check_available(self, vehicle, start_time, end_time):
+        available = api.Calendar.check_if_reservation_available(
+            vehicle.calendarGroupID,
+            vehicle.calendarID,
+            start_time,
+            end_time
+        )
+        return available
 
     

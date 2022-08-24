@@ -127,10 +127,7 @@ slack_events_adapter = SlackEventAdapter(
 slack_bot = Slack_Bot_Logic()
 
 
-def check_available(vehicle, start_time, end_time):
-    available = api.Calendar.check_if_reservation_available(vehicle.calendarGroupID, vehicle.calendarID, start_time,
-                                                            end_time)
-    return available
+
 
 
 def reserve_vehicle(payload, selected_vehicle):
@@ -153,7 +150,7 @@ def reserve_vehicle(payload, selected_vehicle):
         slack_bot.send_ephemeral_message("Name is required for reservation", channel_id, user_id, thread_id)
         return {'status': 400}
     try:
-        available = check_available(vehicle, start_time, end_time)
+        available = slack_bot.check_available(vehicle, start_time, end_time)
         if not available:
             slack_bot.send_ephemeral_message(f"{selected_vehicle} is not available at that time", channel_id, user_id, thread_id)
             return {'status': 400}  # NOTE These return statements are not necessary. Used for testing
@@ -187,7 +184,7 @@ def check_vehicle(payload, selected_vehicle):
         slack_bot.send_ephemeral_message("Time of reservation is required", channel_id, user_id, thread_id)
         return {'status': 400}
     try:
-        available = check_available(vehicle, start_time, end_time)
+        available = slack_bot.check_available(vehicle, start_time, end_time)
         if not available:
             slack_bot.send_ephemeral_message(f"{selected_vehicle} is not available at that time", channel_id, user_id, thread_id)
             return {'status': 400}
@@ -259,7 +256,7 @@ def construct_vehicles_command():
     }
     with app.app_context():
         for vehicle in api.db.index.get_all_vehicles():
-            available = check_available(vehicle, start_time, end_time)
+            available = slack_bot.check_available(vehicle, start_time, end_time)
             availability_message = "available" if available else "not available"
             vehicles_block['blocks'].append(
                 {
