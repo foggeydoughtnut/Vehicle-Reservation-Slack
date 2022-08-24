@@ -71,7 +71,7 @@ def interactions():
         if payload['actions'][0]['action_id'] != 'submit':
             return {'status': 200}
         else:
-            selected_vehicle = Slack_Bot_Logic.get_selected_vehicle_name_from_payload(payload)
+            selected_vehicle = slack_bot.get_selected_vehicle_name_from_payload(payload)
             if selected_vehicle is None:
                 requests.post(payload['response_url'], json={"text": "Did not select a vehicle"})
                 return {'status': 404}

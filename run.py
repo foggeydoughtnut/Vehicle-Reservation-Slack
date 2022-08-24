@@ -122,85 +122,18 @@ slack_bot = Slack_Bot_Logic()
 @slack_events_adapter.on("app_mention")
 def handle_message(event_data):
     def send_reply(value):
-        """ Reads the command given in slack and responds depending on what the user's input was
-
-            Keyword arguments\n
-            value   -- A dictionary that contains important information like team_id, event information, ect. The main
-            important one is the event sub-dictionary because it contains the message and user
-        """
-        valid = slack_bot.validate_slack_message(value)
-        if not valid:
-            return
-        message = value["event"]
-        if message.get("subtype") is None:
-            commands = message.get('text').split()
-            channel_id = message["channel"]
-            if len(commands) == 1:
-                slack_bot.send_ephemeral_message("Did not provide a command", channel_id, get_user_slack_id(), message['ts'])
-                return
-            command = commands[1]
-            # This is where Slack messages are handled
-            """Makes an event on the calendar."""
-            if command.lower() == Slack_Bot_Commands.RESERVE_COMMAND:
-                data = slack_bot.get_slack_block_and_add_vehicles('app/slack_blocks/reserve_block.json', vehicle_names)
-                slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'],
-                                              text="Please fill out the form", blocks=data['blocks'])
-                return
-
-            """Gets reservations on the calendar"""
-            if command.lower() == Slack_Bot_Commands.GET_ALL_RESERVATIONS_COMMAND:
-                data = slack_bot.get_slack_block_and_add_vehicles('app/slack_blocks/reservations_block.json', vehicle_names)
-                slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'],
-                                              text="Please fill out the form", blocks=data['blocks'])
-                return
-
-            """Check if vehicle is available from start_time to end_time"""
-            if command.lower() == Slack_Bot_Commands.CHECK_VEHICLE_COMMAND:
-                data = slack_bot.get_slack_block_and_add_vehicles('app/slack_blocks/check_vehicle_block.json', vehicle_names)
-                slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'],
-                                              text="Please fill out the form", blocks=data['blocks'])
-                return
-
-            """Lists all of the vehicle's names and displays if they are available"""
-            if command.lower() == Slack_Bot_Commands.VEHICLES_COMMAND:
-                with app.app_context():
-                    vehicles = api.db.index.get_all_vehicles()
-                slack_bot.construct_vehicles_command(vehicles)
-                with open('app/slack_blocks/vehicles_results.json', 'r') as f:
-                    data = json.load(f)
-                slack_bot.send_ephemeral_message(
-                    "List of vehicles",
-                    channel_id,
-                    get_user_slack_id(),
-                    message['ts'],
-                    data['blocks']
-                )
-                return
-
-            """Displays the usage manual which contains what commands there are and how to use them"""
-            if command.lower() == Slack_Bot_Commands.HELP_COMMAND:
-                with open('app/slack_blocks/help_block.json') as f:
-                    data = json.load(f)
-                slack_client.chat_postMessage(text="Here is the usage manual", channel=channel_id,
-                                              thread_ts=message['ts'], blocks=data['blocks'])
-                return
-            else:
-                """No command matched the available commands. Tries to find similar command for what the user typed"""
-                response_text = slack_bot.find_similar_commands(command)
-                slack_client.chat_postMessage(text=response_text, channel=channel_id, thread_ts=message['ts'])
-                return
+        slack_bot.handle_message_response(value, app, vehicle_names)
 
     thread = Thread(target=send_reply, kwargs={"value": event_data})
     thread.start()
     return Response(status=200)
 
 
-def get_user_slack_id():
-    return user_client.users_identity()['user']['id']
+
 
 
 def send_direct_message(response_text):
-    user_slack_id = get_user_slack_id()
+    user_slack_id = slack_bot.get_user_slack_id()
     slack_client.chat_postEphemeral(channel=user_slack_id, text=response_text, user=user_slack_id)
 
 
