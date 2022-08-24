@@ -301,6 +301,10 @@ class Slack_Bot_Logic:
     def get_user_slack_id(self):
         return self.user_client.users_identity()['user']['id']
 
+    def send_direct_message(self, response_text):
+        user_slack_id = self.get_user_slack_id()
+        self.slack_client.chat_postEphemeral(channel=user_slack_id, text=response_text, user=user_slack_id)
+
     def handle_message_response(self, value, app, vehicle_names):
         """ Reads the command given in slack and responds depending on what the user's input was
 

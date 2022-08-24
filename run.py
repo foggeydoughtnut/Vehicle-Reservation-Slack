@@ -129,13 +129,5 @@ def handle_message(event_data):
     return Response(status=200)
 
 
-
-
-
-def send_direct_message(response_text):
-    user_slack_id = slack_bot.get_user_slack_id()
-    slack_client.chat_postEphemeral(channel=user_slack_id, text=response_text, user=user_slack_id)
-
-
 if __name__ == "__main__":
     app.run(port=3000)

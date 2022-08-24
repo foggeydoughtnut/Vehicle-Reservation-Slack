@@ -2,6 +2,7 @@ import webbrowser
 import msal
 import os
 import run
+from app.slack_bot import Slack_Bot_Logic
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -30,7 +31,8 @@ def generate_access_token_response(application_id, SCOPES):
     else:
         flow = client.initiate_device_flow(scopes=SCOPES)
         auth_code = flow['user_code']
-        run.send_direct_message(f"Authentication code : {auth_code}")
+        slack_bot = Slack_Bot_Logic()
+        slack_bot.send_direct_message(f"Authentication code : {auth_code}")
         webbrowser.open(flow['verification_uri'])
         token_response = client.acquire_token_by_device_flow(flow)
     
