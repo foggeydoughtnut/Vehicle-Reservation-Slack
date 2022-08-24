@@ -1,6 +1,3 @@
-import json
-from time import strftime, time
-from datetime import datetime, timedelta
 from threading import Thread
 # Flask Imports
 from flask import Flask, Response, render_template
@@ -9,16 +6,15 @@ from flask_admin.contrib.sqla import ModelView
 from flask_login import LoginManager, current_user
 # Slack Imports
 from slackeventsapi import SlackEventAdapter
-from slack_sdk import WebClient
 # Local Imports
 import api.Calendar
 from app.models import Vehicle, User
 from app.models import db
-from config import SLACK_SIGNING_SECRET, VERIFICATION_TOKEN, slack_token, user_token
+from config import SLACK_SIGNING_SECRET
 import api.db.index
 from app.views import login, logout, create_new_user, interactions, event_hook
 from app.links import links
-from app.slack_bot import Slack_Bot_Commands, Slack_Bot_Logic
+from app.slack_bot import Slack_Bot_Logic
 
 # This function is required or else there will be a context error
 def create_app():
@@ -108,11 +104,6 @@ def shutdown_session(exception=None):
     db.session.remove()
 
 """ Slack Bot Setup and command logic """
-slack_client = WebClient(token=slack_token)
-user_client = WebClient(user_token)
-
-vehicle_names = api.db.index.get_vehicle_names()
-
 slack_events_adapter = SlackEventAdapter(
     SLACK_SIGNING_SECRET, "/slack/events", app
 )
@@ -122,7 +113,7 @@ slack_bot = Slack_Bot_Logic()
 @slack_events_adapter.on("app_mention")
 def handle_message(event_data):
     def send_reply(value):
-        slack_bot.handle_message_response(value, app, vehicle_names)
+        slack_bot.handle_message_response(value, app)
 
     thread = Thread(target=send_reply, kwargs={"value": event_data})
     thread.start()

@@ -305,7 +305,7 @@ class Slack_Bot_Logic:
         user_slack_id = self.get_user_slack_id()
         self.slack_client.chat_postEphemeral(channel=user_slack_id, text=response_text, user=user_slack_id)
 
-    def handle_message_response(self, value, app, vehicle_names):
+    def handle_message_response(self, value, app):
         """ Reads the command given in slack and responds depending on what the user's input was
 
             Keyword arguments\n
@@ -315,6 +315,8 @@ class Slack_Bot_Logic:
         valid = self.validate_slack_message(value)
         if not valid:
             return
+        with app.app_context():
+            vehicle_names = api.db.index.get_vehicle_names()
         message = value["event"]
         if message.get("subtype") is None:
             commands = message.get('text').split()
