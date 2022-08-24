@@ -3,7 +3,7 @@ from flask_login import login_user, logout_user
 import api.db.index
 import requests
 import json
-import run
+from app.slack_bot import Slack_Bot_Logic
 from config import VERIFICATION_TOKEN
 from app.links import links
 
@@ -63,13 +63,14 @@ def create_new_user():
 
 def interactions():
     """The route that slack blocks call when you click submit"""
+    slack_bot = Slack_Bot_Logic()
     if request.method == 'POST':
         data = request.form.to_dict()
         payload = json.loads(data['payload'])
         if payload['actions'][0]['action_id'] != 'submit':
             return {'status': 200}
         else:
-            selected_vehicle = run.get_selected_vehicle_name_from_payload(payload)
+            selected_vehicle = slack_bot.get_selected_vehicle_name_from_payload(payload)
             if selected_vehicle is None:
                 requests.post(payload['response_url'], json={"text": "Did not select a vehicle"})
                 return {'status': 404}
@@ -78,11 +79,11 @@ def interactions():
                               json={"text": "Thanks for your request. We will process that shortly"})
             block_command_type = payload['message']['blocks'][0]['text']['text']
             if block_command_type == 'Reserve':
-                run.reserve_vehicle(payload, selected_vehicle)
+                slack_bot.reserve_vehicle(payload, selected_vehicle)
             elif block_command_type == 'Check':
-                run.check_vehicle(payload, selected_vehicle)
+                slack_bot.check_vehicle(payload, selected_vehicle)
             elif block_command_type == 'Reservations':
-                run.get_reservations(payload, selected_vehicle)
+                slack_bot.get_reservations(payload, selected_vehicle)
             else:
                 print(payload['message']['blocks'][0]['text']['text'])
             return {'status': 200}
