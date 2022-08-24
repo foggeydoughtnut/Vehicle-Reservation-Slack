@@ -24,7 +24,7 @@
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "Command 2 - *reservations* \n Gets the events/reservations of a specific vehicle for today"
+                "text": "Command 2 - *reservations* \n Gets the reservations of a specific vehicle for today"
             }
         },
         {
