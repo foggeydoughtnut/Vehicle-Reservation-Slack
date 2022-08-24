@@ -23,7 +23,7 @@ def create_app():
     new_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(new_app)
 
-    # Define views
+    # Add views
     new_app.add_url_rule(links.login, view_func=login, methods=['POST', 'GET'])
     new_app.add_url_rule(links.logout, view_func=logout, methods=['POST', 'GET'])
     new_app.add_url_rule(links.create_new_user, view_func=create_new_user, methods=['POST'])

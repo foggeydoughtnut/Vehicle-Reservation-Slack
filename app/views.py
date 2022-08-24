@@ -1,11 +1,13 @@
 from flask import redirect, request, render_template, session, flash
 from flask_login import login_user, logout_user, current_user
-import api.db.index
-import requests
+
 import json
+import requests
+
+import api.db.index
+from app.links import links
 from app.slack_bot import Slack_Bot_Logic
 from config import VERIFICATION_TOKEN
-from app.links import links
 
 
 def login():
@@ -22,6 +24,7 @@ def login():
             flash('Invalid Credentials. Please try again', 'error')
             return redirect(links.login)
         if user.username and user.check_password(password):
+            session.permanent = True
             session['user'] = user.username
             login_user(user)
             return redirect(links.admin_home)
@@ -50,7 +53,10 @@ def create_new_user():
         password_are_same = (password == confirm_password)
         username_exists = api.db.index.check_if_user_exists(username)
 
-        if password_are_same and not username_exists:
+        if not username or not password or not confirm_password:
+            flash('Please fill out all fields', 'error')
+            return redirect(links.admin_user_new)
+        elif password_are_same and not username_exists:
             api.db.index.create_user(username, password)
             flash('Successfully created account', 'success')
             return redirect(links.admin_user)
