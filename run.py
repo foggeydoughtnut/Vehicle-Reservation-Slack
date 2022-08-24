@@ -108,16 +108,8 @@ def shutdown_session(exception=None):
     db.session.remove()
 
 """ Slack Bot Setup and command logic """
-# instantiating slack client
 slack_client = WebClient(token=slack_token)
 user_client = WebClient(user_token)
-
-# COMMANDS
-# RESERVE_COMMAND = "reserve"
-# GET_ALL_RESERVATIONS_COMMAND = "reservations"
-# VEHICLES_COMMAND = "vehicles"
-# CHECK_VEHICLE_COMMAND = "check"
-# HELP_COMMAND = "help"
 
 vehicle_names = api.db.index.get_vehicle_names()
 
