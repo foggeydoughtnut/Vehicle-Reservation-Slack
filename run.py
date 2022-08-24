@@ -200,38 +200,6 @@ def check_vehicle(payload, selected_vehicle):
 
 
 
-def construct_vehicles_command():
-    """Constructs the vehicle slack block.
-    This is what adds the vehicles to the block and adds if they are available or not"""
-    offset_minutes = 15  # 15 Minute offset for check availability
-    start_time = strftime("%Y-%m-%dT%H:%M")
-
-    offset_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M') + timedelta(minutes=offset_minutes)
-    end_time = offset_time.strftime('%Y-%m-%dT%H:%M')
-
-    with open("app/slack_blocks/vehicles_results.json", "r+") as f:
-        f.truncate(0)  # Clear the json file
-
-    vehicles_block = {
-        "blocks": []
-    }
-    with app.app_context():
-        for vehicle in api.db.index.get_all_vehicles():
-            available = slack_bot.check_available(vehicle, start_time, end_time)
-            availability_message = "available" if available else "not available"
-            vehicles_block['blocks'].append(
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"{vehicle.name} - *{availability_message}*"
-                    }
-                }
-            )
-    with open('app/slack_blocks/vehicles_results.json', 'w') as f:
-        json.dump(vehicles_block, f)
-
-
 @slack_events_adapter.on("app_mention")
 def handle_message(event_data):
     def send_reply(value):
@@ -276,7 +244,9 @@ def handle_message(event_data):
 
             """Lists all of the vehicle's names and displays if they are available"""
             if command.lower() == Slack_Bot_Commands.VEHICLES_COMMAND:
-                construct_vehicles_command()
+                with app.app_context():
+                    vehicles = api.db.index.get_all_vehicles()
+                slack_bot.construct_vehicles_command(vehicles)
                 with open('app/slack_blocks/vehicles_results.json', 'r') as f:
                     data = json.load(f)
                 slack_bot.send_ephemeral_message(

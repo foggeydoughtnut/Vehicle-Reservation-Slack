@@ -1,6 +1,7 @@
 import difflib
-from time import time
 import json
+from time import time, strftime
+from datetime import datetime, timedelta
 
 # Slack Imports
 from slack_sdk import WebClient
@@ -197,4 +198,35 @@ class Slack_Bot_Logic:
             )
             return {'status': 500}
 
-    
+
+    def construct_vehicles_command(self, vehicles):
+        """Constructs the vehicle slack block.
+        This is what adds the vehicles to the block and adds if they are available or not"""
+        offset_minutes = 15  # 15 Minute offset for check availability
+        start_time = strftime("%Y-%m-%dT%H:%M")
+
+        offset_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M') + timedelta(minutes=offset_minutes)
+        end_time = offset_time.strftime('%Y-%m-%dT%H:%M')
+
+        with open("app/slack_blocks/vehicles_results.json", "r+") as f:
+            f.truncate(0)  # Clear the json file
+
+        vehicles_block = {
+            "blocks": []
+        }
+        for vehicle in vehicles:
+            available = self.check_available(vehicle, start_time, end_time)
+            availability_message = "available" if available else "not available"
+            vehicles_block['blocks'].append(
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"{vehicle.name} - *{availability_message}*"
+                    }
+                }
+            )
+        with open('app/slack_blocks/vehicles_results.json', 'w') as f:
+            json.dump(vehicles_block, f)
+
+        
