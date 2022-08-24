@@ -1,7 +1,6 @@
 import json
 from time import strftime, time
 from datetime import datetime, timedelta
-import difflib
 from threading import Thread
 # Flask Imports
 from flask import Flask, Response, render_template
@@ -345,35 +344,7 @@ def validate_slack_message(request):
         return False
     return True
 
-def find_similar_commands(command):
-    """Command that was used doesn't exist. Tries to get the closest command to what the user typed
 
-    Keyword arguments\n
-        command - The command the user typed in
-    """
-    similar_commands = difflib.get_close_matches(
-        command.lower(),
-        [
-            Slack_Bot_Commands.RESERVE_COMMAND,
-            Slack_Bot_Commands.GET_ALL_RESERVATIONS_COMMAND,
-            Slack_Bot_Commands.VEHICLES_COMMAND,
-            Slack_Bot_Commands.HELP_COMMAND,
-            Slack_Bot_Commands.CHECK_VEHICLE_COMMAND
-        ]
-    )
-    similar_command_response = ''
-    index = 0
-    for item in similar_commands:
-        index += 1
-        if index >= len(similar_commands):
-            similar_command_response += item
-        else:
-            similar_command_response += (item + ', ')
-    if similar_command_response:
-        return f"Did not recognize command: {command.lower()}\nDid you mean to use the command{'s' if len(similar_commands) > 1 else ''}: " \
-                        f"{similar_command_response}? "
-    else:
-        return f"Did not recognize command: {command.lower()}"
 
 
 @slack_events_adapter.on("app_mention")
@@ -441,7 +412,7 @@ def handle_message(event_data):
                 return
             else:
                 """No command matched the available commands. Tries to find similar command for what the user typed"""
-                response_text = find_similar_commands(command)
+                response_text = slack_bot.find_similar_commands(command)
                 slack_client.chat_postMessage(text=response_text, channel=channel_id, thread_ts=message['ts'])
                 return
 
