@@ -4,7 +4,7 @@
 Poetry install   
 Copy the .env-example into a .env file and enter the needed data  
 Run the run.py
-Then navigate to localhost:3000/login and login to the admin page with username: admin password: password  
+Then navigate to localhost:3000/login and login to the admin page with username: **admin** password: **password**    
 Then from the admin (/admin) page you can add vehicles and create admin users  
 
 Start ngrok (or anything similar) on port 3000 so that way traffic can be forwarded to localhost:3000.  
@@ -16,8 +16,12 @@ ngrok http 3000
 Copy the forwarding https url and go to the slack app's homepage.  
 Navigate to Event Subscriptions and set the Request URL to be that forwarding https url with /slack/events added on to it.  
 ex. https://e446-blah-blah.ngrok.io/slack/events  
+![Screenshot from 2022-08-26 08-27-32](https://user-images.githubusercontent.com/78196548/186927233-688045ed-1ad8-439b-8cd5-8d1e5ea08053.png)
+
 Navigate to Interactivity & Shortcuts and set the Request URL to be that forwarding https url with /interactions added to it.  
 ex. https://e446-blah-blah.ngrok.io/interactions  
+ ![Screenshot from 2022-08-26 08-27-44](https://user-images.githubusercontent.com/78196548/186927374-fffb86e8-08b7-4e56-a615-13ef42615254.png)
+
 Reinstall the app to the workplace through the Install App tab
 
 ## Create Admin User  
