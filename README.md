@@ -12,7 +12,9 @@ Download Ngrok [here](https://ngrok.com/download)
 Run the following command to start ngrok
 ```
 ngrok http 3000
-```
+```  
+![Screenshot from 2022-08-26 09-04-45](https://user-images.githubusercontent.com/78196548/186935488-277a41a0-b071-4e4d-b510-aa74124ea66c.png)
+
 Copy the forwarding https url and go to the slack app's homepage.  
 Navigate to Event Subscriptions and set the Request URL to be that forwarding https url with /slack/events added on to it.  
 ex. https://e446-blah-blah.ngrok.io/slack/events  
