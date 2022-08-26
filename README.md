@@ -39,6 +39,26 @@ From there find the calendars for the vehicles. The calendar id for that vehicle
 
 Run the following get query with the route: https://graph.microsoft.com/v1.0/me/calendarGroups to get all of the calendar groups for that account.  
 From there find the calendar group that contains the calendars for the vehicles. The id will be the calander group id in the database. 
+## Using the slack bot  
+If you have completed all of the previous parts, your slack bot should ready to run.  
+Navigate to the slack channel that has the Vehicle Reservation app. If there is no workspace with the app, go ahead and add the app through the slack website.  
+Start using the slack bot by mentioning the slack bot in any public channel. (ex. @Vehicle Reservation 'insert command here')  
+Currently there are 5 commands the slack bot has. A reserve command, check command, vehicles command, reservations command, and help command.  
+- **Reserve command**  
+  1. This is the command that is when filled out and submitted will make a reservation for the vehicle the user requested.  
+- **Check command**  
+  1. This command is used to see if a vehicle is available from start_time to end_time. The start_time and end_time are given to the command by the user. 
+- **Vehicles command**  
+  1. This command is used to see all of the vehicles in the database and checks if there are any reservations for it in the next 15 minutes.  
+- **Reservations command**  
+  1. This command can be used to see all of the reservations that a certain vehicle has for today.  
+- **Help command**  
+  1. This command displays all of the commands available and what keyword is used to invoke the command. It also gives basic information about what the command does.  
+
+When the api access token is not in the api_token_access.bin file and a user uses the commands that need outlook's calendars for the first time, the user is sent a direct message through the Vehicle Reservations bot channel and Microsofts verification window is opened. The user needs to take the code that was sent to them and input it into the window that was opened. Then the user chooses the user that has all of the vehicles in it.  
+It then will save the access token inside of the api_token_access.bin file, so that way it is saved.  
+> Note: The access token will need to be for the same outlook account that we used to fill up the database.  
+
 ### Tests  
 This repository uses Pytest.  
 To run the tests navigate to base directory.  
