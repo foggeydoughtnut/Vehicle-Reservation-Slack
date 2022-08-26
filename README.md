@@ -59,6 +59,7 @@ coverage report or coverage html
 #### **User Token Scopes**  
 - identity.basic  
 
-### Azure (For Outlook api)  
+### Azure (For Outlook api) 
+#### **Graph api**  
 - Calendars.ReadWrite  
 - User.Read  
