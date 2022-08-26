@@ -1,7 +1,7 @@
 # Vehicle Reservation app for Slack
 
 ## Setup  
-Poetry install   
+Poetry install to install all of the needed packages/modules    
 Copy the .env-example into a .env file and enter the needed data  
 Run the run.py
 Then navigate to localhost:3000/login and login to the admin page with username: **admin** password: **password**    
