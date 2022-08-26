@@ -26,6 +26,13 @@ class Slack_Bot_Logic:
         self.user_client = WebClient(user_token)
         self.commands = Slack_Bot_Commands()
 
+        with open('app/slack_blocks/app_home_block.json') as f:
+            home_block = json.load(f)
+        self.slack_client.views_publish(
+            user_id = self.get_user_slack_id(),
+            view = home_block
+        )
+
     def send_ephemeral_message(self, text, channel_id, user_id, ts_id, blocks=''):
         if blocks == '':
             self.slack_client.chat_postEphemeral(

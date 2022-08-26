@@ -1,0 +1,60 @@
+{
+    "type": "home",
+    "blocks": [
+        {
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": "Welcome to Vehicle Reservation's Home!"
+            }
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "Below is the usage manual for how to use this bot. Get started using this app by mentioning the app like @Vehicle Reservation 'insert_command_here' in a channel that the bot is in. \n An example command would be as follows : *@Vehicle Reservation help* \n In this example this would display the usage manual for this bot."
+            }
+        },
+        {
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": "Usage Manual"
+            }
+        },
+        {
+            "type": "divider"
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "Command 1 - *reserve* \n Command used to reserve a vehicle."
+            }
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "Command 2 - *reservations* \n Gets the reservations of a specific vehicle for today"
+            }
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "Command 3 - *vehicles* \n Lists all of the vehicles and checks if they are available"
+            }
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "Command 4 - *check* \n Checks if a vehicle is available from start-time to end-time"
+            }
+        },
+        {
+            "type": "divider"
+        }
+    ]
+}
