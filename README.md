@@ -1,6 +1,7 @@
 # Vehicle Reservation app for Slack
 
 ## Setup  
+Clone the repository and navigate into the project.  
 Poetry install to install all of the needed packages/modules    
 Copy the .env-example into a .env file and enter the needed data  
 Run the run.py
