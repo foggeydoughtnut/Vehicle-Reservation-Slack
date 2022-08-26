@@ -47,4 +47,18 @@ To generate a coverage report, run the following:
 ```
 coverage run -m pytest
 coverage report or coverage html
-```
+```  
+
+## Scopes  
+### Slack 
+#### **Bot Token Scopes**
+- app_mentions:read  
+- channels:history  
+- chat:write  
+- im:history  
+#### **User Token Scopes**  
+- identity.basic  
+
+### Azure (For Outlook api)  
+- Calendars.ReadWrite  
+- User.Read  
