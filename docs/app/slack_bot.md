@@ -1,9 +1,9 @@
 # [Slack Bot](../../app/slack_bot.py)  
 
-## Class **Slack_Bot_Commands**  
+## Class **SlackBotCommands**  
 - This class is just an object that has what each command is.  
 ---
-## Class **Slack_Bot_Logic**
+## Class **SlackBotLogic**
 `send_ephemeral_message(text, channel_id, user_id, ts_id, blocks='')`
 - **Params**  
     1. **text**  

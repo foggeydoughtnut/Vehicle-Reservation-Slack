@@ -12,7 +12,7 @@ import api.Calendar
 import api.db.index
 
 
-class Slack_Bot_Commands:
+class SlackBotCommands:
     RESERVE_COMMAND = "reserve"
     GET_ALL_RESERVATIONS_COMMAND = "reservations"
     VEHICLES_COMMAND = "vehicles"
@@ -20,11 +20,11 @@ class Slack_Bot_Commands:
     HELP_COMMAND = "help"
 
 
-class Slack_Bot_Logic:
+class SlackBotLogic:
     def __init__(self):
         self.slack_client = WebClient(token=slack_token)
         self.user_client = WebClient(user_token)
-        self.commands = Slack_Bot_Commands()
+        self.commands = SlackBotCommands()
 
         with open('app/slack_blocks/app_home_block.json') as f:
             home_block = json.load(f)
@@ -386,7 +386,7 @@ class Slack_Bot_Logic:
                 return
 
             """Displays the usage manual which contains what commands there are and how to use them"""
-            if command.lower() == Slack_Bot_Commands.HELP_COMMAND:
+            if command.lower() == SlackBotCommands.HELP_COMMAND:
                 with open('app/slack_blocks/help_block.json') as f:
                     data = json.load(f)
                 self.slack_client.chat_postMessage(text="Here is the usage manual", channel=channel_id,

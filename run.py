@@ -14,7 +14,7 @@ from config import SLACK_SIGNING_SECRET
 import api.db.index
 from app.views import login, logout, create_new_user, interactions, event_hook
 from app.links import links
-from app.slack_bot import Slack_Bot_Logic
+from app.slack_bot import SlackBotLogic
 
 # This function is required or else there will be a context error
 def create_app():
@@ -107,7 +107,7 @@ def shutdown_session(exception=None):
 slack_events_adapter = SlackEventAdapter(
     SLACK_SIGNING_SECRET, "/slack/events", app
 )
-slack_bot = Slack_Bot_Logic()
+slack_bot = SlackBotLogic()
 
 
 @slack_events_adapter.on("app_mention")

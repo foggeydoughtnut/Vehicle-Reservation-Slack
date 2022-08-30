@@ -1,7 +1,7 @@
-from app.slack_bot import Slack_Bot_Logic
+from app.slack_bot import SlackBotLogic
 import json
 
-slack_bot = Slack_Bot_Logic()
+slack_bot = SlackBotLogic()
 
 with open('tests/valid_payload.json') as f:
     test_payload = json.load(f)
@@ -28,40 +28,40 @@ def test_check_available(mocker):
 
 def test_reserve_vehicle_successfull(mocker):
     mocker.patch('api.db.index.get_vehicle_by_name', return_value=Vehicle())
-    mocker.patch.object(Slack_Bot_Logic, 'check_available', return_value=True)
+    mocker.patch.object(SlackBotLogic, 'check_available', return_value=True)
     mocker.patch('api.Calendar.schedule_event', return_value={"SUCCESS" : "Successfully created an event"})
-    mocker.patch.object(Slack_Bot_Logic, 'send_ephemeral_message', return_value='SUCCESS')
+    mocker.patch.object(SlackBotLogic, 'send_ephemeral_message', return_value='SUCCESS')
     res = slack_bot.reserve_vehicle(test_payload, 'test')
     assert res['status'] == 200
 
 def test_reserve_vehicle_error_schedule(mocker):
     """Returns a 500 error when api.Calendar.schedule_event returns an error"""
     mocker.patch('api.db.index.get_vehicle_by_name', return_value=Vehicle())
-    mocker.patch.object(Slack_Bot_Logic, 'check_available', return_value=True)
+    mocker.patch.object(SlackBotLogic, 'check_available', return_value=True)
     mocker.patch('api.Calendar.schedule_event', return_value={"ERROR" : "An error occured"})
-    mocker.patch.object(Slack_Bot_Logic, 'send_ephemeral_message', return_value='')
+    mocker.patch.object(SlackBotLogic, 'send_ephemeral_message', return_value='')
     res = slack_bot.reserve_vehicle(test_payload, 'test')
     assert res['status'] == 500
 
 def test_reserve_vehicle_not_available(mocker):
     """Returns a 400 status if the vehicle is not available"""
     mocker.patch('api.db.index.get_vehicle_by_name', return_value=Vehicle())
-    mocker.patch.object(Slack_Bot_Logic, 'check_available', return_value=False)
-    mocker.patch.object(Slack_Bot_Logic, 'send_ephemeral_message', return_value='')
+    mocker.patch.object(SlackBotLogic, 'check_available', return_value=False)
+    mocker.patch.object(SlackBotLogic, 'send_ephemeral_message', return_value='')
     res = slack_bot.reserve_vehicle(test_payload, 'test')
     assert res['status'] == 400
 
 def test_reserve_vehicle_exception(mocker):
     """Returns status of 500 when exception occurs"""
     mocker.patch('api.db.index.get_vehicle_by_name', return_value=Vehicle())
-    mocker.patch.object(Slack_Bot_Logic, 'check_available', side_effect=Exception("mocked error"))
-    mocker.patch.object(Slack_Bot_Logic, 'send_ephemeral_message', return_value='')
+    mocker.patch.object(SlackBotLogic, 'check_available', side_effect=Exception("mocked error"))
+    mocker.patch.object(SlackBotLogic, 'send_ephemeral_message', return_value='')
     res = slack_bot.reserve_vehicle(test_payload, 'test')
     assert res['status'] == 500
 
 def test_reserve_vehicle_no_name(mocker):
     mocker.patch('api.db.index.get_vehicle_by_name', return_value=Vehicle())
-    mocker.patch.object(Slack_Bot_Logic, 'send_ephemeral_message', return_value='')
+    mocker.patch.object(SlackBotLogic, 'send_ephemeral_message', return_value='')
     with open('tests/no_name_payload.json') as f:
         payload = json.load(f)
     res = slack_bot.reserve_vehicle(payload, 'test')
@@ -69,64 +69,64 @@ def test_reserve_vehicle_no_name(mocker):
 
 def test_reserve_vehicle_no_date_time(mocker):
     mocker.patch('api.db.index.get_vehicle_by_name', return_value=Vehicle())
-    mocker.patch.object(Slack_Bot_Logic, 'send_ephemeral_message', return_value='')
-    mocker.patch.object(Slack_Bot_Logic, 'get_start_end_time_from_payload', return_value=('NoneTNone', 'NoneTNone'))
+    mocker.patch.object(SlackBotLogic, 'send_ephemeral_message', return_value='')
+    mocker.patch.object(SlackBotLogic, 'get_start_end_time_from_payload', return_value=('NoneTNone', 'NoneTNone'))
     res = slack_bot.reserve_vehicle(test_payload, 'test')
     assert res['status'] == 400
 
 def test_reserve_vehicle_missing_time(mocker):
     mocker.patch('api.db.index.get_vehicle_by_name', return_value=Vehicle())
-    mocker.patch.object(Slack_Bot_Logic, 'send_ephemeral_message', return_value='')
-    mocker.patch.object(Slack_Bot_Logic, 'get_start_end_time_from_payload', return_value=('2022-08-10TNone', '2022-08-10TNone'))
+    mocker.patch.object(SlackBotLogic, 'send_ephemeral_message', return_value='')
+    mocker.patch.object(SlackBotLogic, 'get_start_end_time_from_payload', return_value=('2022-08-10TNone', '2022-08-10TNone'))
     res = slack_bot.reserve_vehicle(test_payload, 'test')
     assert res['status'] == 400
 
 def test_reserve_vehicle_missing_date(mocker):
     mocker.patch('api.db.index.get_vehicle_by_name', return_value=Vehicle())
-    mocker.patch.object(Slack_Bot_Logic, 'send_ephemeral_message', return_value='')
-    mocker.patch.object(Slack_Bot_Logic, 'get_start_end_time_from_payload', return_value=('NoneT13:00', 'NoneT14:00'))
+    mocker.patch.object(SlackBotLogic, 'send_ephemeral_message', return_value='')
+    mocker.patch.object(SlackBotLogic, 'get_start_end_time_from_payload', return_value=('NoneT13:00', 'NoneT14:00'))
     res = slack_bot.reserve_vehicle(test_payload, 'test')
     assert res['status'] == 400
 
 def test_check_vehicle_success(mocker):
     mocker.patch('api.db.index.get_vehicle_by_name', return_value=Vehicle())
-    mocker.patch.object(Slack_Bot_Logic, 'check_available', return_value=True)
-    mocker.patch.object(Slack_Bot_Logic, 'send_ephemeral_message', return_value='')
+    mocker.patch.object(SlackBotLogic, 'check_available', return_value=True)
+    mocker.patch.object(SlackBotLogic, 'send_ephemeral_message', return_value='')
     res = slack_bot.check_vehicle(test_payload, 'test')
     assert res['status'] == 200
 
 def test_check_vehicle_unavailable(mocker):
     mocker.patch('api.db.index.get_vehicle_by_name', return_value=Vehicle())
-    mocker.patch.object(Slack_Bot_Logic, 'check_available', return_value=False)
-    mocker.patch.object(Slack_Bot_Logic, 'send_ephemeral_message', return_value='')
+    mocker.patch.object(SlackBotLogic, 'check_available', return_value=False)
+    mocker.patch.object(SlackBotLogic, 'send_ephemeral_message', return_value='')
     res = slack_bot.check_vehicle(test_payload, 'test')
     assert res['status'] == 400
 
 def test_check_vehicle_exception(mocker):
     mocker.patch('api.db.index.get_vehicle_by_name', return_value=Vehicle())
-    mocker.patch.object(Slack_Bot_Logic, 'check_available', side_effect=Exception('mocked exception'))
-    mocker.patch.object(Slack_Bot_Logic, 'send_ephemeral_message', return_value='')
+    mocker.patch.object(SlackBotLogic, 'check_available', side_effect=Exception('mocked exception'))
+    mocker.patch.object(SlackBotLogic, 'send_ephemeral_message', return_value='')
     res = slack_bot.check_vehicle(test_payload, 'test')
     assert res['status'] == 500
 
 def test_check_vehicle_no_date_time(mocker):
     mocker.patch('api.db.index.get_vehicle_by_name', return_value=Vehicle())
-    mocker.patch.object(Slack_Bot_Logic, 'send_ephemeral_message', return_value='')
-    mocker.patch.object(Slack_Bot_Logic, 'get_start_end_time_from_payload', return_value=('NoneTNone', 'NoneTNone'))
+    mocker.patch.object(SlackBotLogic, 'send_ephemeral_message', return_value='')
+    mocker.patch.object(SlackBotLogic, 'get_start_end_time_from_payload', return_value=('NoneTNone', 'NoneTNone'))
     res = slack_bot.check_vehicle(test_payload, 'test')
     assert res['status'] == 400
 
 def test_check_vehicle_missing_time(mocker):
     mocker.patch('api.db.index.get_vehicle_by_name', return_value=Vehicle())
-    mocker.patch.object(Slack_Bot_Logic, 'send_ephemeral_message', return_value='')
-    mocker.patch.object(Slack_Bot_Logic, 'get_start_end_time_from_payload', return_value=('2022-08-10TNone', '2022-08-10TNone'))
+    mocker.patch.object(SlackBotLogic, 'send_ephemeral_message', return_value='')
+    mocker.patch.object(SlackBotLogic, 'get_start_end_time_from_payload', return_value=('2022-08-10TNone', '2022-08-10TNone'))
     res = slack_bot.check_vehicle(test_payload, 'test')
     assert res['status'] == 400
 
 def test_check_vehicle_missing_date(mocker):
     mocker.patch('api.db.index.get_vehicle_by_name', return_value=Vehicle())
-    mocker.patch.object(Slack_Bot_Logic, 'send_ephemeral_message', return_value='')
-    mocker.patch.object(Slack_Bot_Logic, 'get_start_end_time_from_payload', return_value=('NoneT13:00', 'NoneT14:00'))
+    mocker.patch.object(SlackBotLogic, 'send_ephemeral_message', return_value='')
+    mocker.patch.object(SlackBotLogic, 'get_start_end_time_from_payload', return_value=('NoneT13:00', 'NoneT14:00'))
     res = slack_bot.check_vehicle(test_payload, 'test')
     assert res['status'] == 400
 
@@ -135,7 +135,7 @@ def test_get_reservations(mocker):
     mocker.patch('api.db.index.get_vehicle_by_name', return_value=Vehicle())
     mocker.patch('api.Calendar.list_specific_calendar_in_group_events', return_value={})
     mocker.patch('api.Calendar.construct_calendar_events_block', return_value = {'reservations' : True})
-    mocker.patch.object(Slack_Bot_Logic, 'send_ephemeral_message', return_value='')
+    mocker.patch.object(SlackBotLogic, 'send_ephemeral_message', return_value='')
     res = slack_bot.get_reservations(test_payload, 'test')
     assert res['status'] == 200
     assert res['reservations'] == True
@@ -145,7 +145,7 @@ def test_get_reservations_no_reservations(mocker):
     mocker.patch('api.db.index.get_vehicle_by_name', return_value=Vehicle())
     mocker.patch('api.Calendar.list_specific_calendar_in_group_events', return_value={})
     mocker.patch('api.Calendar.construct_calendar_events_block', return_value = {'reservations' : False})
-    mocker.patch.object(Slack_Bot_Logic, 'send_ephemeral_message', return_value='')
+    mocker.patch.object(SlackBotLogic, 'send_ephemeral_message', return_value='')
     res = slack_bot.get_reservations(test_payload, 'test')
     assert res['status'] == 200
     assert res['reservations'] == False
@@ -154,7 +154,7 @@ def test_get_reservations_excpetion(mocker):
     """Tests that 500 status is returned when exception occurs"""
     mocker.patch('api.db.index.get_vehicle_by_name', return_value=Vehicle())
     mocker.patch('api.Calendar.list_specific_calendar_in_group_events', side_effect=Exception('mocked exception'))
-    mocker.patch.object(Slack_Bot_Logic, 'send_ephemeral_message', return_value='')
+    mocker.patch.object(SlackBotLogic, 'send_ephemeral_message', return_value='')
     res = slack_bot.get_reservations(test_payload, 'test')
     assert res['status'] == 500
 
@@ -171,7 +171,7 @@ def test_construct_vehicles_command(mocker):
         ]
     }
     mocker.patch('api.db.index.get_all_vehicles', return_value=[Vehicle()])
-    mocker.patch.object(Slack_Bot_Logic, 'check_available', return_value=True)
+    mocker.patch.object(SlackBotLogic, 'check_available', return_value=True)
     slack_bot.construct_vehicles_command([])
 
     with open('app/slack_blocks/vehicles_results.json', 'r') as f:

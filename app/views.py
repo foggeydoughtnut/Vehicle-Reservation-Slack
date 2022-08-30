@@ -6,7 +6,7 @@ import requests
 
 import api.db.index
 from app.links import links
-from app.slack_bot import Slack_Bot_Logic
+from app.slack_bot import SlackBotLogic
 from config import VERIFICATION_TOKEN
 
 
@@ -70,7 +70,7 @@ def create_new_user():
 
 def interactions():
     """The route that Slack blocks call when you click submit"""
-    slack_bot = Slack_Bot_Logic()
+    slack_bot = SlackBotLogic()
     if request.method == 'POST':
         data = request.form.to_dict()
         payload = json.loads(data['payload'])
