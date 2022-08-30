@@ -12,7 +12,6 @@ from config import VERIFICATION_TOKEN
 
 def login():
     """Login URL for the admin page"""
-    error = None
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')

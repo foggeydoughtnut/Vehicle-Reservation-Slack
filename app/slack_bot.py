@@ -34,6 +34,15 @@ class Slack_Bot_Logic:
         )
 
     def send_ephemeral_message(self, text, channel_id, user_id, ts_id, blocks=''):
+        """Sends a message that is only visible to the user that is specified by user_id
+        
+        Keyword arguments\n
+            text - The message that will be sent\n
+            channel_id - The slack channel\n
+            user_id - The user's id that the message will be sent to\n
+            ts_id - The thread id\n
+            blocks (optional) - The interactive block. See https://api.slack.com/block-kit\n
+        """
         if blocks == '':
             self.slack_client.chat_postEphemeral(
                 channel=channel_id,
@@ -82,9 +91,10 @@ class Slack_Bot_Logic:
             return f"Did not recognize command: {command.lower()}"
 
     def get_selected_vehicle_name_from_payload(self, payload):
+        """Gets the vehicle_name that was selected on an interactive block"""
         selected_option = list(payload['state']['values'].items())[0][1]['static_select-action']['selected_option']
         if selected_option is None:
-            return selected_option
+            return
         else:
             vehicle_name = selected_option.get('text').get('text', None)
             return vehicle_name
@@ -153,6 +163,12 @@ class Slack_Bot_Logic:
 
 
     def check_available(self, vehicle, start_time, end_time):
+        """Uses the api.Calendar.check_if_reservation_available to see if a vehicle is available
+        Keyword arguments\n
+            vehicle - The vehicle we want to check if it is available\n
+            start_time - The start time for the check\n
+            end_time - The end time for the check\n
+        """
         available = api.Calendar.check_if_reservation_available(
             vehicle.calendarGroupID,
             vehicle.calendarID,
@@ -240,7 +256,7 @@ class Slack_Bot_Logic:
             Keyword arguments\n
                 payload -- The slack block payload that was sent from submitting the check_vehicle slack block\n
                 selected_vehicle -- The vehicle the user selected
-            """
+        """
         vehicle = api.db.index.get_vehicle_by_name(selected_vehicle)
         start_time, end_time = self.get_start_end_time_from_payload(payload)
         channel_id = payload['channel']['id']
