@@ -1,4 +1,4 @@
-# Database Logic  
+# [Database Logic](../../../api/db/index.py)  
 Contains the database logic so that way the database models don't have to be imported into the other files.  
 
 --- 

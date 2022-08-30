@@ -17,18 +17,18 @@ ngrok http 3000
 ![Screenshot from 2022-08-26 09-04-45](https://user-images.githubusercontent.com/78196548/186935488-277a41a0-b071-4e4d-b510-aa74124ea66c.png)
 
 Copy the forwarding https url and go to the slack app's homepage.  
-Navigate to Event Subscriptions and set the Request URL to be that forwarding https url with /slack/events added on to it.  
+Navigate to **Event Subscriptions** and set the Request URL to be that forwarding https url with /slack/events added on to it.  
 ex. https://e446-blah-blah.ngrok.io/slack/events  
 ![Screenshot from 2022-08-26 08-27-32](https://user-images.githubusercontent.com/78196548/186927233-688045ed-1ad8-439b-8cd5-8d1e5ea08053.png)
 
-Navigate to Interactivity & Shortcuts and set the Request URL to be that forwarding https url with /interactions added to it.  
+Navigate to **Interactivity & Shortcuts** and set the Request URL to be that forwarding https url with /interactions added to it.  
 ex. https://e446-blah-blah.ngrok.io/interactions  
  ![Screenshot from 2022-08-26 08-27-44](https://user-images.githubusercontent.com/78196548/186927374-fffb86e8-08b7-4e56-a615-13ef42615254.png)
 
 Reinstall the app to the workplace through the Install App tab
 
 ## Create Admin User  
-When you run the run.py for the first time it will make a admin account with username: admin and password: password.  
+When you run the run.py for the first time it will make a admin account with username: *admin* and password: *password*.  
 With that you can log into the admin page and create a more secure admin account.  
 
 ## Getting vehicle's calendar id and calendar group id  
@@ -60,11 +60,11 @@ It then will save the access token inside of the api_token_access.bin file, so t
 > Note: The access token will need to be for the same outlook account that we used to fill up the database.  
 
 ## Database  
-This project uses sqlite3 for its database.  
-This project uses SQLAlchemy for its ORM.  
+This project uses [**sqlite3**](https://www.sqlite.org/docs.html) for its database.  
+This project uses [**SQLAlchemy**](https://docs.sqlalchemy.org/en/14/) for its ORM.  
 
 ## Tests  
-This repository uses Pytest.  
+This repository uses [Pytest](https://docs.pytest.org/en/7.1.x/contents.html).  
 To run the tests navigate to base directory.  
 Run the following command
 ```

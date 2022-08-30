@@ -1,4 +1,4 @@
-# Calendar.py  
+# [Calendar.py](../../api/Calendar.py)  
 `generate_headers()`  
 - Used for the headers in Microsoft's graph api.  
 - Uses the `generate_access_token` method to get the access_token then uses that in the headers' dictionary.  

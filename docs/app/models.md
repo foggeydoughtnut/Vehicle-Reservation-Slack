@@ -1,4 +1,4 @@
-# Models  
+# [Models](../../app/models.py)  
 This project uses [SQLAlchemy](https://www.sqlalchemy.org/) for its ORM.  
 =
 ## Vehicle Model  

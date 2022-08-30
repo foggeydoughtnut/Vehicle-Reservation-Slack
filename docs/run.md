@@ -1,4 +1,4 @@
-# run.py  
+# [run.py](../run.py)  
 This file is where all the slack bot logic is handled. It is also where the Flask configuration is done.  
 
 ---  
@@ -15,7 +15,7 @@ This file is where all the slack bot logic is handled. It is also where the Flas
 - This function overrides the default create view so that way you can create a new user without needing to hash the password manually.  
 ---  
 ### MyHomeView(AdminIndexView)  
-- Overides the base admin index view to contain the `admin/index.html` template.  
+- Overides the base admin index view to contain the [admin/index.html](../app/templates/admin/index.html) template.  
 --- 
 `handle_message` and `send_reply`  
 - The `@slack_events_adapter.on("app_mention")` listens for when the slack bot is mentioned. It then will take the message's data that was sent and calls the `handle_message_reponse` in [slack_bot.py](../app/slack_bot.py)

@@ -1,4 +1,4 @@
-# Slack Bot  
+# [Slack Bot](../../app/slack_bot.py)  
 
 ## Class **Slack_Bot_Commands**  
 - This class is just an object that has what each command is.  

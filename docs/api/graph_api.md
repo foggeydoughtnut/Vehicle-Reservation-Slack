@@ -1,4 +1,4 @@
-# graph_api  
+# [graph_api](../../api/graph_api.py)  
 `generate_access_token_response(application_id, SCOPES)`  
 - Parameters  
     1. **application_id**  
