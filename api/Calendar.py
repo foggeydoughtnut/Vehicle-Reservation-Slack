@@ -2,7 +2,7 @@ import requests
 import os
 import json
 from datetime import datetime, timedelta
-import api.graphAPI
+import api.graph_api
 from dotenv import load_dotenv
 from time import strftime
 load_dotenv()
@@ -12,7 +12,7 @@ application_id = os.getenv('APPLICATION_ID')
 
 
 def generate_headers():
-    access_token = api.graphAPI.generate_access_token(application_id, api.graphAPI.SCOPES)
+    access_token = api.graph_api.generate_access_token(application_id, api.graph_api.SCOPES)
     headers = {
         'Authorization': 'Bearer ' + access_token
     }
@@ -61,7 +61,7 @@ def schedule_event(calendar_group_id, calendar_id, start_time, end_time, users_n
     else:
         try:
             requests.post(
-                api.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendar_group_id}'
+                api.graph_api.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendar_group_id}'
                                                   f'/calendars/{calendar_id}/events',
                 headers=generate_headers(),
                 json=construct_event_detail(
@@ -92,7 +92,7 @@ def list_specific_calendar_in_group_events(calendar_group_id, calendar_id):
     start_date_time = strftime("%Y-%m-%dT%H:%M:%S")
     end_date_time = strftime("%Y-%m-%dT23:59:59")
     events = requests.get(
-        api.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendar_group_id}/calendars/{calendar_id}'
+        api.graph_api.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendar_group_id}/calendars/{calendar_id}'
                                           f'/calendarview?startdatetime={start_date_time}-06:00'
                                           f'&endDateTime={end_date_time}-06:00',
         headers=calendar_headers
@@ -201,7 +201,7 @@ def check_if_reservation_available(calendar_group_id, calendar_id, start_time, e
     calendar_headers = generate_headers()
     calendar_headers['Prefer'] = 'outlook.timezone="America/Denver"'
     events = requests.get(
-        api.graphAPI.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendar_group_id}/calendars/{calendar_id}'
+        api.graph_api.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendar_group_id}/calendars/{calendar_id}'
                                           f'/calendarView?startDateTime={s_time}-06:00&endDateTime={e_time}-06:00',
         # NOTE: offset is needed or else this won't work
         headers=calendar_headers
