@@ -8,4 +8,3 @@ class links:
     admin_home = '/admin'
     admin_user = '/admin/user'
     admin_user_new = '/admin/user/new'
-

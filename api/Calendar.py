@@ -62,7 +62,7 @@ def schedule_event(calendar_group_id, calendar_id, start_time, end_time, users_n
         try:
             requests.post(
                 api.graph_api.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendar_group_id}'
-                                                  f'/calendars/{calendar_id}/events',
+                                                   f'/calendars/{calendar_id}/events',
                 headers=generate_headers(),
                 json=construct_event_detail(
                     event_name,
@@ -93,8 +93,8 @@ def list_specific_calendar_in_group_events(calendar_group_id, calendar_id):
     end_date_time = strftime("%Y-%m-%dT23:59:59")
     events = requests.get(
         api.graph_api.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendar_group_id}/calendars/{calendar_id}'
-                                          f'/calendarview?startdatetime={start_date_time}-06:00'
-                                          f'&endDateTime={end_date_time}-06:00',
+                                           f'/calendarview?startdatetime={start_date_time}-06:00'
+                                           f'&endDateTime={end_date_time}-06:00',
         headers=calendar_headers
     )
     # To be returned for slack bot
@@ -202,7 +202,7 @@ def check_if_reservation_available(calendar_group_id, calendar_id, start_time, e
     calendar_headers['Prefer'] = 'outlook.timezone="America/Denver"'
     events = requests.get(
         api.graph_api.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendar_group_id}/calendars/{calendar_id}'
-                                          f'/calendarView?startDateTime={s_time}-06:00&endDateTime={e_time}-06:00',
+                                           f'/calendarView?startDateTime={s_time}-06:00&endDateTime={e_time}-06:00',
         # NOTE: offset is needed or else this won't work
         headers=calendar_headers
     )

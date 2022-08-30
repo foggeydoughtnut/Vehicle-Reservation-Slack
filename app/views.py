@@ -69,7 +69,7 @@ def create_new_user():
 
 
 def interactions():
-    """The route that slack blocks call when you click submit"""
+    """The route that Slack blocks call when you click submit"""
     slack_bot = Slack_Bot_Logic()
     if request.method == 'POST':
         data = request.form.to_dict()

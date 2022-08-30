@@ -12,13 +12,13 @@ import api.Calendar
 import api.db.index
 
 
-
 class Slack_Bot_Commands:
     RESERVE_COMMAND = "reserve"
     GET_ALL_RESERVATIONS_COMMAND = "reservations"
     VEHICLES_COMMAND = "vehicles"
     CHECK_VEHICLE_COMMAND = "check"
     HELP_COMMAND = "help"
+
 
 class Slack_Bot_Logic:
     def __init__(self):
@@ -29,8 +29,8 @@ class Slack_Bot_Logic:
         with open('app/slack_blocks/app_home_block.json') as f:
             home_block = json.load(f)
         self.slack_client.views_publish(
-            user_id = self.get_user_slack_id(),
-            view = home_block
+            user_id=self.get_user_slack_id(),
+            view=home_block
         )
 
     def send_ephemeral_message(self, text, channel_id, user_id, ts_id, blocks=''):
@@ -38,7 +38,7 @@ class Slack_Bot_Logic:
         
         Keyword arguments\n
             text - The message that will be sent\n
-            channel_id - The slack channel\n
+            channel_id - The Slack channel\n
             user_id - The user's id that the message will be sent to\n
             ts_id - The thread id\n
             blocks (optional) - The interactive block. See https://api.slack.com/block-kit\n
@@ -59,7 +59,6 @@ class Slack_Bot_Logic:
                 blocks=blocks
             )
 
-    
     def find_similar_commands(self, command):
         """Command that was used doesn't exist. Tries to get the closest command to what the user typed
 
@@ -85,8 +84,9 @@ class Slack_Bot_Logic:
             else:
                 similar_command_response += (item + ', ')
         if similar_command_response:
-            return f"Did not recognize command: {command.lower()}\nDid you mean to use the command{'s' if len(similar_commands) > 1 else ''}: " \
-                            f"{similar_command_response}? "
+            return f"Did not recognize command: {command.lower()}\n" \
+                   f"Did you mean to use the command{'s' if len(similar_commands) > 1 else ''}: " \
+                   f"{similar_command_response}? "
         else:
             return f"Did not recognize command: {command.lower()}"
 
@@ -113,10 +113,9 @@ class Slack_Bot_Logic:
         end = f"{end_date}T{end_time}"
         return start, end
 
-
     def validate_slack_message(self, request):
-        """Validates slack message using the verfication token.\n
-            TODO: Verifcation tokens are going to be depracated. Use the slack-signing-secret method instead.\n
+        """Validates slack message using the verification token.\n
+            TODO: Verification tokens are going to be deprecated. Use the slack-signing-secret method instead.\n
             https://api.slack.com/authentication/verifying-requests-from-slack
         """
         timestamp = request['event_time']
@@ -126,7 +125,6 @@ class Slack_Bot_Logic:
         if token != VERIFICATION_TOKEN:
             return False
         return True
-
 
     def create_vehicle_options_slack_block(self, vehicle_names):
         """Creates the vehicle_options that will be used in the get_slack_block_and_add_vehicles method"""
@@ -144,7 +142,6 @@ class Slack_Bot_Logic:
             i += 1
         return vehicle_options
 
-
     def get_slack_block_and_add_vehicles(self, path_to_file, vehicle_names):
         """Gets the slack block that is at path_to_file then it adds all the vehicle options to that block
 
@@ -161,7 +158,6 @@ class Slack_Bot_Logic:
             new_data = json.load(new_f)
         return new_data
 
-
     def check_available(self, vehicle, start_time, end_time):
         """Uses the api.Calendar.check_if_reservation_available to see if a vehicle is available
         Keyword arguments\n
@@ -176,7 +172,6 @@ class Slack_Bot_Logic:
             end_time
         )
         return available
-
 
     def get_reservations(self, payload, selected_vehicle):
         """Gets all the reservations for the selected_vehicle
@@ -219,7 +214,6 @@ class Slack_Bot_Logic:
             )
             return {'status': 500}
 
-
     def construct_vehicles_command(self, vehicles):
         """Constructs the vehicle slack block.
         This is what adds the vehicles to the block and adds if they are available or not"""
@@ -250,7 +244,6 @@ class Slack_Bot_Logic:
         with open('app/slack_blocks/vehicles_results.json', 'w') as f:
             json.dump(vehicles_block, f)
 
-
     def check_vehicle(self, payload, selected_vehicle):
         """Checks a specific vehicle from start time to end time
             Keyword arguments\n
@@ -268,16 +261,17 @@ class Slack_Bot_Logic:
         try:
             available = self.check_available(vehicle, start_time, end_time)
             if not available:
-                self.send_ephemeral_message(f"{selected_vehicle} is not available at that time", channel_id, user_id, thread_id)
+                self.send_ephemeral_message(f"{selected_vehicle} is not available at that time",
+                                            channel_id, user_id, thread_id)
                 return {'status': 400}
             else:
-                self.send_ephemeral_message(f"{selected_vehicle} is available at that time", channel_id, user_id, thread_id)
+                self.send_ephemeral_message(f"{selected_vehicle} is available at that time",
+                                            channel_id, user_id, thread_id)
                 return {'status': 200}
         except:
-            self.send_ephemeral_message(f"Sorry, an error has occurred, so I was unable to complete your request", channel_id,
-                                user_id, thread_id)
+            self.send_ephemeral_message(f"Sorry, an error has occurred, so I was unable to complete your request",
+                                        channel_id, user_id, thread_id)
             return {'status': 500}
-
 
     def reserve_vehicle(self, payload, selected_vehicle):
         """Uses the api to check that vehicle is available. If it is, it will reserve the vehicle
@@ -301,23 +295,24 @@ class Slack_Bot_Logic:
         try:
             available = self.check_available(vehicle, start_time, end_time)
             if not available:
-                self.send_ephemeral_message(f"{selected_vehicle} is not available at that time", channel_id, user_id, thread_id)
+                self.send_ephemeral_message(f"{selected_vehicle} is not available at that time",
+                                            channel_id, user_id, thread_id)
                 return {'status': 400}  # NOTE These return statements are not necessary. Used for testing
             else:
-                response = api.Calendar.schedule_event(vehicle.calendarGroupID, vehicle.calendarID, start_time, end_time,
-                                                    users_name)
+                response = api.Calendar.schedule_event(vehicle.calendarGroupID, vehicle.calendarID, start_time,
+                                                       end_time, users_name)
                 if "ERROR" in response:
                     self.send_ephemeral_message(f"{response['ERROR']}", channel_id, user_id, thread_id)
                     return {'status': 500}
                 else:
-                    self.send_ephemeral_message(f"{selected_vehicle} was successfully reserved", channel_id, user_id, thread_id)
+                    self.send_ephemeral_message(f"{selected_vehicle} was successfully reserved",
+                                                channel_id, user_id, thread_id)
                     return {'status': 200}
         except:
-            self.send_ephemeral_message(f"Sorry, an error has occurred, so I was unable to complete your request", channel_id,
-                                user_id, thread_id)
+            self.send_ephemeral_message(f"Sorry, an error has occurred, so I was unable to complete your request",
+                                        channel_id, user_id, thread_id)
             return {'status': 500}
 
-    
     def get_user_slack_id(self):
         return self.user_client.users_identity()['user']['id']
 
@@ -343,11 +338,13 @@ class Slack_Bot_Logic:
             commands = message.get('text').split()
             channel_id = message["channel"]
             if len(commands) == 1:
-                self.send_ephemeral_message("Did not provide a command", channel_id, self.get_user_slack_id(), message['ts'])
+                self.send_ephemeral_message("Did not provide a command",
+                                            channel_id, self.get_user_slack_id(), message['ts'])
                 return
             command = commands[1]
-            if vehicle_names == []:
-                self.send_ephemeral_message("There are no vehicles in the database", channel_id, self.get_user_slack_id(), message['ts'])
+            if not vehicle_names:
+                self.send_ephemeral_message("There are no vehicles in the database",
+                                            channel_id, self.get_user_slack_id(), message['ts'])
                 return
 
             # This is where Slack messages are handled
@@ -355,21 +352,21 @@ class Slack_Bot_Logic:
             if command.lower() == self.commands.RESERVE_COMMAND:
                 data = self.get_slack_block_and_add_vehicles('app/slack_blocks/reserve_block.json', vehicle_names)
                 self.slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'],
-                                              text="Please fill out the form", blocks=data['blocks'])
+                                                   text="Please fill out the form", blocks=data['blocks'])
                 return
 
             """Gets reservations on the calendar"""
             if command.lower() == self.commands.GET_ALL_RESERVATIONS_COMMAND:
                 data = self.get_slack_block_and_add_vehicles('app/slack_blocks/reservations_block.json', vehicle_names)
                 self.slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'],
-                                              text="Please fill out the form", blocks=data['blocks'])
+                                                   text="Please fill out the form", blocks=data['blocks'])
                 return
 
             """Check if vehicle is available from start_time to end_time"""
             if command.lower() == self.commands.CHECK_VEHICLE_COMMAND:
                 data = self.get_slack_block_and_add_vehicles('app/slack_blocks/check_vehicle_block.json', vehicle_names)
                 self.slack_client.chat_postMessage(channel=channel_id, thread_ts=message['ts'],
-                                              text="Please fill out the form", blocks=data['blocks'])
+                                                   text="Please fill out the form", blocks=data['blocks'])
                 return
 
             """Lists all of the vehicle's names and displays if they are available"""
@@ -393,7 +390,7 @@ class Slack_Bot_Logic:
                 with open('app/slack_blocks/help_block.json') as f:
                     data = json.load(f)
                 self.slack_client.chat_postMessage(text="Here is the usage manual", channel=channel_id,
-                                              thread_ts=message['ts'], blocks=data['blocks'])
+                                                   thread_ts=message['ts'], blocks=data['blocks'])
                 return
             else:
                 """No command matched the available commands. Tries to find similar command for what the user typed"""

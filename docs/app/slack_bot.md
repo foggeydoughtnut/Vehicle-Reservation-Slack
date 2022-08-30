@@ -19,7 +19,7 @@
 - Sends an ephemeral message to the user specified by the id.  
 ---
 `find_similar_commands`  
-- **Paramas**  
+- **Params**  
     1. command  
         - The command that was given  
 - Using the difflib library it finds the closest command to what the user typed.  
@@ -43,8 +43,8 @@
 - **Params**  
     1. request  
         - The request that was sent by slack  
-- Validates the slack message using the verification token. This assures that the message is comming from the correct location.  
-> Note: Verfication tokens will be depracated eventually. The recommended way to do this now is by using the slack-signing-secret method instead. See https://api.slack.com/authentication/verifying-requests-from-slack for more info
+- Validates the Slack message using the verification token. This assures that the message is coming from the correct location.  
+> Note: Verification tokens will be deprecated eventually. The recommended way to do this now is by using the slack-signing-secret method instead. See https://api.slack.com/authentication/verifying-requests-from-slack for more info
 ---
 `create_vehicle_options_slack_block(vehicle_names)`  
 - **Params**  
