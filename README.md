@@ -59,7 +59,11 @@ When the api access token is not in the api_token_access.bin file and a user use
 It then will save the access token inside of the api_token_access.bin file, so that way it is saved.  
 > Note: The access token will need to be for the same outlook account that we used to fill up the database.  
 
-### Tests  
+## Database  
+This project uses sqlite3 for its database.  
+This project uses SQLAlchemy for its ORM.  
+
+## Tests  
 This repository uses Pytest.  
 To run the tests navigate to base directory.  
 Run the following command
