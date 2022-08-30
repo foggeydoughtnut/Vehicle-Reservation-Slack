@@ -1,6 +1,6 @@
 from time import strftime
 import api.Calendar
-import api.graphAPI
+import api.graph_api
 from time import strftime
 from datetime import datetime, timedelta
 import json
@@ -80,7 +80,7 @@ def test_list_specific_calendar_events(requests_mock, mocker):
     end_date_time = strftime("%Y-%m-%dT23:59:59")
     mocker.patch('api.Calendar.generate_headers', return_value={'test': 'testing'})
     requests_mock.get(
-        f"{api.graphAPI.GRAPH_API_ENDPOINT}/me/calendarGroups/{test_calendar_group_id}/calendars/{test_calendar_id}/calendarview?startdatetime={start_date_time}-06:00&endDateTime={end_date_time}-06:00",
+        f"{api.graph_api.GRAPH_API_ENDPOINT}/me/calendarGroups/{test_calendar_group_id}/calendars/{test_calendar_id}/calendarview?startdatetime={start_date_time}-06:00&endDateTime={end_date_time}-06:00",
         json = {'value' : [
             {
                 'webLink' : 'test link',
@@ -112,7 +112,7 @@ def test_check_if_reservation_available(requests_mock, mocker):
     ####
     mocker.patch('api.Calendar.generate_headers', return_value={'test': 'testing'})
     requests_mock.get(
-        f"{api.graphAPI.GRAPH_API_ENDPOINT}/me/calendarGroups/{test_calendar_group_id}/calendars/{test_calendar_id}/calendarview?startDateTime={s_time_offset_formatted}-06:00&endDateTime={e_time_offset_formatted}-06:00",
+        f"{api.graph_api.GRAPH_API_ENDPOINT}/me/calendarGroups/{test_calendar_group_id}/calendars/{test_calendar_id}/calendarview?startDateTime={s_time_offset_formatted}-06:00&endDateTime={e_time_offset_formatted}-06:00",
         json = {'value' : []},
         status_code=200,
     )
@@ -136,7 +136,7 @@ def test_available_fails_if_event(requests_mock, mocker):
 
     mocker.patch('api.Calendar.generate_headers', return_value={'test': 'testing'})
     requests_mock.get(
-        f"{api.graphAPI.GRAPH_API_ENDPOINT}/me/calendarGroups/{test_calendar_group_id}/calendars/{test_calendar_id}/calendarview?startdatetime={s_time_offset_formatted}-06:00&endDateTime={e_time_offset_formatted}-06:00",
+        f"{api.graph_api.GRAPH_API_ENDPOINT}/me/calendarGroups/{test_calendar_group_id}/calendars/{test_calendar_id}/calendarview?startdatetime={s_time_offset_formatted}-06:00&endDateTime={e_time_offset_formatted}-06:00",
         json = {'value' : [
             {
                 'webLink' : 'test link',
