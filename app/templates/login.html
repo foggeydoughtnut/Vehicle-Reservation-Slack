@@ -18,7 +18,7 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
-        <form action="/login" method="POST" class="add-padding">
+        <form action="{{ login_route }}" method="POST" class="add-padding">
             <div class="form-floating mb-3">
                 <input type="text" class="form-control form-control-lg" id="username" placeholder="username"
                     name="username" />

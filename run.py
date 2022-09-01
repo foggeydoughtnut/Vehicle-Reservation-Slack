@@ -40,7 +40,7 @@ with app.app_context():
 
 
 def page_not_found(e):
-    return render_template('404.html'), 404
+    return render_template('404.html', admin_route=links.admin_home), 404
 app.register_error_handler(404, page_not_found)
 
 app.config.from_pyfile('config.py')
@@ -79,14 +79,14 @@ class MyUserView(ModelView):
         """
         Custom create view.
         """
-        return self.render('user_create.html')
+        return self.render('user_create.html', create_new_user_route=links.create_new_user)
 
 
 class MyHomeView(AdminIndexView):
-    @expose('/')
+    @expose(links.home)
     def index(self):
         text = 'Log In' if not current_user.is_authenticated else 'Log Out'
-        return self.render('admin/index.html', button_text=text)
+        return self.render('admin/index.html', button_text=text, logout_route=links.logout)
 
 
 admin = Admin(

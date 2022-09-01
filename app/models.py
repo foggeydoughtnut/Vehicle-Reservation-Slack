@@ -6,6 +6,7 @@ db = SQLAlchemy()
 
 
 class Vehicle(db.Model):
+    """ This model holds the necessary information that we need to identify the calendar a specific vehicle uses. """
     __tablename__ = 'vehicles'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True)
@@ -22,6 +23,7 @@ class Vehicle(db.Model):
 
 
 class User(db.Model, UserMixin):
+    """ This model holds very basic information about the user """
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True)

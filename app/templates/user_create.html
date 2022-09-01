@@ -7,7 +7,7 @@
 <div>
     <div class="center-div" style="width: 33%;">
         <h1 class="add-padding">Create User</h1>
-        <form action="/create/new/user" method="POST" class="add-padding">
+        <form action="{{ create_new_user_route }}" method="POST" class="add-padding">
             <div style="padding-bottom: 16pt;">
                 <label for="username" class="form-label">New Username</label>
                 <input type="text" class="form-control" id="username" placeholder="Username" name="username" />

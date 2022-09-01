@@ -11,7 +11,7 @@ from config import VERIFICATION_TOKEN
 
 
 def login():
-    """Login URL for the admin page"""
+    """Login url for the admin page"""
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -30,10 +30,11 @@ def login():
         else:
             flash('Invalid Credentials. Please try again', 'error')
             return redirect(links.login)
-    return render_template('login.html')
+    return render_template('login.html', login_route=links.login)
 
 
 def logout():
+    """Logout url for the admin page"""
     authorized = current_user.is_authenticated
     if authorized: 
         flash('Successfully logged out', 'message')
@@ -42,7 +43,9 @@ def logout():
 
 
 def create_new_user():
-    """Route to create a new user for the admin page"""
+    """ Route to create a new user for the admin page. This is the view that takes the information from the 
+        create user form and uses the api to create a new user. 
+    """
     if request.method == 'POST':
         if request.form.get('Cancel'):
             return redirect(links.admin_user)

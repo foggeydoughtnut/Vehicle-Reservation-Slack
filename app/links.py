@@ -1,5 +1,6 @@
 
 class links:
+    """ This object stores information about what page is which route. """
     home = '/'
     login = '/login'
     logout = '/logout'
