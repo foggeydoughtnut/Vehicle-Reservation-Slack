@@ -245,7 +245,7 @@ class SlackBotLogic:
             json.dump(vehicles_block, f)
 
     def check_vehicle(self, payload, selected_vehicle):
-        """Checks a specific vehicle from start time to end time
+        """ Checks a specific vehicle from start time to end time
             Keyword arguments\n
                 payload -- The slack block payload that was sent from submitting the check_vehicle slack block\n
                 selected_vehicle -- The vehicle the user selected
@@ -317,6 +317,11 @@ class SlackBotLogic:
         return self.user_client.users_identity()['user']['id']
 
     def send_direct_message(self, response_text):
+        """ Sends a direct message to the user through the slack app's personal channel
+        
+            Keyword arguments\n
+            response_text - The text that will be sent to the user
+        """
         user_slack_id = self.get_user_slack_id()
         self.slack_client.chat_postEphemeral(channel=user_slack_id, text=response_text, user=user_slack_id)
 
