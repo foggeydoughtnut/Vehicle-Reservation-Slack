@@ -13,6 +13,7 @@ import api.db.index
 
 
 class SlackBotCommands:
+    """This object has the keywords for what each command is. """
     RESERVE_COMMAND = "reserve"
     GET_ALL_RESERVATIONS_COMMAND = "reservations"
     VEHICLES_COMMAND = "vehicles"
