@@ -75,6 +75,7 @@ class SlackBotLogic:
                 self.commands.CHECK_VEHICLE_COMMAND
             ]
         )
+        # See https://docs.python.org/3/library/difflib.html#difflib.get_close_matches for documentation for difflib.get_close_matches
         similar_command_response = ''
         index = 0
         for item in similar_commands:

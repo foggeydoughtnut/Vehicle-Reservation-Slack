@@ -20,9 +20,10 @@
 ---
 `find_similar_commands`  
 - **Params**  
-    1. command  
+    1. **command**  
         - The command that was given  
 - Using the difflib library it finds the closest command to what the user typed.  
+- See the [documentation](https://docs.python.org/3/library/difflib.html#difflib.get_close_matches)
 ---  
 `get_selected_vehicle_name_from_payload(payload)`  
 - **Params**  
