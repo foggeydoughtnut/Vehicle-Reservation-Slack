@@ -29,10 +29,11 @@ class SlackBotLogic:
 
         with open('app/slack_blocks/app_home_block.json') as f:
             home_block = json.load(f)
-        self.slack_client.views_publish(
-            user_id=self.get_user_slack_id(),  # Fix this. Right now it is only getting my id (Jeff's)
-            view=home_block
-        )
+        for member in self.slack_client.users_list()['members']:
+            self.slack_client.views_publish(
+                user_id=member['id'],
+                view=home_block
+            )
 
     def send_ephemeral_message(self, text, channel_id, user_id, ts_id, blocks=''):
         """Sends a message that is only visible to the user that is specified by user_id
