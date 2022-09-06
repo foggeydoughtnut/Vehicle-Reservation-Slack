@@ -30,7 +30,7 @@ class SlackBotLogic:
         with open('app/slack_blocks/app_home_block.json') as f:
             home_block = json.load(f)
         self.slack_client.views_publish(
-            user_id=self.get_user_slack_id(),
+            user_id=self.get_user_slack_id(),  # Fix this. Right now it is only getting my id (Jeff's)
             view=home_block
         )
 
@@ -160,7 +160,7 @@ class SlackBotLogic:
             new_data = json.load(new_f)
         return new_data
 
-    def check_available(self, vehicle, start_time, end_time):
+    def check_available(self, vehicle, start_time, end_time, user_id):
         """Uses the api.Calendar.check_if_reservation_available to see if a vehicle is available
         Keyword arguments\n
             vehicle - The vehicle we want to check if it is available\n
@@ -171,7 +171,8 @@ class SlackBotLogic:
             vehicle.calendarGroupID,
             vehicle.calendarID,
             start_time,
-            end_time
+            end_time,
+            user_id
         )
         return available
 
@@ -186,7 +187,7 @@ class SlackBotLogic:
         user_id = payload['user']['id']
         thread_id = payload['message']['ts']
         try:
-            events = api.Calendar.list_specific_calendar_in_group_events(vehicle.calendarGroupID, vehicle.calendarID)
+            events = api.Calendar.list_specific_calendar_in_group_events(vehicle.calendarGroupID, vehicle.calendarID, user_id)
             res = api.Calendar.construct_calendar_events_block(events, selected_vehicle)
             if not res['reservations']:
                 self.send_ephemeral_message(
@@ -216,7 +217,7 @@ class SlackBotLogic:
             )
             return {'status': 500}
 
-    def construct_vehicles_command(self, vehicles):
+    def construct_vehicles_command(self, vehicles, user_id):
         """Constructs the vehicle slack block.
         This is what adds the vehicles to the block and adds if they are available or not"""
         offset_minutes = 15  # 15 Minute offset for check availability
@@ -232,7 +233,7 @@ class SlackBotLogic:
             "blocks": []
         }
         for vehicle in vehicles:
-            available = self.check_available(vehicle, start_time, end_time)
+            available = self.check_available(vehicle, start_time, end_time, user_id)
             availability_message = "available" if available else "not available"
             vehicles_block['blocks'].append(
                 {
@@ -261,7 +262,7 @@ class SlackBotLogic:
             self.send_ephemeral_message("Time of reservation is required", channel_id, user_id, thread_id)
             return {'status': 400}
         try:
-            available = self.check_available(vehicle, start_time, end_time)
+            available = self.check_available(vehicle, start_time, end_time, user_id)
             if not available:
                 self.send_ephemeral_message(f"{selected_vehicle} is not available at that time",
                                             channel_id, user_id, thread_id)
@@ -295,14 +296,14 @@ class SlackBotLogic:
             self.send_ephemeral_message("Name is required for reservation", channel_id, user_id, thread_id)
             return {'status': 400}
         try:
-            available = self.check_available(vehicle, start_time, end_time)
+            available = self.check_available(vehicle, start_time, end_time, user_id)
             if not available:
                 self.send_ephemeral_message(f"{selected_vehicle} is not available at that time",
                                             channel_id, user_id, thread_id)
                 return {'status': 400}  # NOTE These return statements are not necessary. Used for testing
             else:
                 response = api.Calendar.schedule_event(vehicle.calendarGroupID, vehicle.calendarID, start_time,
-                                                       end_time, users_name)
+                                                       end_time, users_name, user_id)
                 if "ERROR" in response:
                     self.send_ephemeral_message(f"{response['ERROR']}", channel_id, user_id, thread_id)
                     return {'status': 500}
@@ -316,16 +317,16 @@ class SlackBotLogic:
             return {'status': 500}
 
     def get_user_slack_id(self):
-        print(self.user_client.users_identity())
+        # print(self.user_client.users_identity())
         return self.user_client.users_identity()['user']['id']
 
-    def send_direct_message(self, response_text):
+    def send_direct_message(self, response_text, user_slack_id):
         """ Sends a direct message to the user through the slack app's personal channel
         
             Keyword arguments\n
             response_text - The text that will be sent to the user
         """
-        user_slack_id = self.get_user_slack_id()
+        # user_slack_id = self.get_user_slack_id()
         self.slack_client.chat_postEphemeral(channel=user_slack_id, text=response_text, user=user_slack_id)
 
     def handle_message_response(self, value, app):
@@ -335,6 +336,7 @@ class SlackBotLogic:
             value   -- A dictionary that contains important information like team_id, event information, ect. The main
             important one is the event sub-dictionary because it contains the message and user
         """
+        user_id = value['event']['user']
         valid = self.validate_slack_message(value)
         if not valid:
             return
@@ -381,13 +383,13 @@ class SlackBotLogic:
             if command.lower() == self.commands.VEHICLES_COMMAND:
                 with app.app_context():
                     vehicles = api.db.index.get_all_vehicles()
-                self.construct_vehicles_command(vehicles)
+                self.construct_vehicles_command(vehicles, user_id)
                 with open('app/slack_blocks/vehicles_results.json', 'r') as f:
                     data = json.load(f)
                 self.send_ephemeral_message(
                     "List of vehicles",
                     channel_id,
-                    self.get_user_slack_id(),
+                    user_id,
                     message['ts'],
                     data['blocks']
                 )

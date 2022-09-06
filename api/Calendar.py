@@ -11,8 +11,8 @@ load_dotenv()
 application_id = os.getenv('APPLICATION_ID')
 
 
-def generate_headers():
-    access_token = api.graph_api.generate_access_token(application_id, api.graph_api.SCOPES)
+def generate_headers(user_slack_id):
+    access_token = api.graph_api.generate_access_token(application_id, api.graph_api.SCOPES, user_slack_id)
     headers = {
         'Authorization': 'Bearer ' + access_token
     }
@@ -34,7 +34,7 @@ def construct_event_detail(event_name, **event_details):
     return request_body
 
 
-def schedule_event(calendar_group_id, calendar_id, start_time, end_time, users_name):
+def schedule_event(calendar_group_id, calendar_id, start_time, end_time, users_name, user_id):
     """Uses Outlook's Graph api to schedule an event based off the information provided
     
         Keyword arguments:\n
@@ -63,7 +63,7 @@ def schedule_event(calendar_group_id, calendar_id, start_time, end_time, users_n
             requests.post(
                 api.graph_api.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendar_group_id}'
                                                    f'/calendars/{calendar_id}/events',
-                headers=generate_headers(),
+                headers=generate_headers(user_id),
                 json=construct_event_detail(
                     event_name,
                     body=body,
@@ -76,7 +76,7 @@ def schedule_event(calendar_group_id, calendar_id, start_time, end_time, users_n
             return {"ERROR": "Something went wrong with scheduling the event"}
 
 
-def list_specific_calendar_in_group_events(calendar_group_id, calendar_id):
+def list_specific_calendar_in_group_events(calendar_group_id, calendar_id, user_id):
     """Uses the outlook api to get the events of a specific calendar in a calendar group and returns the events
     happening that day in an object with only the information needed. NOTE: events variable has all the calendar
     information and I use a portion of the information found in events\n
@@ -86,7 +86,7 @@ def list_specific_calendar_in_group_events(calendar_group_id, calendar_id):
         calendar_id               -- The specific id for the calendar
     """
 
-    calendar_headers = generate_headers()
+    calendar_headers = generate_headers(user_id)
     calendar_headers['Prefer'] = 'outlook.timezone="America/Denver"'
 
     start_date_time = strftime("%Y-%m-%dT%H:%M:%S")
@@ -183,7 +183,7 @@ def construct_calendar_events_block(events, vehicle_name):
         return {'reservations': True}
 
 
-def check_if_reservation_available(calendar_group_id, calendar_id, start_time, end_time):
+def check_if_reservation_available(calendar_group_id, calendar_id, start_time, end_time, user_id):
     """Returns true or false if there is a reservation between start_time and end_time
 
     Keyword arguments:\n
@@ -198,7 +198,7 @@ def check_if_reservation_available(calendar_group_id, calendar_id, start_time, e
     end_offset_time = datetime.strptime(end_time, '%Y-%m-%dT%H:%M') - timedelta(minutes=1)
     e_time = end_offset_time.strftime('%Y-%m-%dT%H:%M')
 
-    calendar_headers = generate_headers()
+    calendar_headers = generate_headers(user_id)
     calendar_headers['Prefer'] = 'outlook.timezone="America/Denver"'
     events = requests.get(
         api.graph_api.GRAPH_API_ENDPOINT + f'/me/calendarGroups/{calendar_group_id}/calendars/{calendar_id}'

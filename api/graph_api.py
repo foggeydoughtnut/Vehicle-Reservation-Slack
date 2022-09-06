@@ -12,7 +12,7 @@ SCOPES = ['User.Read', 'Calendars.ReadWrite']
 application_id = os.getenv('APPLICATION_ID')
 
 
-def generate_access_token_response(application_id, SCOPES):
+def generate_access_token_response(application_id, SCOPES, user_slack_id):
     """ Uses Outlook's Graph api to generate the user's access token response that contains the user's access token
     
         Keyword arguments:\n
@@ -31,7 +31,7 @@ def generate_access_token_response(application_id, SCOPES):
         flow = client.initiate_device_flow(scopes=SCOPES)
         auth_code = flow['user_code']
         slack_bot = SlackBotLogic()
-        slack_bot.send_direct_message(f"Authentication code : {auth_code}")
+        slack_bot.send_direct_message(f"Authentication code : {auth_code}", user_slack_id)
         webbrowser.open(flow['verification_uri'])
         token_response = client.acquire_token_by_device_flow(flow)
     
@@ -41,12 +41,12 @@ def generate_access_token_response(application_id, SCOPES):
     return token_response
 
 
-def generate_access_token(application_id, SCOPES):
+def generate_access_token(application_id, SCOPES, user_slack_id):
     """ Generates the user's access token by using generate_access_token_response
     
         Keyword arguments:\n
         application_id      -- The outlook application id found in Azure\n
         SCOPES              -- The permissions that the app has access to
     """
-    token_response = generate_access_token_response(application_id, SCOPES)
+    token_response = generate_access_token_response(application_id, SCOPES, user_slack_id)
     return token_response['access_token']
