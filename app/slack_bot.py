@@ -316,6 +316,7 @@ class SlackBotLogic:
             return {'status': 500}
 
     def get_user_slack_id(self):
+        print(self.user_client.users_identity())
         return self.user_client.users_identity()['user']['id']
 
     def send_direct_message(self, response_text):
