@@ -90,3 +90,6 @@ coverage report or coverage html
 #### **Graph api**  
 - Calendars.ReadWrite  
 - User.Read  
+
+### Create slack blocks  
+Use [this link](https://app.slack.com/block-kit-builder/T03H89XHC5T#%7B%22blocks%22:%5B%5D%7D) to easily create slack blocks
