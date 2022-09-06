@@ -317,9 +317,6 @@ class SlackBotLogic:
                                         channel_id, user_id, thread_id)
             return {'status': 500}
 
-    def get_user_slack_id(self):
-        # print(self.user_client.users_identity())
-        return self.user_client.users_identity()['user']['id']
 
     def send_direct_message(self, response_text, user_slack_id):
         """ Sends a direct message to the user through the slack app's personal channel
@@ -327,7 +324,6 @@ class SlackBotLogic:
             Keyword arguments\n
             response_text - The text that will be sent to the user
         """
-        # user_slack_id = self.get_user_slack_id()
         self.slack_client.chat_postEphemeral(channel=user_slack_id, text=response_text, user=user_slack_id)
 
     def handle_message_response(self, value, app):
@@ -350,12 +346,12 @@ class SlackBotLogic:
             channel_id = message["channel"]
             if len(commands) == 1:
                 self.send_ephemeral_message("Did not provide a command",
-                                            channel_id, self.get_user_slack_id(), message['ts'])
+                                            channel_id, user_id, message['ts'])
                 return
             command = commands[1]
             if not vehicle_names:
                 self.send_ephemeral_message("There are no vehicles in the database",
-                                            channel_id, self.get_user_slack_id(), message['ts'])
+                                            channel_id, user_id, message['ts'])
                 return
 
             # This is where Slack messages are handled

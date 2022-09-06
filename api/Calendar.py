@@ -39,8 +39,9 @@ def schedule_event(calendar_group_id, calendar_id, start_time, end_time, users_n
     
         Keyword arguments:\n
         start_time       -- The start time for the reservation\n
-        end_time         -- The end time for the reservation
-        users_name       -- The name for the reserve
+        end_time         -- The end time for the reservation\n
+        users_name       -- The name for the reserve\n
+        user_id          -- The user's Slack id
     """
     event_name = f"Reservation for {users_name}"
     body = {
@@ -83,7 +84,8 @@ def list_specific_calendar_in_group_events(calendar_group_id, calendar_id, user_
 
         Keyword arguments:\n
         calendar_group_id         -- The calendar group id that the calendar is located in\n
-        calendar_id               -- The specific id for the calendar
+        calendar_id               -- The specific id for the calendar\n 
+        user_id                   -- The user's Slack id
     """
 
     calendar_headers = generate_headers(user_id)
@@ -187,10 +189,11 @@ def check_if_reservation_available(calendar_group_id, calendar_id, start_time, e
     """Returns true or false if there is a reservation between start_time and end_time
 
     Keyword arguments:\n
-        calendar_group_id      -- The calendar group id for Outlook
-        calendar_id            -- The calendar id for outlook
-        start_time             -- The start time of the check
-        end_time               -- The end time of the check
+        calendar_group_id      -- The calendar group id for Outlook\n
+        calendar_id            -- The calendar id for outlook\n
+        start_time             -- The start time of the check\n
+        end_time               -- The end time of the check\n
+        user_id                -- The user's Slack id
     """
     # Offset start time and end time by one minute to allow reservations like 9-10 and 10-11 to happen.
     start_offset_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M') + timedelta(minutes=1)

@@ -13,7 +13,7 @@
 - Constructs a calendar event with the name and details given.  
 - **Returns** the request body that was constructed.  
 ---  
-`schedule_event(calendar_group_id, calendar_id, start_time, end_time, users_name)`  
+`schedule_event(calendar_group_id, calendar_id, start_time, end_time, users_name, user_id)`  
 - **Parameters**  
   1. **calendar_group_id**  
       - The group id for the Outlook calendar  
@@ -25,17 +25,21 @@
       - The end time for the reservation  
   5. **users_name**  
       - The name for the reservee  
+  6. **user_id**  
+      - The user's slack id
 - Uses Outlook's api to schedule an event for the calendar specified by the calendar_id and calendar_group_id with the information provided.  
 - **Returns** dictionary with ERROR property if reservation is made before the current time.  
 - **Returns** dictionary with SUCCESS property if reservation is successfully made and no errors are found.  
 - **Returns** ERROR if an error occurs when reserving the vehicle.  
 ---  
-`list_specific_calendar_in_group_events(calendar_group_id, calendar_id)`  
+`list_specific_calendar_in_group_events(calendar_group_id, calendar_id, user_id)`  
 - **Parameters**  
   1. **calendar_group_id**  
       - The group id for the Outlook calendar  
   2. **calendar_id**  
       - The id for the Outlook calendar  
+  3. **user_id**  
+      - The user's Slack id
 - Uses the outlook graph api to get the events of a specific calendar in a calendar group.  
 - **Returns** the events happening that day in an object with the properties of *webLink, start, end, event{i}*
 >Note: `events` variable contains all the calendar information. I only use some information in it.
@@ -59,7 +63,7 @@
 - It adds the data from the events (start_time, end_time, and url) and adds that to the reservations_dict.  
 - It writes the reservations_dict to the reservations_results slack block in the blocks array for each event in events.  
 ---  
-`check_if_reservation_available(calendar_group_id, calendar_id, start_time, end_time)`  
+`check_if_reservation_available(calendar_group_id, calendar_id, start_time, end_time, user_id)`  
 - **Parameters**  
     1. **calendar_group_id**  
       - The id for the group that the calendar is in  
@@ -69,6 +73,8 @@
       - The start_time of the reservation  
     4. **end_time**  
       - The end_time of the reservation  
+    5. **user_id**  
+      - The user's Slack id
 - Checks if the call to the graph api for getting events from start_time to end_time is an empty array.  
 - **Returns** true or false depending on if there are events in the array or not. True if events array is empty, false otherwise.  
 

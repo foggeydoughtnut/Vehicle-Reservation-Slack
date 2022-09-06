@@ -70,7 +70,7 @@
 - This method gets the slack block from the file specified by the parameter and then adds all the vehicles options to that block from. The vehicle options are found from the `create_vehicle_options_slack_block` method.  
 - **Returns** a slack block with the vehicle options added on to the original slack_block. 
 ---  
-`check_available(vehicle, start_time, end_time)`
+`check_available(vehicle, start_time, end_time, user_id)`
 - **Params**  
     1. **vehicle**  
       - The vehicle that was queried  
@@ -78,6 +78,8 @@
       - The start_time of the check  
     3. **end_time**  
       - The end_time of the check  
+    4. **user_id**  
+      - The user's Slack id
 - Calls the api to check_if_reservation_available and returns that boolean.  
 ---  
 `get_reservations(payload, selected_vehicle)`
@@ -88,10 +90,12 @@
       - The vehicle that we want to get the reservations for  
 - Uses the api to get all the reservations for the selected vehicle.  
 ---
-`construct_vehicles_command(vehicles)`  
+`construct_vehicles_command(vehicles, user_id)`  
 - **Params**  
     1. **vehicles**  
       - The vehicles that are in the database
+    2. **user_id**  
+      - The user's Slack id
 - Constructs the vehicles command's slack block, so it includes all the vehicles and if they are available within the next 15 minutes or not.  
 - It truncates the block file first to get rid of whatever was there before it adds on to the file. That way we know we have the accurate information everytime.  
 --- 
@@ -112,9 +116,6 @@
 - Uses the api to check that the vehicle is available for when the user would like to reserve it. If it is, it reserves the vehicle, else, it messages the user that it is not available at that time.  
 - If the start or end time is NoneTNone that means the user did not input any start_time or end_time.  
 ---  
-`get_user_slack_id`  
-- Finds the user's slack id using the users_identity method.  
---- 
 `send_direct_message(response_text)`  
 - **Params**  
     1. **response_text**  
