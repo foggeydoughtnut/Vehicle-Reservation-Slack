@@ -7,8 +7,8 @@ import json
 
 
 def test_generate_headers():
-    headers = api.Calendar.generate_headers()
-    assert api.Calendar.generate_headers()
+    headers = api.Calendar.generate_headers('test')
+    assert api.Calendar.generate_headers('test')
     assert type(headers) == dict
     assert headers["Authorization"]
 
@@ -56,20 +56,20 @@ def test_schedule_event():
     start = offset_start_time.strftime('%Y-%m-%dT%H:%M:%S')
     end = offset_end_time.strftime('%Y-%m-%dT%H:%M:%S')
 
-    status = api.Calendar.schedule_event('', '', start, end, '')
+    status = api.Calendar.schedule_event('', '', start, end, '', '')
 
     assert status["SUCCESS"]
     assert type(status) == dict
 
 def test_schedule_event_fails_past():
     """Tests if schedule_event returns ERROR when event is made in the past"""
-    status = api.Calendar.schedule_event('', '', '2022-06-27T08:00:00', '2022-06-27T08:30:00', '')
+    status = api.Calendar.schedule_event('', '', '2022-06-27T08:00:00', '2022-06-27T08:30:00', '', '')
     assert type(status) == dict
     assert status["ERROR"]
 
 def test_schedule_event_fails_no_time():
     """Tests if Error is returned when no start/end time is given"""
-    status = api.Calendar.schedule_event('', '', '', '', '')
+    status = api.Calendar.schedule_event('', '', '', '', '', '')
     assert type(status) == dict
     assert status["ERROR"]
 
@@ -91,7 +91,7 @@ def test_list_specific_calendar_events(requests_mock, mocker):
         },
         status_code=200,
     )
-    resp = api.Calendar.list_specific_calendar_in_group_events(test_calendar_group_id, test_calendar_id)
+    resp = api.Calendar.list_specific_calendar_in_group_events(test_calendar_group_id, test_calendar_id, '')
     assert type(resp) == dict
     assert resp['event0']['webLink'] == 'test link'
     assert resp['event0']['start'] == '2022-06-27T12:00:00'
@@ -116,7 +116,7 @@ def test_check_if_reservation_available(requests_mock, mocker):
         json = {'value' : []},
         status_code=200,
     )
-    resp = api.Calendar.check_if_reservation_available(test_calendar_group_id, test_calendar_id, s_time, e_time)
+    resp = api.Calendar.check_if_reservation_available(test_calendar_group_id, test_calendar_id, s_time, e_time, '')
     assert resp == True
     assert type(resp) == bool
 
@@ -146,7 +146,7 @@ def test_available_fails_if_event(requests_mock, mocker):
         ]},
         status_code=200,
     )
-    resp = api.Calendar.check_if_reservation_available(test_calendar_group_id, test_calendar_id, s_time, e_time)
+    resp = api.Calendar.check_if_reservation_available(test_calendar_group_id, test_calendar_id, s_time, e_time, '')
     assert resp == False
     assert type(resp) == bool
 

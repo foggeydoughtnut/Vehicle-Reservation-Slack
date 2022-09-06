@@ -23,7 +23,7 @@ class Vehicle:
 def test_check_available(mocker):
     mocker.patch('api.Calendar.check_if_reservation_available', return_value=True)
     vehicle = Vehicle()
-    available = slack_bot.check_available(vehicle, 'start_time', 'end_time')
+    available = slack_bot.check_available(vehicle, 'start_time', 'end_time', '')
     assert available == True
 
 def test_reserve_vehicle_successfull(mocker):
@@ -172,7 +172,7 @@ def test_construct_vehicles_command(mocker):
     }
     mocker.patch('api.db.index.get_all_vehicles', return_value=[Vehicle()])
     mocker.patch.object(SlackBotLogic, 'check_available', return_value=True)
-    slack_bot.construct_vehicles_command([])
+    slack_bot.construct_vehicles_command([], '')
 
     with open('app/slack_blocks/vehicles_results.json', 'r') as f:
         data = json.load(f)
