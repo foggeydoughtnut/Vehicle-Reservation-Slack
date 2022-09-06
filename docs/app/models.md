@@ -12,7 +12,7 @@ This project uses [SQLAlchemy](https://www.sqlalchemy.org/) for its ORM.
 ### Columns  
 - **id** - int  
 - **username** - string (unique = True)
-- **password** - string  
+- **password_hash** - string  
 ### Methods  
 `set_password(self, password)`  
  - Sets the User's password_hash to the password after it has been hashed.  
