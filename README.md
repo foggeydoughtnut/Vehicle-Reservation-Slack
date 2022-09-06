@@ -34,6 +34,8 @@ With that you can log into the admin page and create a more secure admin account
 ## Getting vehicle's calendar id and calendar group id  
 Go to the following link https://developer.microsoft.com/en-us/graph/graph-explorer#  
 Sign in to the account that has all of the calendars needed.  
+Grant consent for the Calendars.Read and Calendars.ReadWrite permissions. These permissions are found in the Calendars dropdown.  
+![Screenshot from 2022-09-06 13-14-17](https://user-images.githubusercontent.com/78196548/188719937-cf6b3f4f-41fe-40eb-bdac-229d73a59126.png)
 Run the following get query with the route: https://graph.microsoft.com/v1.0/me/calendars to get all of the calendars for the account.  
 From there find the calendars for the vehicles. The calendar id for that vehicle will be the id value in that query for the vehicle's calendar.  
 
