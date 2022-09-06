@@ -85,6 +85,7 @@ coverage report or coverage html
 - channels:history  
 - chat:write  
 - im:history  
+- users:read
 #### **User Token Scopes**  
 - identity.basic  
 
