@@ -103,7 +103,7 @@ class SlackBotLogic:
             return vehicle_name
 
     def get_start_end_time_from_payload(self, payload):
-        """Accesses the payload and gets the date and time information from the slack command
+        """ Accesses the payload and gets the date and time information from the slack command
 
             Returns a tuple with start and end time that is formatted correctly for Graph api
         """
@@ -167,6 +167,7 @@ class SlackBotLogic:
             vehicle - The vehicle we want to check if it is available\n
             start_time - The start time for the check\n
             end_time - The end time for the check\n
+            user_id - The user's Slack id\n
         """
         available = api.Calendar.check_if_reservation_available(
             vehicle.calendarGroupID,
@@ -220,7 +221,12 @@ class SlackBotLogic:
 
     def construct_vehicles_command(self, vehicles, user_id):
         """Constructs the vehicle slack block.
-        This is what adds the vehicles to the block and adds if they are available or not"""
+        This is what adds the vehicles to the block and adds if they are available or not
+        
+        Keyword Arguments\n
+            vehicles  - The vehicles that are in the database\n    
+            user_id   - The user's Slack id  
+        """
         offset_minutes = 15  # 15 Minute offset for check availability
         start_time = strftime("%Y-%m-%dT%H:%M")
 
@@ -322,7 +328,7 @@ class SlackBotLogic:
         """ Sends a direct message to the user through the slack app's personal channel
         
             Keyword arguments\n
-            response_text - The text that will be sent to the user
+                response_text - The text that will be sent to the user
         """
         self.slack_client.chat_postEphemeral(channel=user_slack_id, text=response_text, user=user_slack_id)
 
@@ -330,8 +336,8 @@ class SlackBotLogic:
         """ Reads the command given in slack and responds depending on what the user's input was
 
             Keyword arguments\n
-            value   -- A dictionary that contains important information like team_id, event information, ect. The main
-            important one is the event sub-dictionary because it contains the message and user
+                value   -- A dictionary that contains important information like team_id, event information, ect. The main
+                important one is the event sub-dictionary because it contains the message and user
         """
         user_id = value['event']['user']
         valid = self.validate_slack_message(value)
